@@ -107,6 +107,7 @@ export interface TokenAutoGroupsConfig {
 
 export type ApiKeysDialogType =
   | 'create'
+  | 'smart-create'
   | 'update'
   | 'delete'
   | 'batch-delete'

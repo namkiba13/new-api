@@ -52,9 +52,7 @@ export function getGroupFallback(
     return null
   }
 
-  return (
-    groups.find((group) => group.value === 'default')?.value ?? groups[0].value
-  )
+  return groups[0].value
 }
 
 export function getOptionLoadErrorMessage(

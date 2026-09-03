@@ -180,13 +180,14 @@ export function Features(_props: FeaturesProps) {
   ]
 
   return (
-    <section className='relative z-10 px-6 py-24 md:py-32'>
-      <div className='mx-auto max-w-6xl'>
+    <section className='relative z-10 px-4 py-20 sm:px-6 md:py-28 lg:px-10 xl:px-14'>
+      <div className='mx-auto max-w-[1680px]'>
         <AnimateInView className='mb-16 max-w-lg'>
-          <p className='text-muted-foreground mb-3 text-xs font-medium tracking-widest uppercase'>
+          <p className='home-kicker mb-4 flex items-center gap-3 font-mono text-xs font-semibold tracking-[0.14em] uppercase'>
+            <span className='size-2 bg-[var(--pricing-accent)]' />
             {t('Core Features')}
           </p>
-          <h2 className='text-2xl leading-tight font-bold tracking-tight md:text-3xl'>
+          <h2 className='text-4xl leading-[0.98] font-semibold tracking-[-0.045em] md:text-6xl'>
             {t('Built for developers,')}
             <br />
             {t('designed for scale')}
@@ -194,13 +195,13 @@ export function Features(_props: FeaturesProps) {
         </AnimateInView>
 
         {/* Bento grid */}
-        <div className='border-border/40 bg-border/40 grid gap-px overflow-hidden rounded-xl border md:grid-cols-3'>
+        <div className='border-border bg-border grid gap-px overflow-hidden rounded-sm border md:grid-cols-3'>
           {features.map((f, i) => (
             <AnimateInView
               key={f.id}
               delay={i * 100}
               animation='scale-in'
-              className={`bg-background group hover:bg-muted/20 p-7 transition-colors duration-300 md:p-8 ${f.span}`}
+              className={`bg-background group hover:bg-[var(--pricing-accent-soft)] p-7 transition-colors duration-300 md:p-8 ${f.span}`}
             >
               <div className='mb-3 flex items-center gap-3'>
                 <span className='border-border/40 bg-muted text-muted-foreground flex size-7 items-center justify-center rounded-md border text-[10px] font-semibold tabular-nums'>

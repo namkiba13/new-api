@@ -610,6 +610,106 @@ const COMMON_CHAT_PARAMS: SupportedParameter[] = [
   },
 ]
 
+const ANTHROPIC_NATIVE_PARAMS: SupportedParameter[] = [
+  {
+    name: 'max_tokens',
+    type: 'integer',
+    range: '>= 1',
+    required: true,
+    descriptionKey: 'Maximum number of tokens in the response',
+  },
+  {
+    name: 'stop_sequences',
+    type: 'array',
+    descriptionKey: 'Strings that stop generation',
+  },
+  {
+    name: 'stream',
+    type: 'boolean',
+    defaultValue: false,
+    descriptionKey: 'Stream tokens via Server-Sent Events',
+  },
+  {
+    name: 'system',
+    type: 'string',
+    descriptionKey: 'System instructions for the assistant',
+  },
+  {
+    name: 'tools',
+    type: 'array',
+    descriptionKey: 'Tool declarations the model may call',
+  },
+  {
+    name: 'tool_choice',
+    type: 'object',
+    descriptionKey: 'Anthropic tool-choice policy',
+  },
+  {
+    name: 'metadata',
+    type: 'object',
+    descriptionKey: 'Request metadata including an optional user identifier',
+  },
+]
+
+const ANTHROPIC_SAMPLING_PARAMS: SupportedParameter[] = [
+  {
+    name: 'temperature',
+    type: 'number',
+    defaultValue: 1,
+    range: '0 ~ 1',
+    descriptionKey: 'Sampling temperature; lower is more deterministic',
+  },
+  {
+    name: 'top_p',
+    type: 'number',
+    range: '0 ~ 1',
+    descriptionKey: 'Nucleus sampling probability mass',
+  },
+  {
+    name: 'top_k',
+    type: 'integer',
+    range: '>= 0',
+    descriptionKey: 'Limits sampling to the most likely tokens',
+  },
+]
+
+const OPENAI_RESPONSE_PARAMS: SupportedParameter[] = [
+  {
+    name: 'input',
+    type: 'string',
+    required: true,
+    descriptionKey: 'Text or structured input for the model',
+  },
+  {
+    name: 'max_output_tokens',
+    type: 'integer',
+    range: '>= 1',
+    descriptionKey: 'Maximum number of output tokens',
+  },
+  {
+    name: 'stream',
+    type: 'boolean',
+    defaultValue: false,
+    descriptionKey: 'Stream response events via Server-Sent Events',
+  },
+  {
+    name: 'tools',
+    type: 'array',
+    descriptionKey: 'Tool / function declarations the model may call',
+  },
+  {
+    name: 'tool_choice',
+    type: 'string',
+    enumValues: ['auto', 'none', 'required'],
+    descriptionKey: 'Tool-choice policy or specific tool name',
+  },
+  {
+    name: 'metadata',
+    type: 'object',
+    descriptionKey: 'Request metadata',
+  },
+]
+
 const REASONING_PARAMS: SupportedParameter[] = [
   {
     name: 'reasoning_effort',
@@ -788,14 +888,59 @@ function apiCategoryOf(model: PricingModel): ApiCategory {
  * each show their relevant parameter set.
  */
 export function buildSupportedParameters(
-  model: PricingModel
+  model: PricingModel,
+  endpointType = 'openai'
 ): SupportedParameter[] {
+  const modelName = model.model_name || ''
+
+  if (endpointType === 'anthropic') {
+    return /claude-sonnet-4-6/i.test(modelName)
+      ? [...ANTHROPIC_SAMPLING_PARAMS, ...ANTHROPIC_NATIVE_PARAMS]
+      : ANTHROPIC_NATIVE_PARAMS
+  }
+
+  if (endpointType === 'openai-response') {
+    return OPENAI_RESPONSE_PARAMS
+  }
+
   const cat = apiCategoryOf(model)
   if (cat === 'reasoning') return REASONING_PARAMS
   if (cat === 'embedding') return EMBEDDING_PARAMS
   if (cat === 'image') return IMAGE_PARAMS
   if (cat === 'video') return VIDEO_PARAMS
-  return COMMON_CHAT_PARAMS
+
+  const universallyVerified = new Set([
+    'max_tokens',
+    'seed',
+    'n',
+    'stream',
+    'response_format',
+    'tools',
+    'tool_choice',
+    'logprobs',
+    'user',
+  ])
+
+  if (/claude-sonnet-4-6|deepseek-v4-pro/i.test(modelName)) {
+    return COMMON_CHAT_PARAMS
+  }
+
+  if (/^gpt-5\.6-(luna|sol|terra)$/i.test(modelName)) {
+    universallyVerified.add('temperature')
+    universallyVerified.add('top_p')
+  }
+
+  if (/^claude-(fable-5|opus-5)$/i.test(modelName)) {
+    universallyVerified.add('frequency_penalty')
+    universallyVerified.add('presence_penalty')
+    universallyVerified.add('stop')
+    universallyVerified.add('top_logprobs')
+    universallyVerified.add('logit_bias')
+  }
+
+  return COMMON_CHAT_PARAMS.filter((param) =>
+    universallyVerified.has(param.name)
+  )
 }
 
 export type RateLimit = {

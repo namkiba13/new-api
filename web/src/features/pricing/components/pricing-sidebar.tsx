@@ -37,7 +37,6 @@ import {
   getEndpointTypeLabels,
   getQuotaTypeLabels,
 } from '../constants'
-import { hasTaskUsageSchema } from '../lib/dynamic-price'
 import { parseTags } from '../lib/filters'
 import type { PricingModel, PricingVendor } from '../types'
 
@@ -202,23 +201,12 @@ export function PricingSidebar(props: PricingSidebarProps) {
     {
       value: QUOTA_TYPES.TOKEN,
       label: quotaTypeLabels[QUOTA_TYPES.TOKEN],
-      count: countBy(
-        props.models,
-        (model) => model.quota_type === 0 && !hasTaskUsageSchema(model)
-      ),
+      count: countBy(props.models, (model) => model.quota_type === 0),
     },
     {
       value: QUOTA_TYPES.REQUEST,
       label: quotaTypeLabels[QUOTA_TYPES.REQUEST],
-      count: countBy(
-        props.models,
-        (model) => model.quota_type === 1 && !hasTaskUsageSchema(model)
-      ),
-    },
-    {
-      value: QUOTA_TYPES.TASK,
-      label: quotaTypeLabels[QUOTA_TYPES.TASK],
-      count: countBy(props.models, (model) => hasTaskUsageSchema(model)),
+      count: countBy(props.models, (model) => model.quota_type === 1),
     },
   ]
 
@@ -258,10 +246,14 @@ export function PricingSidebar(props: PricingSidebarProps) {
   ]
 
   return (
-    <aside className={cn('rounded-xl border p-3', props.className)}>
+    <aside
+      className={cn('rounded-xl border bg-background p-5', props.className)}
+    >
       <div className='mb-2.5 flex items-center justify-between gap-2'>
         <div>
-          <h2 className='text-foreground text-sm font-bold'>{t('Filter')}</h2>
+          <h2 className='font-mono text-xs font-bold tracking-[0.12em] uppercase'>
+            {t('Filter')}
+          </h2>
           <p className='text-muted-foreground mt-1 text-xs'>
             {t('Refine models by provider, group, type, and tags.')}
           </p>

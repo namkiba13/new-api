@@ -24,6 +24,7 @@ import { getFreshModuleAccess } from '@/lib/nav-modules'
 import { useAuthStore } from '@/stores/auth-store'
 
 const pricingSearchSchema = z.object({
+  lang: z.enum(['en', 'vi', 'zh-CN', 'zh-TW', 'fr', 'ru', 'ja']).optional(),
   search: z.string().optional(),
   sort: z.string().optional(),
   vendor: z.string().optional(),

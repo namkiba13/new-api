@@ -34,7 +34,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import {
   Tooltip,
@@ -85,11 +84,6 @@ function PlaygroundParameterContent({
     key: PlaygroundParameterKey,
     value: number | null
   ) => {
-    if (key === 'seed') {
-      onConfigChange('seed', value)
-      return
-    }
-
     onConfigChange(key, value ?? 0)
   }
 
@@ -148,46 +142,25 @@ function PlaygroundParameterContent({
               />
             </div>
 
-            {control.valueType === 'slider' ? (
-              <Slider
-                className='py-1.5'
-                disabled={disabled || !enabled}
-                id={controlId}
-                max={control.max}
-                min={control.min}
-                onValueChange={(nextValue) => {
-                  const firstValue = Array.isArray(nextValue)
-                    ? nextValue[0]
-                    : nextValue
-                  updateParameterConfig(
+            <Input
+              disabled={disabled || !enabled}
+              id={controlId}
+              inputMode='numeric'
+              max={control.max}
+              min={control.min}
+              onChange={(event) => {
+                updateParameterConfig(
+                  control.key,
+                  normalizeParameterNumberValue(
                     control.key,
-                    normalizeParameterNumberValue(control.key, firstValue)
+                    event.target.value
                   )
-                }}
-                step={control.step}
-                value={[Number(value)]}
-              />
-            ) : (
-              <Input
-                disabled={disabled || !enabled}
-                id={controlId}
-                inputMode='numeric'
-                max={control.max}
-                min={control.min}
-                onChange={(event) => {
-                  updateParameterConfig(
-                    control.key,
-                    normalizeParameterNumberValue(
-                      control.key,
-                      event.target.value
-                    )
-                  )
-                }}
-                step={control.step}
-                type='number'
-                value={value ?? ''}
-              />
-            )}
+                )
+              }}
+              step={control.step}
+              type='number'
+              value={value ?? ''}
+            />
           </div>
         )
       })}

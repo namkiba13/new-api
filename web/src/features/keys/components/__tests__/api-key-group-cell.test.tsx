@@ -31,7 +31,8 @@ await i18n.use(initReactI18next).init({
     en: {
       translation: {
         Auto: 'Auto',
-        'Cross-group': 'Cross-group',
+        Balanced: 'Balanced',
+        'Custom routing': 'Custom routing',
         Ratio: 'Ratio',
         'Automatically selects the best available group with circuit breaker mechanism':
           'Automatically selects the best available group with circuit breaker mechanism',
@@ -44,12 +45,14 @@ function CellHarness(props: {
   group: string
   ratio?: number | string
   crossGroupRetry?: boolean
+  autoGroups?: string[]
   shouldReduceMotion?: boolean
 }) {
   return (
     <I18nextProvider i18n={i18n}>
       <TooltipProvider>
         <ApiKeyGroupCell
+          autoGroups={props.autoGroups}
           group={props.group}
           ratio={props.ratio}
           crossGroupRetry={props.crossGroupRetry ?? false}
@@ -65,6 +68,7 @@ describe('API key group table cell', () => {
     const { container } = render(
       <CellHarness
         group='auto'
+        autoGroups={['openai-stable', 'claude-stable']}
         ratio='自动'
         crossGroupRetry
         shouldReduceMotion={false}
@@ -98,11 +102,11 @@ describe('API key group table cell', () => {
     expect(ratio).toHaveTextContent('Auto Ratio')
     expect(ratio).not.toHaveTextContent('x')
     expect(container).not.toHaveTextContent('自动')
-    expect(container).toHaveTextContent('Cross-group')
+    expect(container).toHaveTextContent('Balanced')
 
     const crossGroupBadge = [
       ...container.querySelectorAll<HTMLElement>('[data-slot="status-badge"]'),
-    ].find((badge) => badge.textContent === 'Cross-group')
+    ].find((badge) => badge.textContent === 'Balanced')
     expect(crossGroupBadge).not.toBeUndefined()
     expect(crossGroupBadge?.closest('[data-auto-group-frame]')).toBeNull()
   })
@@ -130,7 +134,7 @@ describe('API key group table cell', () => {
     expect(container.querySelector('[data-auto-group-effect="ratio"]')).toBe(
       null
     )
-    expect(container).toHaveTextContent('Cross-group')
+    expect(container).toHaveTextContent('Custom routing')
     expect(container).not.toHaveTextContent('Auto')
     expect(container).not.toHaveTextContent('Ratio')
   })

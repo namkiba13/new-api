@@ -39,30 +39,20 @@ export const API_ENDPOINTS = {
   USER_GROUPS: '/api/user/self/groups',
 } as const
 
-// Default group — uses 'default' as the safe fallback; auto-group is
-// only selected when the backend confirms it is available for the user.
-export const DEFAULT_GROUP = 'default' as const
+// Start without an internal group. The first user-facing group returned by
+// the backend is selected after the hidden `default` group is removed.
+export const DEFAULT_GROUP = '' as const
 
 // Default configuration
 export const DEFAULT_CONFIG: PlaygroundConfig = {
   model: 'gpt-4o',
   group: DEFAULT_GROUP,
-  temperature: 0.7,
-  top_p: 1,
   max_tokens: 4096,
-  frequency_penalty: 0,
-  presence_penalty: 0,
-  seed: null,
   stream: true,
 }
 
 export const DEFAULT_PARAMETER_ENABLED: ParameterEnabled = {
-  temperature: true,
-  top_p: true,
-  max_tokens: false,
-  frequency_penalty: true,
-  presence_penalty: true,
-  seed: false,
+  max_tokens: true,
 }
 
 // Storage keys

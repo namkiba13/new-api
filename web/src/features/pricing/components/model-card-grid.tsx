@@ -73,7 +73,13 @@ export function ModelCardGrid(props: ModelCardGridProps) {
 
   return (
     <div className='space-y-4 sm:space-y-5'>
-      <div className='grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3'>
+      <div
+        className={
+          props.models.length === 1
+            ? 'grid grid-cols-1 gap-3 sm:gap-4'
+            : 'grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3'
+        }
+      >
         {pagedModels.map((model) => (
           <ModelCard
             key={model.id ?? model.model_name}

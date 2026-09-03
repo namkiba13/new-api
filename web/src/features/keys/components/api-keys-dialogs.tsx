@@ -20,6 +20,7 @@ import { ApiKeysDeleteDialog } from './api-keys-delete-dialog'
 import { ApiKeysMutateDrawer } from './api-keys-mutate-drawer'
 import { useApiKeys } from './api-keys-provider'
 import { CCSwitchDialog } from './dialogs/cc-switch-dialog'
+import { SmartApiKeyDrawer } from './smart-api-key-drawer'
 
 export function ApiKeysDialogs() {
   const { open, setOpen, currentRow, resolvedKey } = useApiKeys()
@@ -30,6 +31,10 @@ export function ApiKeysDialogs() {
         open={open === 'create' || open === 'update'}
         onOpenChange={(isOpen) => !isOpen && setOpen(null)}
         currentRow={open === 'update' ? currentRow || undefined : undefined}
+      />
+      <SmartApiKeyDrawer
+        open={open === 'smart-create'}
+        onOpenChange={(isOpen) => !isOpen && setOpen(null)}
       />
       <ApiKeysDeleteDialog />
       <CCSwitchDialog

@@ -26,14 +26,11 @@ import {
 } from '@/components/data-table'
 import { GroupBadge } from '@/components/group-badge'
 import { StatusBadge } from '@/components/status-badge'
-import { getLobeIcon } from '@/lib/lobe-icon'
 
 import { DEFAULT_TOKEN_UNIT } from '../constants'
 import {
   getDynamicDisplayGroupRatio,
-  getDynamicPriceUnitLabelKey,
   getDynamicPricingSummary,
-  isUnconfiguredTaskUsageModel,
 } from '../lib/dynamic-price'
 import { parseTags } from '../lib/filters'
 import { isTokenBasedModel } from '../lib/model-helpers'
@@ -42,6 +39,7 @@ import {
   formatRequestPrice,
   stripTrailingZeros,
 } from '../lib/price'
+import { getPricingModelIcon, getPricingProvider } from '../lib/provider-icon'
 import type { PricingModel, TokenUnit } from '../types'
 import { ModelBillingModeBadge } from './model-billing-mode-badge'
 
@@ -81,8 +79,7 @@ export function usePricingColumns(
       ),
       cell: ({ row }) => {
         const model = row.original
-        const modelIconKey = model.icon || model.vendor_icon
-        const modelIcon = modelIconKey ? getLobeIcon(modelIconKey, 14) : null
+        const modelIcon = getPricingModelIcon(model, 14)
 
         return (
           <div className='flex max-w-full min-w-0 items-center gap-2'>
@@ -156,39 +153,21 @@ export function usePricingColumns(
           return (
             <div className='max-w-full min-w-0'>
               <span className='font-mono text-sm tabular-nums'>
-                {primaryEntries.map((entry, index) => {
-                  const unitLabelKey = getDynamicPriceUnitLabelKey(entry)
-                  return (
-                    <span key={entry.key}>
-                      {index > 0 && (
-                        <span className='text-muted-foreground/40 mx-1'>/</span>
-                      )}
-                      {stripTrailingZeros(
-                        entry.formattedRange ?? entry.formatted
-                      )}
-                      {unitLabelKey && <>/{t(unitLabelKey)}</>}
-                    </span>
-                  )
-                })}
+                {primaryEntries.map((entry, index) => (
+                  <span key={entry.key}>
+                    {index > 0 && (
+                      <span className='text-muted-foreground/40 mx-1'>/</span>
+                    )}
+                    {stripTrailingZeros(entry.formatted)}
+                  </span>
+                ))}
               </span>
               <div className='text-muted-foreground/50 text-[10px]'>
-                {!dynamicSummary.isTaskUsage && `/ ${tokenUnitLabel} tokens`}
-                {dynamicSummary.isTaskUsage && dynamicSummary.tier?.label}
+                / {tokenUnitLabel} tokens
                 {dynamicSummary.tierCount > 1 &&
                   ` · ${t('{{count}} tiers', {
                     count: dynamicSummary.tierCount,
                   })}`}
-              </div>
-            </div>
-          )
-        }
-
-        if (isUnconfiguredTaskUsageModel(model)) {
-          return (
-            <div className='max-w-full min-w-0'>
-              <div className='text-sm font-medium'>{t('Not configured')}</div>
-              <div className='text-muted-foreground/50 text-[10px]'>
-                {t('Usage-based billing')}
               </div>
             </div>
           )
@@ -302,10 +281,6 @@ export function usePricingColumns(
           )
         }
 
-        if (isUnconfiguredTaskUsageModel(model)) {
-          return <span className='text-muted-foreground/30 text-xs'>—</span>
-        }
-
         const isTokenBased = isTokenBasedModel(model)
 
         if (!isTokenBased || model.cache_ratio == null) {
@@ -345,18 +320,14 @@ export function usePricingColumns(
       header: t('Vendor'),
       cell: ({ row }) => {
         const model = row.original
-        if (!model.vendor_name) {
-          return <span className='text-muted-foreground/50 text-xs'>—</span>
-        }
-        const vendorIcon = model.vendor_icon
-          ? getLobeIcon(model.vendor_icon, 12)
-          : null
+        const vendorName = getPricingProvider(model)
+        const vendorIcon = getPricingModelIcon(model, 12)
         return (
           <BadgeCell className='gap-1.5'>
             {vendorIcon}
             <StatusBadge
-              label={model.vendor_name}
-              autoColor={model.vendor_name}
+              label={vendorName}
+              autoColor={vendorName}
               size='sm'
               copyable={false}
             />

@@ -36,7 +36,7 @@ export function CTA(props: CTAProps) {
   }
 
   return (
-    <section className='relative z-10 overflow-hidden px-6 py-24 md:py-32'>
+    <section className='relative z-10 overflow-hidden px-4 pb-20 sm:px-6 md:pb-28 lg:px-10 xl:px-14'>
       {/* Gradient mesh background */}
       <div
         aria-hidden
@@ -50,29 +50,29 @@ export function CTA(props: CTAProps) {
       />
 
       <AnimateInView
-        className='mx-auto max-w-2xl text-center'
+        className='bg-background/90 mx-auto max-w-[1680px] border p-8 text-start shadow-[0_24px_80px_-52px_rgba(0,0,0,.65)] backdrop-blur-sm sm:p-12 lg:flex lg:items-end lg:justify-between lg:gap-12'
         animation='scale-in'
       >
-        <h2 className='text-2xl leading-tight font-bold tracking-tight md:text-4xl'>
-          {t('Ready to simplify')}
-          <br />
-          <span className='bg-gradient-to-r from-blue-400 via-violet-400 to-purple-500 bg-clip-text text-transparent'>
-            {t('your AI integration?')}
-          </span>
-        </h2>
-        <p className='text-muted-foreground/80 mx-auto mt-5 max-w-md text-sm leading-relaxed md:text-base'>
-          {t(
-            'Deploy your own gateway and start routing requests through your configured upstream services.'
-          )}
-        </p>
-        <div className='mt-8 flex items-center justify-center gap-3'>
-          <Button className='group rounded-lg' render={<Link to='/sign-up' />}>
+        <div>
+          <p className='home-kicker mb-4 font-mono text-xs font-semibold tracking-[0.14em] uppercase'>
+            {t('Get Started')}
+          </p>
+          <h2 className='text-4xl leading-[0.98] font-semibold tracking-[-0.045em] md:text-6xl'>
+            {t('Ready to simplify')}{' '}
+            <span className='text-[var(--pricing-accent)]'>{t('your AI integration?')}</span>
+          </h2>
+          <p className='text-muted-foreground mt-5 max-w-2xl text-sm leading-relaxed md:text-base'>
+            {t('Deploy your own gateway and start routing requests through your configured upstream services.')}
+          </p>
+        </div>
+        <div className='mt-8 flex shrink-0 items-center gap-2 lg:mt-0'>
+          <Button className='group rounded-sm bg-[var(--pricing-accent)] text-black hover:brightness-95' render={<Link to='/sign-up' />}>
             {t('Get Started')}
             <ArrowRight className='ml-1 size-3.5 transition-transform duration-200 group-hover:translate-x-0.5' />
           </Button>
           <Button
             variant='outline'
-            className='border-border/50 hover:border-border hover:bg-muted/50 rounded-lg'
+            className='border-border hover:bg-muted/50 rounded-sm'
             render={<Link to='/pricing' />}
           >
             {t('View Pricing')}

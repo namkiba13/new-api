@@ -27,6 +27,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 
+import { detectSmartRoutingStrategy } from '../lib/smart-routing-strategy'
 import {
   // AutoGroupBadge,
   GroupRatioBadge,
@@ -34,6 +35,7 @@ import {
 } from './auto-group-visuals'
 
 type ApiKeyGroupCellProps = {
+  autoGroups?: string[] | null
   crossGroupRetry: boolean
   group: string
   ratio?: GroupRatio
@@ -56,6 +58,14 @@ export function ApiKeyGroupCell(props: ApiKeyGroupCellProps) {
     )
   }
 
+  const strategy = detectSmartRoutingStrategy(props.autoGroups)
+  const strategyLabel = {
+    balanced: t('Balanced'),
+    stability: t('Stability first'),
+    'low-price': t('Low price first'),
+    custom: t('Custom routing'),
+  }[strategy]
+
   return (
     <Tooltip>
       <TooltipTrigger
@@ -66,11 +76,7 @@ export function ApiKeyGroupCell(props: ApiKeyGroupCellProps) {
           />
         }
       >
-        <StatusBadge
-          label={t('Cross-group')}
-          variant='info'
-          copyable={false}
-        />
+        <StatusBadge label={strategyLabel} variant='info' copyable={false} />
         {/*<AutoGroupBadge shouldReduceMotion={props.shouldReduceMotion} />*/}
         <GroupRatioBadge
           ratio={props.ratio}
@@ -80,9 +86,9 @@ export function ApiKeyGroupCell(props: ApiKeyGroupCellProps) {
       </TooltipTrigger>
       <TooltipContent>
         <span className='text-xs'>
-          {t(
-            'Automatically selects the best available group with circuit breaker mechanism'
-          )}
+          {props.autoGroups?.length
+            ? props.autoGroups.join(' → ')
+            : t('Automatically selects available groups in configured order')}
         </span>
       </TooltipContent>
     </Tooltip>

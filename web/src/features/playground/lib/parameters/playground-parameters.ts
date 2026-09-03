@@ -26,7 +26,6 @@ export type PlaygroundParameterControl = {
   key: PlaygroundParameterKey
   labelKey: string
   descriptionKey: string
-  valueType: 'slider' | 'number'
   min: number
   max: number
   step: number
@@ -34,57 +33,11 @@ export type PlaygroundParameterControl = {
 
 export const PLAYGROUND_PARAMETER_CONTROLS = [
   {
-    key: 'temperature',
-    labelKey: 'Temperature',
-    descriptionKey: 'Controls randomness and creativity',
-    valueType: 'slider',
-    min: 0.1,
-    max: 1,
-    step: 0.1,
-  },
-  {
-    key: 'top_p',
-    labelKey: 'Top P',
-    descriptionKey: 'Limits token selection to a probability mass',
-    valueType: 'slider',
-    min: 0.1,
-    max: 1,
-    step: 0.1,
-  },
-  {
-    key: 'frequency_penalty',
-    labelKey: 'Frequency Penalty',
-    descriptionKey: 'Reduces repeated wording',
-    valueType: 'slider',
-    min: -2,
-    max: 2,
-    step: 0.1,
-  },
-  {
-    key: 'presence_penalty',
-    labelKey: 'Presence Penalty',
-    descriptionKey: 'Encourages new topics',
-    valueType: 'slider',
-    min: -2,
-    max: 2,
-    step: 0.1,
-  },
-  {
     key: 'max_tokens',
     labelKey: 'Max Tokens',
     descriptionKey: 'Caps the response length',
-    valueType: 'number',
     min: 0,
     max: 200000,
-    step: 1,
-  },
-  {
-    key: 'seed',
-    labelKey: 'Seed',
-    descriptionKey: 'Keeps compatible responses more repeatable',
-    valueType: 'number',
-    min: 0,
-    max: 2147483647,
     step: 1,
   },
 ] as const satisfies readonly PlaygroundParameterControl[]
@@ -96,16 +49,12 @@ export function normalizeParameterNumberValue(
   key: PlaygroundParameterKey,
   value: string | number
 ): number | null {
-  if (value === '') {
-    return key === 'seed' ? null : 0
-  }
+  if (value === '') return 0
 
   const control = PLAYGROUND_PARAMETER_CONTROLS.find((item) => item.key === key)
   const parsed = typeof value === 'number' ? value : Number.parseFloat(value)
 
-  if (!control || Number.isNaN(parsed)) {
-    return key === 'seed' ? null : 0
-  }
+  if (!control || Number.isNaN(parsed)) return 0
 
   const clamped = Math.min(control.max, Math.max(control.min, parsed))
 
@@ -118,12 +67,8 @@ export function normalizeParameterNumberValue(
 }
 
 export function getParameterControlValueText(
-  key: PlaygroundParameterKey,
+  _key: PlaygroundParameterKey,
   value: ParameterValue
 ): string {
-  if (key === 'seed' && value === null) {
-    return 'Not set'
-  }
-
   return String(value)
 }

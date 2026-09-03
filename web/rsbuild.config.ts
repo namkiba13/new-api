@@ -14,14 +14,22 @@ export default defineConfig(({ envMode }) => {
     process.env.VITE_REACT_APP_SERVER_URL ||
     env.rawPublicVars.VITE_REACT_APP_SERVER_URL ||
     'http://localhost:3000'
+  const proxyHost =
+    process.env.VITE_REACT_APP_PROXY_HOST ||
+    env.rawPublicVars.VITE_REACT_APP_PROXY_HOST
 
   const isProd = envMode === 'production'
   const devProxy = Object.fromEntries(
-    (['/api', '/v1', '/mj', '/pg'] as const).map((key) => [
+    (['/api', '/mj', '/pg'] as const).map((key) => [
       key,
-      { target: serverUrl, changeOrigin: true },
+      {
+        target: serverUrl,
+        changeOrigin: true,
+        secure: !proxyHost,
+        ...(proxyHost ? { headers: { host: proxyHost } } : {}),
+      },
     ])
-  ) as Record<string, { target: string; changeOrigin: boolean }>
+  )
 
   return {
     plugins: [pluginReact(), pluginTailwindcss({ optimize: false })],
