@@ -39,7 +39,7 @@ export function AuthenticatedLayout(props: AuthenticatedLayoutProps) {
       <SearchProvider>
         <SidebarProvider
           defaultOpen={defaultOpen}
-          className='94API-console flex-col'
+          className='apimore-console flex-col'
         >
           <SkipToMain />
           <AppHeader />

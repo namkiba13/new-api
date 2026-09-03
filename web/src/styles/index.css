@@ -124,7 +124,7 @@ For commercial licensing, please contact support@quantumnous.com
 }
 
 @layer components {
-.94API-console {
+.apimore-console {
     --app-header-height: 3.5rem;
     --console-accent: oklch(0.91 0.22 120);
     --console-accent-soft: oklch(0.91 0.22 120 / 18%);
@@ -137,7 +137,7 @@ For commercial licensing, please contact support@quantumnous.com
     background: var(--console-canvas);
   }
 
-  .dark .94API-console {
+  .dark .apimore-console {
     --console-accent: oklch(0.91 0.22 120);
     --console-accent-soft: oklch(0.91 0.22 120 / 13%);
     --console-canvas: oklch(0.155 0.006 105);
@@ -147,29 +147,29 @@ For commercial licensing, please contact support@quantumnous.com
     --primary-foreground: oklch(0.16 0.01 105);
   }
 
-  .94API-console > header {
+  .apimore-console > header {
     border-bottom: 1px solid color-mix(in oklch, var(--border) 82%, transparent);
     background: color-mix(in oklch, var(--console-panel) 94%, transparent);
     box-shadow: 0 1px 0 color-mix(in oklch, var(--foreground) 3%, transparent);
     backdrop-filter: blur(16px);
   }
 
-  .94API-console [data-slot='sidebar-container'] {
+  .apimore-console [data-slot='sidebar-container'] {
     border-right: 1px solid color-mix(in oklch, var(--border) 82%, transparent);
     background: var(--console-sidebar);
   }
 
-  .94API-console [data-slot='sidebar-inner'],
-  .94API-console [data-slot='sidebar-content'] {
+  .apimore-console [data-slot='sidebar-inner'],
+  .apimore-console [data-slot='sidebar-content'] {
     background: transparent;
   }
 
-  .94API-console [data-slot='sidebar-group'] {
+  .apimore-console [data-slot='sidebar-group'] {
     padding-inline: 0.65rem;
     padding-block: 0.45rem;
   }
 
-  .94API-console [data-slot='sidebar-group-label'] {
+  .apimore-console [data-slot='sidebar-group-label'] {
     margin-bottom: 0.2rem;
     padding-inline: 0.65rem;
     color: color-mix(in oklch, var(--foreground) 44%, transparent);
@@ -178,7 +178,7 @@ For commercial licensing, please contact support@quantumnous.com
     letter-spacing: 0.11em;
   }
 
-  .94API-console [data-slot='sidebar-menu-button'] {
+  .apimore-console [data-slot='sidebar-menu-button'] {
     position: relative;
     min-height: 2.15rem;
     border: 1px solid transparent;
@@ -191,13 +191,13 @@ For commercial licensing, please contact support@quantumnous.com
       transform 140ms ease;
   }
 
-  .94API-console [data-slot='sidebar-menu-button']:hover {
+  .apimore-console [data-slot='sidebar-menu-button']:hover {
     border-color: color-mix(in oklch, var(--border) 72%, transparent);
     background: color-mix(in oklch, var(--console-panel) 72%, transparent);
     color: var(--foreground);
   }
 
-  .94API-console [data-slot='sidebar-menu-button'][data-active] {
+  .apimore-console [data-slot='sidebar-menu-button'][data-active] {
     border-color: color-mix(in oklch, var(--console-accent) 32%, var(--border));
     background: linear-gradient(
       90deg,
@@ -208,7 +208,7 @@ For commercial licensing, please contact support@quantumnous.com
     box-shadow: inset 2px 0 0 var(--console-accent);
   }
 
-  .94API-console [data-slot='sidebar-inset'] {
+  .apimore-console [data-slot='sidebar-inset'] {
     background:
       linear-gradient(
         to right,
@@ -219,14 +219,14 @@ For commercial licensing, please contact support@quantumnous.com
     background-size: 72px 100%;
   }
 
-  .94API-console [data-slot='card'],
-  .94API-console main .rounded-2xl {
+  .apimore-console [data-slot='card'],
+  .apimore-console main .rounded-2xl {
     border-radius: 0.5rem;
   }
 
-  .94API-console [data-slot='card'],
-  .94API-console main > div > div.border,
-  .94API-console main .rounded-2xl.border {
+  .apimore-console [data-slot='card'],
+  .apimore-console main > div > div.border,
+  .apimore-console main .rounded-2xl.border {
     border-color: color-mix(in oklch, var(--border) 86%, transparent);
     box-shadow:
       0 1px 0 color-mix(in oklch, var(--foreground) 3%, transparent),
@@ -234,38 +234,38 @@ For commercial licensing, please contact support@quantumnous.com
   }
 
   @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-    .94API-console [data-slot='card'],
-    .94API-console main .rounded-2xl.border {
+    .apimore-console [data-slot='card'],
+    .apimore-console main .rounded-2xl.border {
       transition:
         border-color 160ms ease,
         box-shadow 180ms ease,
         transform 180ms ease;
     }
 
-    .94API-console [data-slot='card']:hover,
-    .94API-console main .rounded-2xl.border:hover {
+    .apimore-console [data-slot='card']:hover,
+    .apimore-console main .rounded-2xl.border:hover {
       border-color: color-mix(in oklch, var(--console-accent) 24%, var(--border));
       box-shadow: 0 16px 38px -30px
         color-mix(in oklch, var(--foreground) 38%, transparent);
     }
   }
 
-  .94API-console main h1,
-  .94API-console main h2 {
+  .apimore-console main h1,
+  .apimore-console main h2 {
     letter-spacing: -0.025em;
   }
 
-  .94API-console main h2 {
+  .apimore-console main h2 {
     font-size: clamp(1.1rem, 1rem + 0.45vw, 1.45rem);
     font-weight: 650;
   }
 
-  .94API-console main button:not([role='switch']):not([role='combobox']) {
+  .apimore-console main button:not([role='switch']):not([role='combobox']) {
     border-radius: 0.4rem;
   }
 
-  .94API-console .94API-user-overview .overview-secondary,
-  .94API-console .94API-user-overview .overview-link {
+  .apimore-console .apimore-user-overview .overview-secondary,
+  .apimore-console .apimore-user-overview .overview-link {
     min-height: 2.35rem;
     border-radius: 0.18rem;
     padding-inline: 0.9rem;
@@ -273,81 +273,81 @@ For commercial licensing, please contact support@quantumnous.com
     box-shadow: none;
   }
 
-  .94API-console .94API-user-overview .overview-secondary {
+  .apimore-console .apimore-user-overview .overview-secondary {
     background: var(--foreground);
     color: var(--background);
     border-color: var(--foreground);
   }
 
-  .94API-console .94API-user-overview .overview-secondary:hover {
+  .apimore-console .apimore-user-overview .overview-secondary:hover {
     background: color-mix(in oklch, var(--foreground) 88%, var(--background));
     color: var(--background);
   }
 
-  .94API-console .94API-user-overview .overview-link {
+  .apimore-console .apimore-user-overview .overview-link {
     min-height: 2rem;
     padding-inline: 0.55rem;
     border: 0;
     background: transparent;
   }
 
-  .94API-console .94API-user-overview .overview-link:hover {
+  .apimore-console .apimore-user-overview .overview-link:hover {
     background: color-mix(in oklch, var(--console-accent) 10%, transparent);
   }
 
-  .dark .94API-console .94API-user-overview .overview-secondary {
+  .dark .apimore-console .apimore-user-overview .overview-secondary {
     background: var(--console-accent);
     border-color: var(--console-accent);
     color: oklch(0.16 0.01 110);
   }
 
-  .dark .94API-console .94API-user-overview .overview-create-key {
+  .dark .apimore-console .apimore-user-overview .overview-create-key {
     border-color: var(--console-accent);
     background: var(--console-accent);
     color: oklch(0.16 0.01 110);
   }
 
-  .94API-console main table {
+  .apimore-console main table {
     border-collapse: separate;
     border-spacing: 0;
   }
 
-  .94API-console main thead {
+  .apimore-console main thead {
     background: color-mix(in oklch, var(--console-sidebar) 74%, transparent);
   }
 
-  .94API-console main tbody tr {
+  .apimore-console main tbody tr {
     transition: background-color 130ms ease;
   }
 
-  .94API-console main tbody tr:hover {
+  .apimore-console main tbody tr:hover {
     background: color-mix(in oklch, var(--console-accent) 5%, transparent);
   }
 
   @media (max-width: 767px) {
-    .94API-console {
+    .apimore-console {
       --app-header-height: 3.35rem;
     }
 
-    .94API-console > header > div {
+    .apimore-console > header > div {
       padding-inline: 0.65rem;
     }
 
-    .94API-console [data-slot='sidebar-inset'] {
+    .apimore-console [data-slot='sidebar-inset'] {
       background-size: 40px 100%;
     }
 
-    .94API-console [data-slot='card'],
-    .94API-console main .rounded-2xl {
+    .apimore-console [data-slot='card'],
+    .apimore-console main .rounded-2xl {
       border-radius: 0.45rem;
     }
 
-    .94API-console main button,
-    .94API-console main [role='button'] {
+    .apimore-console main button,
+    .apimore-console main [role='button'] {
       min-height: 2.5rem;
     }
 
-    .94API-console main h2 {
+    .apimore-console main h2 {
       font-size: 1.15rem;
     }
   }
@@ -443,8 +443,8 @@ For commercial licensing, please contact support@quantumnous.com
 }
 
 /* ModelFlare-inspired user console: precise panels, compact hierarchy. */
-.94API-console [data-slot='card'],
-.94API-console main .bg-card.border {
+.apimore-console [data-slot='card'],
+.apimore-console main .bg-card.border {
   border-radius: 0.25rem;
 }
 

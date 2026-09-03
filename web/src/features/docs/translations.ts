@@ -16,7 +16,7 @@ const UI = {
     build: 'Build with every model.',
     oneApi: 'One clean API.',
     summary:
-      'Set up API keys, SDKs, Codex, Claude Code, Gemini CLI, OpenCode, CC-Switch, and 94API-compatible endpoints.',
+      'Set up API keys, SDKs, Codex, Claude Code, Gemini CLI, OpenCode, CC-Switch, and OpenAI-compatible endpoints.',
     baseUrl: 'Base URL',
     support: 'Need help? Contact 94API support',
     setup: 'Setup guides',

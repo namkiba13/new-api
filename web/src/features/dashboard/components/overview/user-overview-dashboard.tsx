@@ -28,7 +28,7 @@ export function UserOverviewDashboard() {
   const accountStanding =
     !user?.group || user.group === 'default' ? t('Basic') : user.group
   return (
-    <div className='94API-user-overview flex flex-col gap-4 sm:gap-5'>
+    <div className='apimore-user-overview flex flex-col gap-4 sm:gap-5'>
       <div className='flex items-center justify-end gap-2 text-xs'>
         <span className='text-muted-foreground'>{t('Account standing')}</span>
         <span className='size-1.5 rounded-full bg-foreground/70' />

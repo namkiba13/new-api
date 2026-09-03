@@ -118,30 +118,30 @@ export function usePageSeo(options: PageSeoOptions) {
     upsertLink('link[rel="canonical"]', { rel: 'canonical', href: canonical })
 
     document.head
-      .querySelectorAll('link[data-94API-hreflang]')
+      .querySelectorAll('link[data-apimore-hreflang]')
       .forEach((element) => element.remove())
     LOCALES.forEach((locale) => {
       const element = document.createElement('link')
       element.rel = 'alternate'
       element.hreflang = locale
       element.href = `${BASE_URL}${options.path}?lang=${encodeURIComponent(locale)}`
-      element.dataset.94APIHreflang = 'true'
+      element.dataset.apimoreHreflang = 'true'
       document.head.appendChild(element)
     })
     const fallback = document.createElement('link')
     fallback.rel = 'alternate'
     fallback.hreflang = 'x-default'
     fallback.href = `${BASE_URL}${options.path}?lang=en`
-    fallback.dataset.94APIHreflang = 'true'
+    fallback.dataset.apimoreHreflang = 'true'
     document.head.appendChild(fallback)
 
     let structuredData = document.head.querySelector<HTMLScriptElement>(
-      'script[data-94API-seo]'
+      'script[data-apimore-seo]'
     )
     if (!structuredData) {
       structuredData = document.createElement('script')
       structuredData.type = 'application/ld+json'
-      structuredData.dataset.94APISeo = 'true'
+      structuredData.dataset.apimoreSeo = 'true'
       document.head.appendChild(structuredData)
     }
     structuredData.textContent = JSON.stringify({

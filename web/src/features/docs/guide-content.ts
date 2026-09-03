@@ -21,7 +21,7 @@ export type GuideSection = {
 }
 
 const verifyCurl = `curl https://94api.dev/v1/chat/completions \\
-  -H "Authorization: Bearer YOUR_94API_API_KEY" \\
+  -H "Authorization: Bearer YOUR_94API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
     "model": "gpt-5-mini",
@@ -88,7 +88,7 @@ export const GUIDE_CONTENT: Record<string, GuideSection[]> = {
       id: 'configure',
       title: '3. Configure the 94API provider',
       paragraphs: [
-        'Create config.toml inside your user-level .codex directory. Store the API key in the separate 94API_api_key file.',
+        'Create config.toml inside your user-level .codex directory. Store the API key in the separate 94api_key file.',
       ],
       code: [
         {
@@ -99,17 +99,17 @@ model = "gpt-5"
 model_reasoning_effort = "high"
 disable_response_storage = true
 
-[model_providers.94API]
+[model_providers.apimore]
 name = "94API"
 base_url = "https://94api.dev/v1"
 wire_api = "responses"
 
-[model_providers.94API.auth]
+[model_providers.apimore.auth]
 command = "sh"
-args = ["-lc", "cat ~/.codex/94API_api_key"]`,
+args = ["-lc", "cat ~/.codex/94api_key"]`,
         },
       ],
-      note: 'On Windows, use PowerShell to read $HOME\\.codex\\94API_api_key in the auth command.',
+      note: 'On Windows, use PowerShell to read $HOME\\.codex\\94api_key in the auth command.',
     },
     {
       id: 'verify',
@@ -122,7 +122,7 @@ args = ["-lc", "cat ~/.codex/94API_api_key"]`,
           label: 'Terminal',
           language: 'bash',
           value:
-            'mkdir my-94API-project\ncd my-94API-project\ncodex --model gpt-5',
+            'mkdir my-94api-project\ncd my-94api-project\ncodex --model gpt-5',
         },
       ],
     },
@@ -160,7 +160,7 @@ args = ["-lc", "cat ~/.codex/94API_api_key"]`,
           label: 'macOS / Linux',
           language: 'bash',
           value: `export ANTHROPIC_BASE_URL="https://94api.dev"
-export ANTHROPIC_AUTH_TOKEN="YOUR_94API_API_KEY"
+export ANTHROPIC_AUTH_TOKEN="YOUR_94API_KEY"
 export ANTHROPIC_MODEL="claude-opus-5"
 claude`,
         },
@@ -168,7 +168,7 @@ claude`,
           label: 'Windows PowerShell',
           language: 'powershell',
           value: `$env:ANTHROPIC_BASE_URL="https://94api.dev"
-$env:ANTHROPIC_AUTH_TOKEN="YOUR_94API_API_KEY"
+$env:ANTHROPIC_AUTH_TOKEN="YOUR_94API_KEY"
 $env:ANTHROPIC_MODEL="claude-opus-5"
 claude`,
         },
@@ -207,14 +207,14 @@ claude`,
         {
           label: 'macOS / Linux',
           language: 'bash',
-          value: `export GEMINI_API_KEY="YOUR_94API_API_KEY"
+          value: `export GEMINI_API_KEY="YOUR_94API_KEY"
 export GOOGLE_GEMINI_BASE_URL="https://94api.dev"
 gemini --model gemini-3.5-flash`,
         },
         {
           label: 'Windows PowerShell',
           language: 'powershell',
-          value: `$env:GEMINI_API_KEY="YOUR_94API_API_KEY"
+          value: `$env:GEMINI_API_KEY="YOUR_94API_KEY"
 $env:GOOGLE_GEMINI_BASE_URL="https://94api.dev"
 gemini --model gemini-3.5-flash`,
         },
@@ -253,7 +253,7 @@ gemini --model gemini-3.5-flash`,
           value: `import OpenAI from "openai";
 
 const client = new OpenAI({
-  apiKey: process.env.94API_API_KEY,
+  apiKey: process.env.API94_KEY,
   baseURL: "https://94api.dev/v1",
 });
 
@@ -271,7 +271,7 @@ console.log(response.output_text);`,
 from openai import OpenAI
 
 client = OpenAI(
-    api_key=os.environ["94API_API_KEY"],
+    api_key=os.environ["94api_key"],
     base_url="https://94api.dev/v1",
 )
 
@@ -314,7 +314,7 @@ print(response.output_text)`,
           value: `import Anthropic from "@anthropic-ai/sdk";
 
 const client = new Anthropic({
-  apiKey: process.env.94API_API_KEY,
+  apiKey: process.env.API94_KEY,
   baseURL: "https://94api.dev",
 });
 
@@ -384,7 +384,7 @@ const message = await client.messages.create({
       "name": "94API",
       "options": {
         "baseURL": "https://94api.dev/v1",
-        "apiKey": "{env:94API_API_KEY}"
+        "apiKey": "{env:94api_key}"
       },
       "models": {
         "gpt-5-mini": { "name": "GPT-5 Mini" }
@@ -399,7 +399,7 @@ const message = await client.messages.create({
       id: 'verify',
       title: '3. Start OpenCode',
       paragraphs: [
-        'Export 94API_API_KEY, start OpenCode, and select the 94API model from the model picker.',
+        'Export 94api_key, start OpenCode, and select the 94API model from the model picker.',
       ],
     },
   ],
