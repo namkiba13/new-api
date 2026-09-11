@@ -61,6 +61,79 @@ func performManageUserRequest(t *testing.T, body string) *httptest.ResponseRecor
 	return recorder
 }
 
+func TestSelfSidebarSettingsPermissions(t *testing.T) {
+	for _, tc := range []struct {
+		name         string
+		role         int
+		canConfigure bool
+		canSave      bool
+	}{
+		{"user", common.RoleCommonUser, false, false},
+		{"admin", common.RoleAdminUser, true, true},
+		{"root", common.RoleRootUser, false, true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			db := setupManageUserTestDB(t)
+			user := model.User{Username: "sidebar-" + tc.name, Role: tc.role, Status: common.UserStatusEnabled, Group: "default", Setting: `{"language":"en","sidebar_modules":"{}"}`}
+			require.NoError(t, db.Create(&user).Error)
+			getRecorder := httptest.NewRecorder()
+			getContext, _ := gin.CreateTestContext(getRecorder)
+			getContext.Request = httptest.NewRequest(http.MethodGet, "/api/user/self", nil)
+			getContext.Set("id", user.Id)
+			getContext.Set("role", tc.role)
+			GetSelf(getContext)
+			var profile struct {
+				Success bool `json:"success"`
+				Data    struct {
+					Permissions struct {
+						SidebarSettings bool `json:"sidebar_settings"`
+					} `json:"permissions"`
+				} `json:"data"`
+			}
+			require.NoError(t, common.Unmarshal(getRecorder.Body.Bytes(), &profile))
+			require.True(t, profile.Success)
+			assert.Equal(t, tc.canConfigure, profile.Data.Permissions.SidebarSettings)
+
+			recorder := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(recorder)
+			// A submitted role must never override the authenticated role.
+			c.Request = httptest.NewRequest(http.MethodPut, "/api/user/self", strings.NewReader(`{"sidebar_modules":"{\"console\":{\"enabled\":false}}","role":100}`))
+			c.Set("id", user.Id)
+			c.Set("role", tc.role)
+			UpdateSelf(c)
+			var saved model.User
+			require.NoError(t, db.First(&saved, user.Id).Error)
+			if tc.canSave {
+				assert.Equal(t, http.StatusOK, recorder.Code)
+				assert.Contains(t, recorder.Body.String(), `"success":true`)
+				assert.JSONEq(t, `{"console":{"enabled":false}}`, saved.GetSetting().SidebarModules)
+			} else {
+				assert.Equal(t, http.StatusForbidden, recorder.Code)
+				assert.Contains(t, recorder.Body.String(), `"success":false`)
+				assert.Equal(t, user.Setting, saved.Setting)
+			}
+		})
+	}
+}
+
+func TestSelfLanguageRemainsEditableWithoutSidebarPermission(t *testing.T) {
+	db := setupManageUserTestDB(t)
+	user := model.User{Username: "sidebar-language", Role: common.RoleCommonUser, Status: common.UserStatusEnabled, Setting: `{"language":"en","sidebar_modules":"{}"}`}
+	require.NoError(t, db.Create(&user).Error)
+	recorder := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(recorder)
+	c.Request = httptest.NewRequest(http.MethodPut, "/api/user/self", strings.NewReader(`{"language":"vi"}`))
+	c.Set("id", user.Id)
+	c.Set("role", common.RoleCommonUser)
+	UpdateSelf(c)
+	assert.Equal(t, http.StatusOK, recorder.Code)
+	assert.Contains(t, recorder.Body.String(), `"success":true`)
+	var saved model.User
+	require.NoError(t, db.First(&saved, user.Id).Error)
+	assert.Equal(t, "vi", saved.GetSetting().Language)
+	assert.Equal(t, "{}", saved.GetSetting().SidebarModules)
+}
+
 func TestManageUserDisableAdvancesAuthVersionOnceAndRevokesSession(t *testing.T) {
 	db := setupManageUserTestDB(t)
 	now := time.Now().Unix()

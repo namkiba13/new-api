@@ -586,8 +586,8 @@ func calculateUserPermissions(userRole int) map[string]interface{} {
 			},
 		}
 	} else {
-		// 普通用户只能设置个人功能，不包含管理员区域
-		permissions["sidebar_settings"] = true
+		// Regular users follow the administrator's sidebar configuration.
+		permissions["sidebar_settings"] = false
 		permissions["sidebar_modules"] = map[string]interface{}{
 			"admin": false, // 普通用户不能访问管理员区域
 		}
@@ -819,6 +819,14 @@ func UpdateSelf(c *gin.Context) {
 
 	// 检查是否是用户设置更新请求 (sidebar_modules 或 language)
 	if sidebarModules, sidebarExists := requestData["sidebar_modules"]; sidebarExists {
+		if c.GetInt("role") < common.RoleAdminUser {
+			c.JSON(http.StatusForbidden, gin.H{
+				"success": false,
+				"code":    "AUTH_INSUFFICIENT_PRIVILEGE",
+				"message": common.TranslateMessage(c, i18n.MsgAuthInsufficientPrivilege),
+			})
+			return
+		}
 		userId := c.GetInt("id")
 		user, err := model.GetUserById(userId, false)
 		if err != nil {
