@@ -56,6 +56,7 @@ afterEach(() => {
   useAuthStore.getState().auth.reset()
   useSystemConfigStore.setState(initialSystemConfig, true)
   localStorage.clear()
+  vi.unstubAllGlobals()
 })
 
 async function renderSignIn(status: Partial<SystemStatus> = {}) {
@@ -99,6 +100,39 @@ async function renderSignIn(status: Partial<SystemStatus> = {}) {
 }
 
 describe('login-03 layout', () => {
+  it('orders OAuth, separator, password, CAPTCHA and submit for a password login', async () => {
+    vi.stubGlobal('turnstile', {
+      render: (element: HTMLElement) => {
+        const frame = document.createElement('iframe')
+        frame.title = 'Cloudflare CAPTCHA'
+        element.append(frame)
+        return 'widget-id'
+      },
+      remove: vi.fn(),
+    })
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(
+      new DOMRect(0, 0, 336, 44)
+    )
+    await renderSignIn({
+      github_oauth: true,
+      turnstile_check: true,
+      turnstile_site_key: 'test-key',
+    })
+    const controls = [
+      screen.getByRole('button', { name: /Continue with GitHub/ }),
+      screen.getByText('Or continue with'),
+      screen.getByLabelText('Password'),
+      screen.getByTitle('Cloudflare CAPTCHA'),
+      screen.getByRole('button', { name: 'Sign in' }),
+    ]
+    for (let i = 1; i < controls.length; i++) {
+      expect(
+        controls[i - 1].compareDocumentPosition(controls[i]) &
+          Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy()
+    }
+  })
+
   it('keeps branding above the card and legal footer outside it when terms are enabled', async () => {
     const card = await renderSignIn({ user_agreement_enabled: true })
     const brand = screen.getByRole('link', { name: /94API/ })

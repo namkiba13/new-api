@@ -339,6 +339,7 @@ export function UserAuthForm({
 
       {/* OAuth Providers */}
       <OAuthProviders
+        showSeparator={false}
         status={status}
         redirectTo={redirectTo}
         disabled={isLoading || (requiresLegalConsent && !agreedToLegal)}
@@ -356,6 +357,14 @@ export function UserAuthForm({
         {...props}
       >
         {hasAlternativeLogin && alternativeLoginMethods}
+        {hasAlternativeLogin && passwordLoginEnabled && (
+          <div
+            role='separator'
+            className='text-muted-foreground before:bg-border after:bg-border flex items-center gap-3 text-xs uppercase before:h-px before:flex-1 after:h-px after:flex-1'
+          >
+            {t('Or continue with')}
+          </div>
+        )}
 
         {passwordLoginEnabled && (
           <>
@@ -405,27 +414,25 @@ export function UserAuthForm({
               )}
             />
 
+            {/* Turnstile */}
+            {isTurnstileEnabled && (
+              <Turnstile
+                key={turnstileWidgetKey}
+                siteKey={turnstileSiteKey}
+                onVerify={setTurnstileToken}
+                onExpire={() => setTurnstileToken('')}
+              />
+            )}
+
             {/* Submit Button */}
             <Button
               type='submit'
-              className='mt-2 w-full justify-center gap-2'
+              className='w-full justify-center gap-2'
               disabled={isLoading || (requiresLegalConsent && !agreedToLegal)}
             >
               {isLoading ? <Loader2 className='animate-spin' /> : <LogIn />}
               {t('Sign in')}
             </Button>
-
-            {/* Turnstile */}
-            {isTurnstileEnabled && (
-              <div className='mt-2'>
-                <Turnstile
-                  key={turnstileWidgetKey}
-                  siteKey={turnstileSiteKey}
-                  onVerify={setTurnstileToken}
-                  onExpire={() => setTurnstileToken('')}
-                />
-              </div>
-            )}
           </>
         )}
 
