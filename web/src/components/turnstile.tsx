@@ -47,6 +47,7 @@ export function Turnstile({
       try {
         window.turnstile.render(ref.current, {
           sitekey: siteKey,
+          size: 'compact',
           callback: (token: string) => onVerify(token),
           'error-callback': () => onExpire?.(),
           'expired-callback': () => onExpire?.(),
