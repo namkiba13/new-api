@@ -93,10 +93,12 @@ export function ProfileSecurityCard({
   return (
     <>
       <TitledCard
+        titleClassName='text-base sm:text-base'
+        headerClassName='sm:p-5 sm:!pb-5'
         title={t('Security')}
         description={t('Manage your security settings and account access')}
         icon={<Shield className='h-4 w-4' />}
-        iconTone='success'
+        iconTone='neutral'
         disableHoverEffect
       >
         <div className='grid grid-cols-1 gap-2.5 sm:gap-3'>

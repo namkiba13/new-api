@@ -16,24 +16,22 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Activity, BarChart3, WalletCards } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
+import { CreditCard } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { StatusBadge } from '@/components/status-badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Card, CardContent } from '@/components/ui/card'
-import { IconBadge, type IconBadgeTone } from '@/components/ui/icon-badge'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useIsSidebarModuleVisible } from '@/hooks/use-sidebar-config'
 import { getUserAvatarFallback, getUserAvatarStyle } from '@/lib/avatar'
 import { formatCompactNumber, formatQuota } from '@/lib/format'
 import { getRoleLabel } from '@/lib/roles'
 
 import { getDisplayName } from '../lib'
 import type { UserProfile } from '../types'
-
-// ============================================================================
-// Profile Header Component
-// ============================================================================
 
 interface ProfileHeaderProps {
   profile: UserProfile | null
@@ -42,147 +40,112 @@ interface ProfileHeaderProps {
 
 export function ProfileHeader({ profile, loading }: ProfileHeaderProps) {
   const { t } = useTranslation()
-
+  const walletVisible = useIsSidebarModuleVisible('/wallet')
   if (loading) {
     return (
-      <Card data-card-hover='false' className='gap-0 overflow-hidden py-0'>
-        <CardContent className='p-4 sm:p-5'>
-          <div className='flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left'>
-            <Skeleton className='h-16 w-16 rounded-2xl' />
-            <div className='space-y-3'>
-              <div className='flex flex-col items-center gap-2 sm:flex-row sm:justify-start'>
-                <Skeleton className='h-8 w-48' />
-                <Skeleton className='h-5 w-16' />
-              </div>
-              <div className='flex flex-col items-center gap-1 sm:flex-row sm:justify-start sm:gap-4'>
-                <Skeleton className='h-4 w-24' />
-                <Skeleton className='h-4 w-40' />
-                <Skeleton className='h-4 w-20' />
-              </div>
-            </div>
+      <div className='space-y-6' aria-busy='true'>
+        <Card className='gap-5 p-5 sm:p-6' data-card-hover='false'>
+          <div className='flex items-center gap-4'>
+            <Skeleton className='size-16 rounded-xl' />
+            <Skeleton className='h-8 w-48 max-w-full' />
           </div>
-        </CardContent>
-        <div className='border-t'>
-          <div className='divide-border/60 grid grid-cols-1 divide-y sm:grid-cols-3 sm:divide-x sm:divide-y-0'>
-            {['balance', 'usage', 'requests'].map((key) => (
-              <div key={key} className='px-4 py-3.5 sm:px-5 sm:py-4'>
-                <Skeleton className='h-3.5 w-20' />
-                <Skeleton className='mt-2 h-7 w-28' />
-                <Skeleton className='mt-1.5 h-3.5 w-24' />
-              </div>
-            ))}
+          <div className='grid grid-cols-2 gap-6'>
+            <Skeleton className='h-20' />
+            <Skeleton className='h-20' />
           </div>
-        </div>
-      </Card>
+        </Card>
+        <Skeleton className='h-44 w-full rounded-xl' />
+      </div>
     )
   }
-
   if (!profile) return null
-
   const displayName = getDisplayName(profile)
   const avatarName = profile.username || displayName
-  const avatarFallback = getUserAvatarFallback(avatarName)
-  const avatarFallbackStyle = getUserAvatarStyle(avatarName)
-  const roleLabel = getRoleLabel(profile.role)
-  const stats: {
-    label: string
-    value: string
-    description: string
-    icon: typeof WalletCards
-    tone: IconBadgeTone
-  }[] = [
-    {
-      label: t('Current Balance'),
-      value: formatQuota(profile.quota),
-      description: t('Remaining quota'),
-      icon: WalletCards,
-      tone: 'success',
-    },
+  const stats = [
     {
       label: t('Total Usage'),
       value: formatQuota(profile.used_quota),
       description: t('Total consumed quota'),
-      icon: BarChart3,
-      tone: 'info',
     },
     {
       label: t('API Requests'),
       value: formatCompactNumber(profile.request_count),
       description: t('Total requests made'),
-      icon: Activity,
-      tone: 'chart-4',
     },
   ]
-
   return (
     <div className='space-y-4 sm:space-y-6'>
-      <div>
-        <div className='flex items-center gap-3 text-left sm:gap-4'>
-          <Avatar className='ring-background h-12 w-12 rounded-xl text-sm ring-2 sm:h-16 sm:w-16 sm:rounded-2xl sm:text-lg sm:ring-4'>
+      <Card data-card-hover='false' className='gap-0 overflow-hidden py-0'>
+        <div className='flex flex-wrap items-center gap-4 p-4 sm:p-6'>
+          <Avatar className='ring-muted size-14 rounded-xl ring-4 after:rounded-xl sm:size-16'>
             <AvatarFallback
-              className='rounded-xl font-semibold text-white sm:rounded-2xl'
-              style={avatarFallbackStyle}
+              className='rounded-xl text-lg font-semibold text-white'
+              style={getUserAvatarStyle(avatarName)}
             >
-              {avatarFallback}
+              {getUserAvatarFallback(avatarName)}
             </AvatarFallback>
           </Avatar>
-
-          <div className='min-w-0 flex-1 space-y-1.5 sm:space-y-3'>
-            <div className='flex min-w-0 flex-wrap items-center gap-2'>
-              <h2 className='max-w-full text-xl font-semibold tracking-tight break-words sm:text-2xl'>
-                {displayName}
-              </h2>
-              <StatusBadge
-                label={roleLabel}
-                variant='neutral'
-                copyable={false}
-              />
-              <StatusBadge
-                label={`${t('User ID')} ${profile.id}`}
-                variant='info'
-                copyText={String(profile.id)}
-              />
-            </div>
-
-            <div className='text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs sm:gap-x-4 sm:text-sm'>
-              <span className='truncate'>@{profile.username}</span>
-              {profile.email && (
-                <>
-                  <span>•</span>
-                  <span className='truncate'>{profile.email}</span>
-                </>
-              )}
-              {profile.group && (
-                <>
-                  <span>•</span>
-                  <span className='truncate'>{profile.group}</span>
-                </>
-              )}
-            </div>
+          <div className='min-w-0 flex-1'>
+            <h2 className='text-xl font-semibold tracking-tight break-words sm:text-2xl'>
+              {displayName}
+            </h2>
+            <p className='text-muted-foreground mt-1 text-sm break-all'>
+              {profile.email || `@${profile.username}`}
+            </p>
+          </div>
+          <div className='flex flex-wrap items-center gap-2'>
+            <StatusBadge
+              label={getRoleLabel(profile.role)}
+              variant='neutral'
+              copyable={false}
+            />
+            <StatusBadge
+              label={`${t('User ID')} ${profile.id}`}
+              variant='neutral'
+              copyText={String(profile.id)}
+            />
           </div>
         </div>
-      </div>
-      <Card data-card-hover='false' className='gap-0 overflow-hidden py-0'>
-        <div className='divide-border/60 grid grid-cols-1 divide-y sm:grid-cols-3 sm:divide-x sm:divide-y-0'>
+        <div className='grid grid-cols-1 divide-y border-t sm:grid-cols-2 sm:divide-x sm:divide-y-0'>
           {stats.map((item) => (
-            <div key={item.label} className='min-w-0 px-3 py-3 sm:px-5 sm:py-4'>
-              <div className='flex items-center gap-2'>
-                <IconBadge tone={item.tone} size='stat'>
-                  <item.icon />
-                </IconBadge>
-                <div className='text-muted-foreground text-xs font-medium tracking-wider uppercase'>
-                  {item.label}
-                </div>
-              </div>
-
-              <div className='text-foreground mt-1.5 font-mono text-xl font-bold tracking-tight break-words tabular-nums sm:mt-2 sm:text-2xl'>
+            <div key={item.label} className='min-w-0 px-4 py-4 sm:px-6'>
+              <p className='text-muted-foreground text-xs font-medium tracking-wider uppercase'>
+                {item.label}
+              </p>
+              <p className='mt-2 text-2xl font-semibold tracking-tight break-words tabular-nums'>
                 {item.value}
-              </div>
-              <div className='text-muted-foreground mt-1 text-xs'>
+              </p>
+              <p className='text-muted-foreground mt-1 text-xs'>
                 {item.description}
-              </div>
+              </p>
             </div>
           ))}
+        </div>
+      </Card>
+      <Card data-card-hover='false' className='gap-4 p-4 sm:p-6'>
+        <div className='flex flex-wrap items-center justify-between gap-3'>
+          <div>
+            <h3 className='text-base font-semibold'>
+              {t('Credits and usage')}
+            </h3>
+            <p className='text-muted-foreground mt-1 text-sm'>
+              {t('Monitor credits, usage, and request volume')}
+            </p>
+          </div>
+          {walletVisible && (
+            <Button size='sm' render={<Link to='/wallet' />}>
+              <CreditCard data-icon='inline-start' />
+              {t('Add credits')}
+            </Button>
+          )}
+        </div>
+        <div className='bg-muted/40 rounded-lg border p-4'>
+          <p className='text-muted-foreground text-xs'>
+            {t('Remaining credits')}
+          </p>
+          <p className='mt-2 text-3xl font-semibold tracking-tight break-words tabular-nums'>
+            {formatQuota(profile.quota)}
+          </p>
         </div>
       </Card>
     </div>
