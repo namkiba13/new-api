@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1b1b22" />
+    <meta
+      name="description"
+      content="One unified API for OpenAI, Claude, Gemini, and more. Route, monitor, and scale AI traffic from one developer-first gateway."
+    />
+    <title>94API — One endpoint. Every model.</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="94API home">
+        <span class="brand-mark" aria-hidden="true">94</span>
+        <span>94API</span>
+      </a>
+      <button
+        class="menu-toggle"
+        type="button"
+        aria-expanded="false"
+        aria-controls="primary-nav"
+      >
+        <span>Menu</span><span aria-hidden="true">+</span>
+      </button>
+      <nav id="primary-nav" class="nav" aria-label="Primary navigation">
+        <a href="#features">Features</a>
+        <a href="#workflow">How it works</a>
+        <a href="/pricing" target="_top">Models & pricing</a>
+        <a href="/docs" target="_top">Docs</a>
+      </nav>
+      <div class="header-actions">
+        <a class="button button-quiet" href="/sign-in" target="_top">Sign in</a>
+        <a class="button button-primary" href="/dashboard" target="_top"
+          >Open console <span aria-hidden="true">→</span></a
+        >
+      </div>
+    </header>
+
+    <main id="main">
+      <section id="top" class="hero section-shell">
+        <div class="hero-copy">
+          <p class="eyebrow">
+            <span class="status-dot"></span> AI gateway · Multi-protocol routing
+          </p>
+          <h1>
+            One endpoint.<br /><span>Every AI model.</span><br /><mark
+              >Built to scale.</mark
+            >
+          </h1>
+          <p class="hero-intro">
+            Connect OpenAI, Claude, Gemini, and more through one compatible API.
+            Route traffic, control spend, and ship without rewriting your stack.
+          </p>
+          <div class="hero-actions">
+            <a
+              class="button button-primary button-large"
+              href="/keys"
+              target="_top"
+              >Get your API key <span aria-hidden="true">→</span></a
+            >
+            <a
+              class="button button-outline button-large"
+              href="/docs"
+              target="_top"
+              >Read the docs</a
+            >
+          </div>
+          <p class="hero-note">
+            OpenAI-compatible · Usage-based billing · No vendor lock-in
+          </p>
+        </div>
+
+        <div class="terminal" aria-label="Interactive API request example">
+          <div class="terminal-head">
+            <span>API request example</span>
+            <span class="live-label">Illustrative demo</span>
+          </div>
+          <div class="protocol-tabs" role="tablist" aria-label="API protocol">
+            <button
+              id="tab-responses"
+              class="protocol-tab active"
+              role="tab"
+              aria-controls="api-example"
+              aria-selected="true"
+              data-protocol="responses"
+            >
+              Responses
+            </button>
+            <button
+              id="tab-chat"
+              class="protocol-tab"
+              role="tab"
+              aria-controls="api-example"
+              aria-selected="false"
+              tabindex="-1"
+              data-protocol="chat"
+            >
+              Chat
+            </button>
+            <button
+              id="tab-claude"
+              class="protocol-tab"
+              role="tab"
+              aria-controls="api-example"
+              aria-selected="false"
+              tabindex="-1"
+              data-protocol="claude"
+            >
+              Claude
+            </button>
+            <button
+              id="tab-gemini"
+              class="protocol-tab"
+              role="tab"
+              aria-controls="api-example"
+              aria-selected="false"
+              tabindex="-1"
+              data-protocol="gemini"
+            >
+              Gemini
+            </button>
+          </div>
+          <div id="api-example" role="tabpanel" aria-labelledby="tab-responses">
+            <div class="endpoint-row">
+              <span class="method">POST</span>
+              <code id="endpoint">/v1/responses</code>
+              <button
+                class="copy-button"
+                type="button"
+                aria-label="Copy request"
+                aria-live="polite"
+              >
+                Copy
+              </button>
+            </div>
+            <div class="code-panel">
+              <span class="code-label">Request</span>
+              <pre
+                id="request-code"
+                tabindex="0"
+                aria-label="Request example"
+              ><code><span class="c-blue">curl</span> -X POST <span class="c-orange">"https://94api.dev/v1/responses"</span> \
+  -H <span class="c-orange">"Authorization: Bearer $API_KEY"</span> \
+  -H <span class="c-orange">"Content-Type: application/json"</span> \
+  -d <span class="c-orange">'{
+    "model": "YOUR_MODEL",
+    "input": "Build something remarkable."
+  }'</span></code></pre>
+            </div>
+            <div class="response-panel">
+              <span class="code-label">Response</span>
+              <pre
+                id="response-code"
+                tabindex="0"
+                aria-label="Response example"
+              ><code>{
+  <span class="c-blue">"status"</span>: <span class="c-green">"completed"</span>,
+  <span class="c-blue">"output"</span>: [{"type": "message", "role": "assistant",
+    "content": [{"type": "output_text", "text": "Ready when you are."}]}]
+}</code></pre>
+            </div>
+          </div>
+          <div class="terminal-foot">
+            <span
+              >Replace YOUR_MODEL with an enabled model from
+              <a href="/pricing" target="_top">Models & pricing ↗</a>.
+              Availability varies by model and protocol.</span
+            >
+          </div>
+        </div>
+      </section>
+
+      <section class="provider-strip" aria-label="Supported providers">
+        <span class="strip-title">API ecosystem</span>
+        <span>OpenAI</span><span>Anthropic</span><span>Gemini</span
+        ><span>DeepSeek</span><span>Qwen</span><span>Mistral</span>
+        <span class="strip-more">+ more</span>
+      </section>
+
+      <section id="features" class="features section-shell reveal">
+        <div class="section-heading">
+          <p class="eyebrow">Why 94API</p>
+          <h2>Infrastructure that stays<br /><mark>out of your way.</mark></h2>
+          <p>
+            One clean control plane for model access, routing, and spend—without
+            changing how your application works.
+          </p>
+        </div>
+        <div class="feature-grid">
+          <article class="feature feature-wide">
+            <span class="feature-index">01</span>
+            <div class="route-map" aria-hidden="true">
+              <span class="route-source">YOUR APP</span>
+              <span class="route-line"></span>
+              <span class="route-core">94</span>
+              <span class="route-line route-line-right"></span>
+              <div class="route-targets"><i>OAI</i><i>ANT</i><i>GEM</i></div>
+            </div>
+            <h3>One integration</h3>
+            <p>
+              Use familiar request formats across providers. Switch models
+              without rebuilding your application layer.
+            </p>
+          </article>
+          <article class="feature">
+            <span class="feature-index">02</span>
+            <div class="metric">
+              <strong>24/7</strong><span>automatic routing</span>
+            </div>
+            <h3>Reliable by default</h3>
+            <p>
+              Health-aware routing and automatic failover keep production
+              traffic moving.
+            </p>
+          </article>
+          <article class="feature">
+            <span class="feature-index">03</span>
+            <div class="metric">
+              <strong>LIVE</strong><span>usage visibility</span>
+            </div>
+            <h3>Every token accounted for</h3>
+            <p>
+              Track requests, token use, latency, and cost from a single
+              dashboard.
+            </p>
+          </article>
+          <article class="feature feature-wide feature-accent">
+            <span class="feature-index">04</span>
+            <div class="protocol-list" aria-label="Supported API formats">
+              <span>/v1/responses</span><span>/v1/chat/completions</span
+              ><span>/v1/messages</span><span>/v1beta/models</span>
+            </div>
+            <h3>Protocol-compatible</h3>
+            <p>
+              Drop 94API into existing OpenAI, Anthropic, and Gemini workflows
+              with minimal changes.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section id="workflow" class="workflow section-shell reveal">
+        <div class="section-heading compact">
+          <p class="eyebrow">How it works</p>
+          <h2>From key to request<br />in <mark>three moves.</mark></h2>
+        </div>
+        <ol class="steps">
+          <li>
+            <span class="step-no">01</span>
+            <div>
+              <h3>Create your API key</h3>
+              <p>
+                Create a 94API account, add balance, and generate a key from
+                your console.
+              </p>
+            </div>
+            <span class="step-arrow" aria-hidden="true">↘</span>
+          </li>
+          <li>
+            <span class="step-no">02</span>
+            <div>
+              <h3>Point to 94API</h3>
+              <p>
+                Replace your base URL. Keep the SDK and request format you
+                already use.
+              </p>
+            </div>
+            <span class="step-arrow" aria-hidden="true">↘</span>
+          </li>
+          <li>
+            <span class="step-no">03</span>
+            <div>
+              <h3>Route & observe</h3>
+              <p>
+                Send traffic with real-time visibility into usage, latency, and
+                cost.
+              </p>
+            </div>
+            <span class="step-arrow" aria-hidden="true">✓</span>
+          </li>
+        </ol>
+      </section>
+
+      <section class="cta section-shell reveal">
+        <div>
+          <p class="eyebrow"><span class="status-dot"></span> Ready to route</p>
+          <h2>Your models.<br /><mark>One API.</mark></h2>
+        </div>
+        <div class="cta-copy">
+          <p>
+            Create your API key, choose an available model, and send your first
+            request.
+          </p>
+          <div class="hero-actions">
+            <a
+              class="button button-light button-large"
+              href="/dashboard"
+              target="_top"
+              >Open console <span aria-hidden="true">→</span></a
+            >
+            <a
+              class="button button-cta-outline button-large"
+              href="/pricing"
+              target="_top"
+              >View pricing</a
+            >
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <a class="brand" href="#top"
+        ><span class="brand-mark" aria-hidden="true">94</span
+        ><span>94API</span></a
+      >
+      <p>Unified AI infrastructure for teams that ship.</p>
+      <nav aria-label="Footer navigation">
+        <a href="/docs" target="_top">Docs</a
+        ><a href="/pricing" target="_top">Pricing</a
+        ><a href="/api/status" target="_top">API status</a>
+      </nav>
+      <p class="copyright">
+        © 2026 94API · Powered by
+        <a
+          href="https://github.com/QuantumNous/new-api"
+          target="_blank"
+          rel="noopener noreferrer"
+          >New API</a
+        >
+        · © 2023–2026 QuantumNous
+      </p>
+    </footer>
+    <script src="./script.js"></script>
+  </body>
+</html>
