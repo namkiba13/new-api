@@ -99,22 +99,22 @@ export function ProfileSecurityCard({
         iconTone='success'
         disableHoverEffect
       >
-        <div className='grid grid-cols-1 gap-2.5 sm:gap-3 md:grid-cols-3'>
+        <div className='grid grid-cols-1 gap-2.5 sm:gap-3'>
           {securityActions.map((item) => (
             <button
               key={item.title}
               type='button'
               onClick={item.action}
-              className={`flex items-center gap-3 rounded-lg border p-3 text-left md:flex-col md:gap-2 md:p-4 md:text-center ${
+              className={`flex items-center gap-3 rounded-lg border p-3 text-left sm:p-4 ${
                 item.variant === 'destructive' ? 'border-destructive/30' : ''
               }`}
             >
               <IconBadge tone='neutral' size='sm'>
                 <item.icon />
               </IconBadge>
-              <div className='min-w-0 md:contents'>
+              <div className='min-w-0'>
                 <p className='text-sm font-medium'>{item.title}</p>
-                <p className='text-muted-foreground line-clamp-1 text-xs md:line-clamp-none'>
+                <p className='text-muted-foreground text-xs'>
                   {item.description}
                 </p>
               </div>

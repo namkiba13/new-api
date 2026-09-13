@@ -115,8 +115,8 @@ export function ProfileHeader({ profile, loading }: ProfileHeaderProps) {
   ]
 
   return (
-    <Card data-card-hover='false' className='gap-0 overflow-hidden py-0'>
-      <CardContent className='p-3 sm:p-5'>
+    <div className='space-y-4 sm:space-y-6'>
+      <div>
         <div className='flex items-center gap-3 text-left sm:gap-4'>
           <Avatar className='ring-background h-12 w-12 rounded-xl text-sm ring-2 sm:h-16 sm:w-16 sm:rounded-2xl sm:text-lg sm:ring-4'>
             <AvatarFallback
@@ -128,10 +128,10 @@ export function ProfileHeader({ profile, loading }: ProfileHeaderProps) {
           </Avatar>
 
           <div className='min-w-0 flex-1 space-y-1.5 sm:space-y-3'>
-            <div className='flex min-w-0 items-center gap-2'>
-              <h1 className='truncate text-xl font-semibold tracking-tight sm:text-2xl'>
+            <div className='flex min-w-0 flex-wrap items-center gap-2'>
+              <h2 className='max-w-full text-xl font-semibold tracking-tight break-words sm:text-2xl'>
                 {displayName}
-              </h1>
+              </h2>
               <StatusBadge
                 label={roleLabel}
                 variant='neutral'
@@ -161,30 +161,30 @@ export function ProfileHeader({ profile, loading }: ProfileHeaderProps) {
             </div>
           </div>
         </div>
-      </CardContent>
-      <div className='border-t'>
-        <div className='divide-border/60 grid grid-cols-3 divide-x'>
+      </div>
+      <Card data-card-hover='false' className='gap-0 overflow-hidden py-0'>
+        <div className='divide-border/60 grid grid-cols-1 divide-y sm:grid-cols-3 sm:divide-x sm:divide-y-0'>
           {stats.map((item) => (
             <div key={item.label} className='min-w-0 px-3 py-3 sm:px-5 sm:py-4'>
               <div className='flex items-center gap-2'>
                 <IconBadge tone={item.tone} size='stat'>
                   <item.icon />
                 </IconBadge>
-                <div className='text-muted-foreground truncate text-xs font-medium tracking-wider uppercase'>
+                <div className='text-muted-foreground text-xs font-medium tracking-wider uppercase'>
                   {item.label}
                 </div>
               </div>
 
-              <div className='text-foreground mt-1.5 truncate font-mono text-lg font-bold tracking-tight tabular-nums sm:mt-2 sm:text-2xl'>
+              <div className='text-foreground mt-1.5 font-mono text-xl font-bold tracking-tight break-words tabular-nums sm:mt-2 sm:text-2xl'>
                 {item.value}
               </div>
-              <div className='text-muted-foreground/60 mt-1 hidden text-xs md:block'>
+              <div className='text-muted-foreground mt-1 text-xs'>
                 {item.description}
               </div>
             </div>
           ))}
         </div>
-      </div>
-    </Card>
+      </Card>
+    </div>
   )
 }

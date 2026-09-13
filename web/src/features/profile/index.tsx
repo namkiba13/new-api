@@ -16,6 +16,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
+import { useTranslation } from 'react-i18next'
+
+import { ErrorState } from '@/components/error-state'
 import { Main } from '@/components/layout'
 import {
   CardStaggerContainer,
@@ -36,7 +39,8 @@ import { TwoFACard } from './components/two-fa-card'
 import { useProfile } from './hooks'
 
 export function Profile() {
-  const { profile, loading, refreshProfile } = useProfile()
+  const { t } = useTranslation()
+  const { profile, loading, refreshProfile, fetchProfile } = useProfile()
   const { status } = useStatus()
   const permissions = useAuthStore((s) => s.auth.user?.permissions)
 
@@ -49,42 +53,72 @@ export function Profile() {
 
   return (
     <Main>
-      <div className='min-h-0 flex-1 overflow-auto px-3 py-3 sm:px-4 sm:py-6'>
+      <div className='profile-page min-h-0 flex-1 overflow-auto px-3 py-3 sm:px-4 sm:py-6'>
         <CardStaggerContainer className='mx-auto flex w-full max-w-7xl flex-col gap-4 sm:gap-6'>
-          <CardStaggerItem>
-            <ProfileHeader profile={profile} loading={loading} />
-          </CardStaggerItem>
+          <h1 className='text-2xl font-semibold tracking-tight'>
+            {t('Profile')}
+          </h1>
+          {!loading && !profile ? (
+            <ErrorState
+              title={t('Failed to load profile')}
+              onRetry={() => void fetchProfile()}
+            />
+          ) : (
+            <>
+              <CardStaggerItem>
+                <ProfileHeader profile={profile} loading={loading} />
+              </CardStaggerItem>
 
-          <CardStaggerItem>
-            <div className='grid gap-4 sm:gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.46fr)] xl:items-start'>
-              <div className='space-y-4 sm:space-y-6'>
+              <CardStaggerItem>
                 <ProfileSettingsCard
+                  section='bindings'
                   profile={profile}
                   loading={loading}
                   onProfileUpdate={refreshProfile}
                 />
+              </CardStaggerItem>
+              <CardStaggerItem>
                 <LanguagePreferencesCard
                   profile={profile}
                   onProfileUpdate={refreshProfile}
                 />
+              </CardStaggerItem>
+              <CardStaggerItem>
+                <ProfileSettingsCard
+                  section='notifications'
+                  profile={profile}
+                  loading={loading}
+                  onProfileUpdate={refreshProfile}
+                />
+              </CardStaggerItem>
+              <CardStaggerItem>
                 <ProfileSecurityCard profile={profile} loading={loading} />
+              </CardStaggerItem>
+              <CardStaggerItem>
+                <TwoFACard loading={loading} />
+              </CardStaggerItem>
+              <CardStaggerItem>
+                <PasskeyCard loading={loading} />
+              </CardStaggerItem>
+              <CardStaggerItem>
                 <LoginSessionsCard />
-              </div>
-
-              <div className='space-y-4 sm:space-y-6 xl:sticky xl:top-6'>
-                {checkinEnabled && (
+              </CardStaggerItem>
+              {checkinEnabled && (
+                <CardStaggerItem>
                   <CheckinCalendarCard
                     checkinEnabled={checkinEnabled}
                     turnstileEnabled={turnstileEnabled}
                     turnstileSiteKey={turnstileSiteKey}
                   />
-                )}
-                {canConfigureSidebar && <SidebarModulesCard />}
-                <PasskeyCard loading={loading} />
-                <TwoFACard loading={loading} />
-              </div>
-            </div>
-          </CardStaggerItem>
+                </CardStaggerItem>
+              )}
+              {canConfigureSidebar && (
+                <CardStaggerItem>
+                  <SidebarModulesCard />
+                </CardStaggerItem>
+              )}
+            </>
+          )}
         </CardStaggerContainer>
       </div>
     </Main>

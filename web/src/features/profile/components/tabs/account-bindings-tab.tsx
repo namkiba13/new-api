@@ -419,7 +419,7 @@ export function AccountBindingsTab({
 
   return (
     <>
-      <div className='grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3'>
+      <div className='grid grid-cols-1 gap-2.5 sm:gap-3'>
         {bindings.map((binding) => {
           let actionLabel = t('Bind')
           if (binding.isBound && binding.id === 'email') {
@@ -474,7 +474,7 @@ export function AccountBindingsTab({
           <p className='text-muted-foreground mb-3 text-sm font-medium'>
             {t('Custom OAuth')}
           </p>
-          <div className='grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3'>
+          <div className='grid grid-cols-1 gap-2.5 sm:gap-3'>
             {customProviders.map((provider) => {
               const binding = customBindingsByProviderId.get(provider.id)
               const isBound = !!binding
