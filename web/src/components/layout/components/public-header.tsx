@@ -85,6 +85,7 @@ export function PublicHeader(props: PublicHeaderProps) {
   const {
     systemName,
     logo: systemLogo,
+    logoWordmark,
     loading,
     logoLoaded,
   } = useSystemConfig()
@@ -98,6 +99,7 @@ export function PublicHeader(props: PublicHeaderProps) {
 
   const user = auth.user
   const isAuthenticated = !!user
+  const hasWordmark = Boolean(logoWordmark && !customLogo)
   const displaySiteName =
     customSiteName || (systemName === 'New API' ? '94API' : systemName)
   const links = dynamicLinks.length > 0 ? dynamicLinks : navLinks
@@ -199,19 +201,32 @@ export function PublicHeader(props: PublicHeaderProps) {
               to={homeUrl}
               className='group flex shrink-0 items-center gap-2.5'
             >
-              <div className='flex size-7 shrink-0 items-center justify-center transition-all duration-300 group-hover:scale-105'>
+              <div
+                className={cn(
+                  'flex shrink-0 items-center justify-center transition-all duration-300 group-hover:scale-105',
+                  hasWordmark ? 'h-7 w-[92px] sm:h-8 sm:w-[104px]' : 'size-7'
+                )}
+              >
                 {loading && <Skeleton className='size-full rounded-lg' />}
                 {!loading && customLogo}
                 {!loading && !customLogo && (
                   <HeaderLogo
-                    src={systemLogo}
+                    src={logoWordmark || systemLogo}
                     loading={loading}
                     logoLoaded={logoLoaded}
-                    className='size-full rounded-lg object-contain'
+                    className={cn(
+                      'size-full object-contain',
+                      hasWordmark ? 'rounded-none' : 'rounded-lg'
+                    )}
                   />
                 )}
               </div>
-              <span className='text-sm font-semibold tracking-tight'>
+              <span
+                className={cn(
+                  'text-sm font-semibold tracking-tight',
+                  hasWordmark && 'sr-only'
+                )}
+              >
                 {loading ? <Skeleton className='h-4 w-16' /> : displaySiteName}
               </span>
             </Link>

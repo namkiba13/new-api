@@ -154,11 +154,12 @@ export function Footer(props: FooterProps) {
   const {
     systemName,
     logo: systemLogo,
+    logoWordmark,
     footerHtml,
     demoSiteEnabled,
   } = useSystemConfig()
 
-  const displayLogo = systemLogo || props.logo || '/logo.png'
+  const displayLogo = logoWordmark || systemLogo || props.logo || '/logo.png'
   const displayName = systemName || props.name || 'New API'
   const isDemoSiteMode = Boolean(demoSiteEnabled)
   const currentYear = new Date().getFullYear()
@@ -258,9 +259,18 @@ export function Footer(props: FooterProps) {
               <img
                 src={displayLogo}
                 alt={displayName}
-                className='size-7 rounded-lg object-contain'
+                className={
+                  logoWordmark
+                    ? 'h-8 w-auto object-contain'
+                    : 'size-7 rounded-lg object-contain'
+                }
               />
-              <span className='text-sm font-semibold tracking-tight'>
+              <span
+                className={cn(
+                  'text-sm font-semibold tracking-tight',
+                  logoWordmark && 'sr-only'
+                )}
+              >
                 {displayName}
               </span>
             </Link>

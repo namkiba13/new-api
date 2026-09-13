@@ -18,6 +18,8 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { useEffect, useCallback } from 'react'
 
+import { useTheme } from '@/context/theme-provider'
+import { resolveBrandLogo } from '@/lib/brand-logo'
 import { DEFAULT_SYSTEM_NAME, DEFAULT_LOGO } from '@/lib/constants'
 import { applyFaviconToDom } from '@/lib/dom-utils'
 import {
@@ -143,6 +145,7 @@ function preloadImage(
  */
 export function useSystemConfig(options: UseSystemConfigOptions = {}) {
   const { autoLoad = false } = options
+  const { resolvedTheme } = useTheme()
   const {
     config,
     loading,
@@ -179,7 +182,7 @@ export function useSystemConfig(options: UseSystemConfigOptions = {}) {
 
     // Preload new logo
     return preloadImage(
-      logo,
+      resolveBrandLogo(logo).icon,
       () => {
         setLoadedLogoUrl(logo)
         applyFaviconToDom(logo)
@@ -196,8 +199,14 @@ export function useSystemConfig(options: UseSystemConfigOptions = {}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config.logo, loadedLogoUrl, setLoadedLogoUrl])
 
+  const brandLogo = resolveBrandLogo(config.logo)
   return {
     ...config,
+    logo: brandLogo.icon,
+    logoWordmark:
+      resolvedTheme === 'dark'
+        ? brandLogo.wordmarkDark
+        : brandLogo.wordmarkLight,
     loading,
     logoLoaded: config.logo === loadedLogoUrl && !!loadedLogoUrl,
   }

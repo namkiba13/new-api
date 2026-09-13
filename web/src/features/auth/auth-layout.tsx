@@ -30,7 +30,7 @@ type AuthLayoutProps = {
 
 export function AuthLayout(props: AuthLayoutProps) {
   const { t } = useTranslation()
-  const { systemName, logo, loading } = useSystemConfig()
+  const { systemName, logo, logoWordmark, loading } = useSystemConfig()
   const isCard = props.variant === 'card'
 
   return (
@@ -56,21 +56,35 @@ export function AuthLayout(props: AuthLayoutProps) {
               : 'absolute top-4 left-4 z-10 sm:top-8 sm:left-8'
           )}
         >
-          <div className='relative h-8 w-8 shrink-0'>
+          <div
+            className={cn(
+              'relative shrink-0',
+              logoWordmark ? 'h-9 w-[116px]' : 'h-8 w-8'
+            )}
+          >
             {loading ? (
               <Skeleton className='absolute inset-0 rounded-full' />
             ) : (
               <img
-                src={logo}
+                src={logoWordmark || logo}
                 alt={t('Logo')}
-                className='h-8 w-8 rounded-full object-cover'
+                className={
+                  logoWordmark
+                    ? 'size-full object-contain'
+                    : 'h-8 w-8 rounded-full object-cover'
+                }
               />
             )}
           </div>
           {loading ? (
             <Skeleton className='h-6 w-24' />
           ) : (
-            <h1 className='min-w-0 text-xl font-medium break-words'>
+            <h1
+              className={cn(
+                'min-w-0 text-xl font-medium break-words',
+                logoWordmark && 'sr-only'
+              )}
+            >
               {systemName}
             </h1>
           )}
