@@ -135,7 +135,13 @@ export async function manageUser(
 export async function adjustUserQuota(
   payload: ManageUserQuotaPayload
 ): Promise<ApiResponse<Partial<User>>> {
-  const res = await api.post('/api/user/manage', payload)
+  const storageKey = `quota-adjust:${JSON.stringify(payload)}`
+  const key = sessionStorage.getItem(storageKey) || crypto.randomUUID()
+  sessionStorage.setItem(storageKey, key)
+  const res = await api.post('/api/user/manage', payload, {
+    headers: { 'Idempotency-Key': key },
+  })
+  if (res.data.success) sessionStorage.removeItem(storageKey)
   return res.data
 }
 

@@ -20,6 +20,7 @@ import i18n from 'i18next'
 import LanguageDetector from 'i18next-browser-languagedetector'
 import { initReactI18next } from 'react-i18next'
 
+import invite from './invite-messages.json'
 import { convertDetectedLanguage } from './languages'
 import en from './locales/en.json'
 import fr from './locales/fr.json'
@@ -30,13 +31,13 @@ import zhTW from './locales/zh-TW.json'
 import zhCN from './locales/zh.json'
 
 export const resources = {
-  en,
-  zhCN,
-  fr,
-  ru,
-  ja,
-  vi,
-  zhTW,
+  en: { translation: { ...en.translation, ...invite.en } },
+  zhCN: { translation: { ...zhCN.translation, ...invite.zhCN } },
+  fr: { translation: { ...fr.translation, ...invite.fr } },
+  ru: { translation: { ...ru.translation, ...invite.ru } },
+  ja: { translation: { ...ja.translation, ...invite.ja } },
+  vi: { translation: { ...vi.translation, ...invite.vi } },
+  zhTW: { translation: { ...zhTW.translation, ...invite.zhTW } },
 } as const
 
 i18n

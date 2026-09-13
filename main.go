@@ -132,6 +132,7 @@ func main() {
 
 	// Subscription quota reset task (daily/weekly/monthly/custom)
 	service.StartSubscriptionQuotaResetTask()
+	model.StartInviteRewardWorker()
 
 	// Report this process as a system instance so the System Info page can show
 	// all currently alive nodes in multi-instance deployments.
@@ -341,6 +342,9 @@ func InitResources() error {
 	// Initialize SQL Database
 	err = model.InitLogDB()
 	if err != nil {
+		return err
+	}
+	if err := model.InitializeInviteHistory(); err != nil {
 		return err
 	}
 

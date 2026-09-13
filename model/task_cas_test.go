@@ -63,12 +63,19 @@ func TestMain(m *testing.M) {
 		panic("failed to migrate: " + err.Error())
 	}
 
+	if err := MigrateInviteRewards(db); err != nil {
+		panic(err)
+	}
 	os.Exit(m.Run())
 }
 
 func truncateTables(t *testing.T) {
 	t.Helper()
 	t.Cleanup(func() {
+		DB.Exec("DELETE FROM invite_fundings")
+		DB.Exec("DELETE FROM invite_debts")
+		DB.Exec("DELETE FROM invite_transfers")
+		DB.Model(&InviteProgram{}).Where("id = ?", 1).Updates(map[string]interface{}{"enabled": false, "mode": "first", "rate_bps": 800, "hold_hours": 24})
 		DB.Exec("DELETE FROM tasks")
 		DB.Exec("DELETE FROM auth_flows")
 		DB.Exec("DELETE FROM external_identity_claims")

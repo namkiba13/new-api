@@ -175,7 +175,7 @@ func Redeem(key string, userId int) (quota int, err error) {
 		if result.RowsAffected == 0 {
 			return errors.New("该兑换码已被使用")
 		}
-		return creditTopUpQuota(tx, userId, redemption.Quota, nil)
+		return creditInviteFunding(tx, InviteRedemptionSource(redemption.Key), userId, redemption.Quota, nil)
 	})
 	if err != nil {
 		common.SysError("redemption failed: " + err.Error())

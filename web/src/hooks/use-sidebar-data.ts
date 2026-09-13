@@ -113,6 +113,7 @@ export function useSidebarData(): SidebarData {
             url: '/profile',
             icon: User,
           },
+          { title: t('Invite friends'), url: '/invite-rewards', icon: Users },
         ],
       },
       {
