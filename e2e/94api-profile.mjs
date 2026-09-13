@@ -144,7 +144,21 @@ try {
         await page
           .locator('body')
           .evaluate(() => document.documentElement.scrollWidth > innerWidth),
-        false
+        false,
+        JSON.stringify(
+          await page.locator('body *').evaluateAll((nodes) =>
+            nodes
+              .filter(
+                (node) => node.getBoundingClientRect().right > innerWidth + 1
+              )
+              .map((node) => ({
+                tag: node.tagName,
+                class: node.className,
+                right: node.getBoundingClientRect().right,
+              }))
+              .slice(0, 15)
+          )
+        )
       )
       assert.equal(
         await page

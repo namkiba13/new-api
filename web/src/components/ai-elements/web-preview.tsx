@@ -43,6 +43,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import dayjs from '@/lib/dayjs'
+import { iframeSandbox } from '@/lib/iframe-sandbox'
 import { cn } from '@/lib/utils'
 
 export type WebPreviewContextValue = {
@@ -212,10 +213,13 @@ export const WebPreviewBody = ({
     <div className='flex-1'>
       <iframe
         className={cn('size-full', className)}
-        sandbox='allow-scripts allow-same-origin allow-forms allow-popups allow-presentation'
         src={(src ?? url) || undefined}
         title={t('Preview')}
         {...props}
+        sandbox={iframeSandbox(
+          props.srcDoc !== undefined ? undefined : (src ?? url),
+          window.location.href
+        )}
       />
       {loading}
     </div>
@@ -280,6 +284,8 @@ export const WebPreviewConsole = ({
                   log.level === 'warn' && 'text-warning',
                   log.level === 'log' && 'text-foreground'
                 )}
+                // Console entries are append-only and can have identical timestamps/messages.
+                // eslint-disable-next-line react/no-array-index-key
                 key={`${log.timestamp.getTime()}-${index}`}
               >
                 <span className='text-muted-foreground'>

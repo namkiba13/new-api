@@ -197,6 +197,7 @@ export function Dashboard() {
   const navigate = useNavigate()
   const params = route.useParams()
   const userRole = useAuthStore((state) => state.auth.user?.role)
+  const userGroup = useAuthStore((state) => state.auth.user?.group)
   const activeSection = (params.section ??
     DASHBOARD_DEFAULT_SECTION) as DashboardSectionId
 
@@ -321,6 +322,20 @@ export function Dashboard() {
   return (
     <SectionPageLayout>
       <SectionPageLayout.Title>{t(meta.titleKey)}</SectionPageLayout.Title>
+      {activeSection === 'overview' && !isAdmin && (
+        <SectionPageLayout.Actions>
+          <div className='text-muted-foreground flex items-center gap-2 text-xs'>
+            <span>{t('Account standing')}</span>
+            <span
+              className='size-1.5 rounded-full bg-current'
+              aria-hidden='true'
+            />
+            <span className='max-w-48 truncate'>
+              {!userGroup || userGroup === 'default' ? t('Basic') : userGroup}
+            </span>
+          </div>
+        </SectionPageLayout.Actions>
+      )}
       <SectionPageLayout.Content>
         <div className='space-y-3 sm:space-y-4'>
           {activeSection !== 'overview' && (

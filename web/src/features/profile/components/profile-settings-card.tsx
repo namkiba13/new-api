@@ -66,6 +66,8 @@ export function ProfileSettingsCard({
 
   return (
     <TitledCard
+      titleClassName='text-base sm:text-base'
+      headerClassName='sm:p-5 sm:!pb-5'
       title={t(isBindings ? 'Account Bindings' : 'Notifications')}
       description={t('Configure your account preferences and integrations')}
       icon={
@@ -75,7 +77,7 @@ export function ProfileSettingsCard({
           <Bell className='h-4 w-4' />
         )
       }
-      iconTone='info'
+      iconTone='neutral'
       disableHoverEffect
     >
       {isBindings ? (

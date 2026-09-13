@@ -162,7 +162,15 @@ For commercial licensing, please contact support@quantumnous.com
     --console-sidebar: oklch(0.955 0.006 105);
     --primary: oklch(0.19 0.006 105);
     --primary-foreground: oklch(0.985 0.002 105);
-    --sidebar-width: 14rem !important;
+    --sidebar-width: 15rem !important;
+    --background: var(--console-canvas);
+    --card: var(--console-panel);
+    --foreground: #242522;
+    --card-foreground: var(--foreground);
+    --muted-foreground: #646660;
+    --border: #d6d8d2;
+    --sidebar-foreground: var(--foreground);
+    --sidebar: var(--console-sidebar);
     background: var(--console-canvas);
   }
 
@@ -174,6 +182,9 @@ For commercial licensing, please contact support@quantumnous.com
     --console-sidebar: oklch(0.135 0.005 105);
     --primary: oklch(0.91 0.22 120);
     --primary-foreground: oklch(0.16 0.01 105);
+    --foreground: #edeee8;
+    --muted-foreground: #a5a79e;
+    --border: #363832;
   }
 
   .apimore-console > header {
@@ -201,7 +212,7 @@ For commercial licensing, please contact support@quantumnous.com
   .apimore-console [data-slot='sidebar-group-label'] {
     margin-bottom: 0.2rem;
     padding-inline: 0.65rem;
-    color: color-mix(in oklch, var(--foreground) 44%, transparent);
+    color: var(--muted-foreground);
     font-size: 0.625rem;
     font-weight: 650;
     letter-spacing: 0.11em;
@@ -227,25 +238,19 @@ For commercial licensing, please contact support@quantumnous.com
   }
 
   .apimore-console [data-slot='sidebar-menu-button'][data-active] {
-    border-color: color-mix(in oklch, var(--console-accent) 32%, var(--border));
-    background: linear-gradient(
-      90deg,
-      var(--console-accent-soft),
-      color-mix(in oklch, var(--console-panel) 84%, transparent)
+    border-color: var(--border);
+    border-radius: 0.3rem;
+    background: color-mix(
+      in oklch,
+      var(--foreground) 7%,
+      var(--console-sidebar)
     ) !important;
     color: var(--foreground) !important;
     box-shadow: inset 2px 0 0 var(--console-accent);
   }
 
   .apimore-console [data-slot='sidebar-inset'] {
-    background:
-      linear-gradient(
-        to right,
-        color-mix(in oklch, var(--border) 24%, transparent) 1px,
-        transparent 1px
-      ),
-      var(--console-canvas);
-    background-size: 72px 100%;
+    background: var(--console-canvas);
   }
 
   .apimore-console [data-slot='card'],
@@ -478,7 +483,48 @@ For commercial licensing, please contact support@quantumnous.com
 /* ModelFlare-inspired user console: precise panels, compact hierarchy. */
 .apimore-console [data-slot='card'],
 .apimore-console main .bg-card.border {
-  border-radius: 0.25rem;
+  border-radius: 0.4rem;
+}
+
+/* Keep the console's navigation and content on the same desktop grid. */
+.apimore-console .console-brand {
+  flex: 0 1 auto;
+}
+.apimore-console [data-slot='sidebar-menu-button'] {
+  border-radius: 0.3rem;
+}
+.apimore-console .overview-create-key {
+  border-radius: 0.3rem;
+}
+.apimore-console .console-page-heading h2 {
+  font-size: 1.5rem;
+  font-weight: 550;
+}
+.apimore-console .console-page-heading {
+  padding: 1.5rem 1rem 1rem;
+}
+.apimore-console [data-slot='console-page-content'] {
+  padding: 0 1rem 1.5rem;
+}
+.apimore-console .apimore-user-overview {
+  gap: 1.5rem;
+}
+.apimore-console .apimore-user-overview section {
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.04);
+}
+@media (min-width: 1024px) {
+  .apimore-console .console-brand {
+    width: calc(var(--sidebar-width) - 3.25rem);
+    flex-shrink: 0;
+    height: 100%;
+    border-right: 1px solid var(--border);
+  }
+  .apimore-console .console-page-heading {
+    padding: 2.5rem 2.75rem 1.5rem;
+  }
+  .apimore-console [data-slot='console-page-content'] {
+    padding: 0 2.75rem 2rem;
+  }
 }
 
 /* Vercel Geist-style skeleton shimmer */
