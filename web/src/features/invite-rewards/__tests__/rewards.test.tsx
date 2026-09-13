@@ -60,9 +60,15 @@ async function show() {
   )
 }
 it('renders a zero rate and immediate release honestly without administrator controls', async () => {
-  vi.spyOn(api, 'get').mockResolvedValue({
-    data: { success: true, data: summary },
-  })
+  vi.spyOn(api, 'get').mockImplementation(
+    async (url) =>
+      ({
+        data: {
+          success: true,
+          data: url.endsWith('/history') ? { items: [], total: 0 } : summary,
+        },
+      }) as Awaited<ReturnType<typeof api.get>>
+  )
   await show()
   expect(
     await screen.findByRole('heading', {
@@ -80,9 +86,15 @@ it('shows a retry rather than a zero balance when the rewards API fails', async 
   expect(screen.queryByText('Reward balance')).not.toBeInTheDocument()
 })
 it('keeps the transfer idempotency key after an ambiguous failure', async () => {
-  vi.spyOn(api, 'get').mockResolvedValue({
-    data: { success: true, data: summary },
-  })
+  vi.spyOn(api, 'get').mockImplementation(
+    async (url) =>
+      ({
+        data: {
+          success: true,
+          data: url.endsWith('/history') ? { items: [], total: 0 } : summary,
+        },
+      }) as Awaited<ReturnType<typeof api.get>>
+  )
   const post = vi.spyOn(api, 'post').mockRejectedValue(new Error('timeout'))
   await show()
   const user = userEvent.setup()

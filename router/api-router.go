@@ -101,6 +101,8 @@ func SetApiRouter(router *gin.Engine) {
 				selfRoute.DELETE("/passkey", middleware.DisableCache(), controller.PasskeyDelete)
 				selfRoute.GET("/aff", controller.GetAffCode)
 				selfRoute.GET("/invite-rewards", middleware.DisableCache(), controller.GetInviteRewards)
+				selfRoute.GET("/invite-rewards/history", middleware.DisableCache(), controller.GetInviteHistory)
+				selfRoute.GET("/invite-rewards/journal", middleware.DisableCache(), controller.GetInviteJournal)
 				selfRoute.POST("/invite-rewards/transfer", middleware.UserCriticalRateLimit("aff-transfer"), middleware.DisableCache(), controller.TransferInviteRewards)
 				selfRoute.GET("/topup/info", controller.GetTopUpInfo)
 				selfRoute.GET("/topup/self", controller.GetUserTopUps)
@@ -197,6 +199,8 @@ func SetApiRouter(router *gin.Engine) {
 		{
 			optionRoute.GET("/", controller.GetOptions)
 			optionRoute.GET("/invite-rewards", controller.GetInviteSettings)
+			optionRoute.GET("/invite-rewards/history", middleware.DisableCache(), controller.AdminInviteHistory)
+			optionRoute.GET("/invite-rewards/journal", middleware.DisableCache(), controller.AdminInviteJournal)
 			optionRoute.PUT("/invite-rewards", controller.UpdateInviteSettings)
 			optionRoute.GET("/invite-rewards/funding", controller.ListInviteFunding)
 			optionRoute.POST("/invite-rewards/reverse", controller.ReverseInviteRewards)

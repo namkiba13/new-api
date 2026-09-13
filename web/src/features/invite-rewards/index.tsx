@@ -28,6 +28,7 @@ import { useAuthStore } from '@/stores/auth-store'
 import { useSystemConfigStore } from '@/stores/system-config-store'
 
 import { getInviteRewards } from './api'
+import { InviteHistory } from './history'
 
 export function InviteRewards() {
   const { t, i18n } = useTranslation()
@@ -96,6 +97,9 @@ export function InviteRewards() {
       const self = await getSelf().catch(() => null)
       if (self?.success) useAuthStore.getState().auth.setUser(self.data)
       await client.invalidateQueries({ queryKey: ['invite-rewards'] })
+      await client.invalidateQueries({ queryKey: ['invite-history'] })
+      await client.invalidateQueries({ queryKey: ['invite-transfers'] })
+      await client.invalidateQueries({ queryKey: ['invite-journal'] })
       await client.invalidateQueries({ queryKey: ['dashboard'] })
     } catch {
       setNotice('Reward transfer failed. Retry safely.')
@@ -240,7 +244,7 @@ export function InviteRewards() {
               <Card>
                 <CardHeader className='flex flex-wrap items-start justify-between gap-3'>
                   <div className='space-y-2'>
-                    <CardTitle>{t('Invite Rewards')}</CardTitle>
+                    <CardTitle>{t('Rewards from my referrals')}</CardTitle>
                     <p className='text-muted-foreground text-sm'>
                       {t(
                         'Pending rewards become transferable after the safety period.'
@@ -347,6 +351,77 @@ export function InviteRewards() {
                   )}
                 </CardContent>
               </Card>
+              {data.received && (
+                <Card data-slot='invite-received'>
+                  <CardHeader>
+                    <CardTitle>{t('My reward for being invited')}</CardTitle>
+                    <p className='text-muted-foreground text-sm'>
+                      {t(
+                        'Your welcome reward is added directly to usable Credits after the hold.'
+                      )}
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <dl className='grid gap-3 sm:grid-cols-3'>
+                      <div
+                        className='bg-muted/30 rounded-md border p-4'
+                        data-slot='invite-received-pending'
+                      >
+                        <dt className='text-muted-foreground text-sm'>
+                          {t('Rewards in safety period')}
+                        </dt>
+                        <dd className='mt-2 font-mono text-lg font-semibold'>
+                          {number.format(data.received.pending)}
+                        </dd>
+                        <dd className='text-sm'>
+                          {t('{{amount}} pending Credits', {
+                            amount: formatQuota(data.received.pending_quota),
+                          })}
+                        </dd>
+                      </div>
+                      <div
+                        className='bg-muted/30 rounded-md border p-4'
+                        data-slot='invite-received-credit'
+                      >
+                        <dt className='text-muted-foreground text-sm'>
+                          {t('Credits added to your wallet')}
+                        </dt>
+                        <dd className='mt-2 font-mono text-lg font-semibold'>
+                          {data.received.credited_quota === null
+                            ? '—'
+                            : formatQuota(data.received.credited_quota)}
+                        </dd>
+                        <dd className='text-sm'>
+                          {t('Rewards released')}:{' '}
+                          {number.format(data.received.released)}
+                        </dd>
+                      </div>
+                      <div className='bg-muted/30 rounded-md border p-4'>
+                        <dt className='text-muted-foreground text-sm'>
+                          {t('Rewards reversed')}
+                        </dt>
+                        <dd className='mt-2 font-mono text-lg font-semibold'>
+                          {number.format(data.received.reversed)}
+                        </dd>
+                      </div>
+                    </dl>
+                    {data.received.credited_quota === null && (
+                      <p className='text-muted-foreground mt-3 text-xs'>
+                        {t(
+                          'Older balance snapshots are unavailable. No historical amounts have been invented.'
+                        )}
+                      </p>
+                    )}
+                    {Boolean(data.received.offset_quota) && (
+                      <p className='mt-3 text-sm'>
+                        {t('Applied to reward debt')}:{' '}
+                        {formatQuota(data.received.offset_quota ?? 0)}
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+              <InviteHistory />
               <div className='grid gap-6 @5xl/invite:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.65fr)]'>
                 <Card>
                   <CardHeader>

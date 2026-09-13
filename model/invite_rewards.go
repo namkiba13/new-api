@@ -179,7 +179,10 @@ var ErrInviteConflict = errors.New("Invite rewards request conflicts with an exi
 var ErrInviteUnavailable = errors.New("Invite rewards are not available")
 
 func MigrateInviteRewards(db *gorm.DB) error {
-	if err := db.AutoMigrate(&InviteProgram{}, &InviteFunding{}, &InviteDebt{}, &InviteTransfer{}); err != nil {
+	if err := db.AutoMigrate(&InviteProgram{}, &InviteFunding{}, &InviteDebt{}, &InviteTransfer{}, &InviteJournal{}); err != nil {
+		return err
+	}
+	if err := backfillInviteTransfers(db); err != nil {
 		return err
 	}
 	if err := db.Clauses(clause.OnConflict{DoNothing: true}).Create(&InviteProgram{ID: 1, Mode: "first", RateBps: 800, HoldHours: 24}).Error; err != nil {
@@ -313,7 +316,7 @@ func creditInviteFunding(tx *gorm.DB, source string, userID, quota int, updates 
 	if err := creditTopUpQuota(tx, userID, quota, updates); err != nil {
 		return err
 	}
-	return nil
+	return journalInviteEarned(tx, source)
 }
 
 func inviteDebt(tx *gorm.DB, userID int) (InviteDebt, error) {
@@ -364,7 +367,7 @@ func releaseInviteFunding(tx *gorm.DB, source string, now int64, credits map[int
 	}
 	for _, id := range []int{event.InviterID, event.UserID} {
 		var u User
-		if err := tx.First(&u, id).Error; err != nil {
+		if err := lockForUpdate(tx).First(&u, id).Error; err != nil {
 			return err
 		}
 		if u.Status != common.UserStatusEnabled {
@@ -375,6 +378,14 @@ func releaseInviteFunding(tx *gorm.DB, source string, now int64, credits map[int
 			return err
 		}
 		if err := creditInviteReward(tx, id, event.RewardQuota-event.ReversedQuota, id == event.InviterID); err != nil {
+			return err
+		}
+		role := "inviter"
+		if id == event.UserID {
+			role = "invitee"
+		}
+		before := InviteBalances{Wallet: u.Quota, Rewards: u.AffQuota, Debt: debt.Quota}
+		if err := appendInviteJournal(tx, event, id, role, "released", "", event.RewardQuota-event.ReversedQuota, before, now); err != nil {
 			return err
 		}
 		if id == event.UserID {
@@ -515,6 +526,10 @@ func TransferInviteRewards(userID, amount int, key string) (int, error) {
 		if err := creditTopUpQuota(tx, userID, transferred, map[string]interface{}{"aff_quota": gorm.Expr("aff_quota - ?", transferred)}); err != nil {
 			return err
 		}
+		before := InviteBalances{Wallet: u.Quota, Rewards: u.AffQuota, Debt: debt.Quota}
+		if err := appendInviteJournal(tx, InviteFunding{Source: id}, userID, "inviter", "transferred", "", transferred, before, common.GetTimestamp()); err != nil {
+			return err
+		}
 		newTransfer = true
 		return tx.Create(&InviteTransfer{ID: id, UserID: userID, Quota: transferred, CreatedAt: common.GetTimestamp()}).Error
 	})
@@ -556,6 +571,10 @@ func ReverseInviteRewards(source string, refunded int) error {
 				if err := lockForUpdate(tx).First(&u, id).Error; err != nil {
 					return err
 				}
+				beforeDebt, err := inviteDebt(tx, id)
+				if err != nil {
+					return err
+				}
 				left := delta
 				fromRewards := 0
 				if id == event.InviterID {
@@ -585,6 +604,27 @@ func ReverseInviteRewards(source string, refunded int) error {
 						return err
 					}
 				}
+				role := "inviter"
+				if id == event.UserID {
+					role = "invitee"
+				}
+				before := InviteBalances{Wallet: u.Quota, Rewards: u.AffQuota, Debt: beforeDebt.Quota}
+				if err := appendInviteJournal(tx, event, id, role, "reversed", fmt.Sprint(refunded), delta, before, common.GetTimestamp()); err != nil {
+					return err
+				}
+			}
+		} else if delta > 0 {
+			for _, participant := range []struct {
+				id   int
+				role string
+			}{{event.InviterID, "inviter"}, {event.UserID, "invitee"}} {
+				before, _, err := inviteBalances(tx, participant.id)
+				if err != nil {
+					return err
+				}
+				if err := appendInviteJournal(tx, event, participant.id, participant.role, "reversed", fmt.Sprint(refunded), delta, before, common.GetTimestamp()); err != nil {
+					return err
+				}
 			}
 		}
 		return tx.Model(&InviteFunding{}).Where("source = ?", source).Updates(map[string]interface{}{"refunded_quota": refunded, "reversed_quota": reversed}).Error
@@ -598,16 +638,17 @@ func ReverseInviteRewards(source string, refunded int) error {
 }
 
 type InviteSummary struct {
-	Program      InviteProgram `json:"program"`
-	Code         string        `json:"code"`
-	Qualified    int64         `json:"qualified"`
-	Pending      int64         `json:"pending"`
-	PendingQuota int64         `json:"pending_quota"`
-	Released     int64         `json:"released"`
-	Reversed     int64         `json:"reversed"`
-	Balance      int           `json:"balance"`
-	Lifetime     int           `json:"lifetime"`
-	Debt         int           `json:"debt"`
+	Program      InviteProgram         `json:"program"`
+	Code         string                `json:"code"`
+	Qualified    int64                 `json:"qualified"`
+	Pending      int64                 `json:"pending"`
+	PendingQuota int64                 `json:"pending_quota"`
+	Released     int64                 `json:"released"`
+	Reversed     int64                 `json:"reversed"`
+	Balance      int                   `json:"balance"`
+	Lifetime     int                   `json:"lifetime"`
+	Debt         int                   `json:"debt"`
+	Received     InviteReceivedSummary `json:"received"`
 }
 
 func GetInviteSummary(userID int) (InviteSummary, error) {
@@ -630,6 +671,10 @@ func GetInviteSummary(userID int) (InviteSummary, error) {
 			return err
 		}
 		result.Debt = debt.Quota
+		result.Received, err = getInviteReceived(tx, userID)
+		if err != nil {
+			return err
+		}
 		q := func() *gorm.DB {
 			return tx.Model(&InviteFunding{}).Where("inviter_id = ? AND reward_quota > 0", userID)
 		}

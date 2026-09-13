@@ -48,7 +48,7 @@ func inviteLab(t *testing.T, hold int) {
 	conn.SetMaxOpenConns(8)
 	require.NoError(t, db.AutoMigrate(&User{}, &TopUp{}, &Redemption{}, &Log{}))
 	require.NoError(t, MigrateInviteRewards(db))
-	for _, table := range []string{"invite_fundings", "invite_debts", "invite_transfers", "users", "top_ups", "redemptions", "logs"} {
+	for _, table := range []string{"invite_journals", "invite_fundings", "invite_debts", "invite_transfers", "users", "top_ups", "redemptions", "logs"} {
 		require.NoError(t, db.Exec("DELETE FROM "+table).Error)
 	}
 	require.NoError(t, db.Model(&InviteProgram{}).Where("id = ?", 1).Updates(map[string]interface{}{"history_ready": false, "enabled": false}).Error)
