@@ -3,6 +3,7 @@ package controller
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/model"
@@ -124,4 +125,74 @@ func ReverseInviteRewards(c *gin.Context) {
 	}
 	recordManageAudit(c, "invite.reward.reverse", map[string]interface{}{"source": input.Source, "refunded_quota": input.RefundedQuota})
 	c.JSON(http.StatusOK, gin.H{"success": true})
+}
+
+func inviteHistoryFilter(c *gin.Context) (model.InviteHistoryFilter, error) {
+	f := model.InviteHistoryFilter{Role: c.Query("role"), Query: c.Query("q"), SourceKind: c.Query("source_kind"), Status: c.Query("status")}
+	var err error
+	f.Page, err = strconv.Atoi(c.DefaultQuery("page", "1"))
+	if err != nil {
+		return f, model.ErrInviteRequest
+	}
+	f.PageSize, err = strconv.Atoi(c.DefaultQuery("page_size", "20"))
+	if err != nil {
+		return f, model.ErrInviteRequest
+	}
+	f.From, err = strconv.ParseInt(c.DefaultQuery("from", "0"), 10, 64)
+	if err != nil {
+		return f, model.ErrInviteRequest
+	}
+	f.To, err = strconv.ParseInt(c.DefaultQuery("to", "0"), 10, 64)
+	if err != nil || !f.Valid() {
+		return f, model.ErrInviteRequest
+	}
+	return f, nil
+}
+
+func GetInviteHistory(c *gin.Context) {
+	if c.GetInt("id") <= 0 {
+		inviteError(c, model.ErrInviteRequest)
+		return
+	}
+	serveInviteHistory(c, c.GetInt("id"))
+}
+
+func AdminInviteHistory(c *gin.Context) { serveInviteHistory(c, 0) }
+
+func serveInviteHistory(c *gin.Context, userID int) {
+	f, err := inviteHistoryFilter(c)
+	if err != nil {
+		inviteError(c, err)
+		return
+	}
+	data, err := model.GetInviteHistory(userID, f)
+	if err != nil {
+		inviteError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"success": true, "data": data})
+}
+
+func GetInviteJournal(c *gin.Context) {
+	if c.GetInt("id") <= 0 {
+		inviteError(c, model.ErrInviteRequest)
+		return
+	}
+	serveInviteJournal(c, c.GetInt("id"))
+}
+
+func AdminInviteJournal(c *gin.Context) { serveInviteJournal(c, 0) }
+
+func serveInviteJournal(c *gin.Context, userID int) {
+	f, err := inviteHistoryFilter(c)
+	if err != nil {
+		inviteError(c, err)
+		return
+	}
+	data, err := model.GetInviteJournal(userID, c.Query("source"), c.Query("transfers") == "true", f)
+	if err != nil {
+		inviteError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"success": true, "data": data})
 }

@@ -1,0 +1,38 @@
+// Copy to model/invite_upgrade_seed_test.go in a detached c8f08f5 worktree.
+// This compiles against the RELEASED implementation, not the candidate journal.
+package model
+
+import (
+ "os"
+ "path/filepath"
+ "testing"
+ "github.com/QuantumNous/new-api/common"
+ "github.com/glebarez/sqlite"
+ "github.com/stretchr/testify/require"
+ "gorm.io/driver/mysql"
+ "gorm.io/driver/postgres"
+ "gorm.io/gorm"
+)
+
+func TestInviteReleasedVersionUpgradeSeed(t *testing.T) {
+ var d gorm.Dialector
+ switch os.Getenv("INVITE_LAB_ENGINE") {
+ case "mysql": require.Contains(t,os.Getenv("INVITE_LAB_DSN"),"invite_lab"); d=mysql.Open(os.Getenv("INVITE_LAB_DSN")); common.SetDatabaseTypes(common.DatabaseTypeMySQL,common.DatabaseTypeMySQL)
+ case "postgres":require.Contains(t,os.Getenv("INVITE_LAB_DSN"),"invite_lab"); d=postgres.Open(os.Getenv("INVITE_LAB_DSN"));common.SetDatabaseTypes(common.DatabaseTypePostgreSQL,common.DatabaseTypePostgreSQL)
+ default:d=sqlite.Open(filepath.Join(os.TempDir(),"opencode","invite-journal-upgrade.db"));common.SetDatabaseTypes(common.DatabaseTypeSQLite,common.DatabaseTypeSQLite)
+ }
+ db,err:=gorm.Open(d,&gorm.Config{});require.NoError(t,err);DB,LOG_DB=db,db;initCol();common.RedisEnabled=false
+ conn,err:=db.DB();require.NoError(t,err);defer conn.Close()
+ require.NoError(t,db.Migrator().DropTable("invite_journals",&InviteFunding{},&InviteDebt{},&InviteTransfer{},&InviteProgram{},&User{},&TopUp{},&Redemption{},&Log{}))
+ require.NoError(t,db.AutoMigrate(&User{},&TopUp{},&Redemption{},&Log{}));require.NoError(t,MigrateInviteRewards(db));require.NoError(t,InitializeInviteHistory())
+ for _,u:=range []User{{Id:1,Username:"upgrade-a",AffCode:"upgrade-a",Status:1},{Id:2,Username:"upgrade-b",AffCode:"upgrade-b",Status:1,InviterId:1},{Id:3,Username:"upgrade-d",AffCode:"upgrade-d",Status:1,InviterId:1}}{require.NoError(t,db.Create(&u).Error)}
+ p,err:=GetInviteProgram();require.NoError(t,err);p.Enabled=true;p.HoldHours=0;p.RateBps=800;require.NoError(t,SaveInviteProgram(p))
+ require.NoError(t,AdminInviteFunding(2,10000,"add","upgrade-old-b-credit001"))
+ _,err=TransferInviteRewards(1,0,"upgrade-old-transfer001");require.NoError(t,err)
+ require.NoError(t,db.Model(&User{}).Where("id = ?",1).Update("quota",0).Error)
+ require.NoError(t,ReverseInviteRewards("admin:upgrade-old-b-credit001",5000))
+ p,err=GetInviteProgram();require.NoError(t,err);p.HoldHours=24;require.NoError(t,SaveInviteProgram(p))
+ require.NoError(t,AdminInviteFunding(3,20000,"add","upgrade-old-d-credit001"))
+ require.False(t,db.Migrator().HasTable("invite_journals"))
+ t.Log("Created by released commit c8f08f5: B partially recovered; A debt 400; D pending 1600; transfer 800")
+}

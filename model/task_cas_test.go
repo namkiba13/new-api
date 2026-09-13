@@ -73,6 +73,7 @@ func truncateTables(t *testing.T) {
 	t.Helper()
 	t.Cleanup(func() {
 		DB.Exec("DELETE FROM invite_fundings")
+		DB.Exec("DELETE FROM invite_journals")
 		DB.Exec("DELETE FROM invite_debts")
 		DB.Exec("DELETE FROM invite_transfers")
 		DB.Model(&InviteProgram{}).Where("id = ?", 1).Updates(map[string]interface{}{"enabled": false, "mode": "first", "rate_bps": 800, "hold_hours": 24})

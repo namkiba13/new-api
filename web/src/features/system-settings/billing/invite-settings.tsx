@@ -1,5 +1,5 @@
 /* Copyright (C) 2023-2026 QuantumNous */
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -9,6 +9,7 @@ import {
   getInviteSettings,
   type InviteProgram,
 } from '@/features/invite-rewards/api'
+import { InviteHistory } from '@/features/invite-rewards/history'
 import { api } from '@/lib/api'
 import {
   formatQuota,
@@ -27,6 +28,7 @@ type Funding = {
 
 export function InviteSettings() {
   const { t } = useTranslation()
+  const client = useQueryClient()
   const query = useQuery({
     queryKey: ['invite-settings'],
     queryFn: getInviteSettings,
@@ -72,6 +74,8 @@ export function InviteSettings() {
       if (!result.data.success) throw new Error()
       setSelected(null)
       await funding.refetch()
+      await client.invalidateQueries({ queryKey: ['invite-history'] })
+      await client.invalidateQueries({ queryKey: ['invite-journal'] })
       setNotice('Settings saved successfully')
     } catch {
       setNotice('Could not save invite settings. Reload before retrying.')
@@ -101,7 +105,7 @@ export function InviteSettings() {
   }
   return (
     <section
-      className='max-w-3xl space-y-5 rounded-lg border p-5'
+      className='space-y-5 rounded-lg border p-5'
       aria-label={t('Invite friends settings')}
     >
       <h3 className='text-lg font-semibold'>{t('Invite friends settings')}</h3>
@@ -118,7 +122,7 @@ export function InviteSettings() {
       </Button>
       {value && (
         <form
-          className='space-y-5'
+          className='max-w-3xl space-y-5'
           onSubmit={(event) => {
             event.preventDefault()
             void save()
@@ -305,6 +309,7 @@ export function InviteSettings() {
         )}
       </details>
       {notice && <p role='status'>{t(notice)}</p>}
+      <InviteHistory admin />
     </section>
   )
 }
