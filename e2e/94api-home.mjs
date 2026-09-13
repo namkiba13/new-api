@@ -5,6 +5,7 @@ import { chromium } from 'playwright'
 
 // Run against the real Home route, or the static document before building.
 const url = process.argv[2] || 'https://94api.dev'
+const requestedWidths = process.argv.slice(3).map(Number)
 const languages = [
   ['vi', 'Tiếng Việt', 'Một điểm truy cập.'],
   ['fr', 'Français', 'Un seul point d’accès.'],
@@ -217,7 +218,9 @@ async function checkNativeTopbar(page, frame, width) {
 ;(async () => {
   const browser = await chromium.launch({ headless: true, channel: 'msedge' })
   try {
-    for (const width of [320, 390, 768, 1024, 1440]) {
+    for (const width of requestedWidths.length
+      ? requestedWidths
+      : [320, 390, 768, 1024, 1440]) {
       const context = await browser.newContext({
         locale: 'en',
         viewport: { width, height: 900 },
