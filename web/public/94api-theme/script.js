@@ -101,17 +101,17 @@ copyButton.addEventListener('click', async () => {
   const value = protocols[active.dataset.protocol].request
   try {
     await navigator.clipboard.writeText(value)
-    copyButton.textContent = 'Copied'
+    copyButton.textContent = window.api94Translate('Copied')
   } catch {
     const range = document.createRange()
     range.selectNodeContents(requestCode)
     const selection = window.getSelection()
     selection.removeAllRanges()
     selection.addRange(range)
-    copyButton.textContent = 'Select code'
+    copyButton.textContent = window.api94Translate('Select code')
   }
   window.setTimeout(() => {
-    copyButton.textContent = 'Copy'
+    copyButton.textContent = window.api94Translate('Copy')
   }, 1600)
 })
 
@@ -136,18 +136,20 @@ document.addEventListener('keydown', (event) => {
   }
 })
 
-const observer = new IntersectionObserver(
-  (entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible')
-        observer.unobserve(entry.target)
-      }
-    })
-  },
-  { threshold: 0.1 }
-)
-document.querySelectorAll('.reveal').forEach((element) => {
-  element.classList.add('reveal-pending')
-  observer.observe(element)
-})
+if ('IntersectionObserver' in window) {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible')
+          observer.unobserve(entry.target)
+        }
+      })
+    },
+    { threshold: 0.1 }
+  )
+  document.querySelectorAll('.reveal').forEach((element) => {
+    element.classList.add('reveal-pending')
+    observer.observe(element)
+  })
+}

@@ -6,8 +6,8 @@
   --muted: #aaa7b0;
   --faint: #aaa7b0;
   --line: #3a3942;
-  --accent: #cf5f40;
-  --accent-dark: #9d412b;
+  --accent: #d7f542;
+  --accent-dark: #bfdc2c;
   --success: #7aa574;
   --blue: #8da6e8;
   --max: 1200px;
@@ -843,4 +843,96 @@ pre {
     opacity: 1;
     transform: none;
   }
+}
+
+/* Preferences follow the app's resolved Light / Dark / System setting. */
+[hidden] {
+  display: none !important;
+}
+:root[data-theme='light'] {
+  --bg: #fafbf7;
+  --surface: #ffffff;
+  --surface-2: #edf0e5;
+  --ink: #1b1b22;
+  --muted: #50564a;
+  --faint: #59604e;
+  --line: #d3d9c6;
+  --success: #326c3d;
+  --blue: #3156a8;
+}
+.site-header,
+.terminal {
+  background: var(--surface);
+  border-color: var(--line);
+}
+.button-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #1b1b22;
+}
+.button-primary:hover {
+  background: var(--accent-dark);
+}
+.brand-mark,
+.route-core {
+  color: #1b1b22;
+}
+.method {
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+}
+.c-orange {
+  color: var(--accent);
+}
+pre,
+.provider-strip span {
+  color: var(--ink);
+}
+.feature-accent,
+.cta,
+.cta mark {
+  color: #1b1b22;
+}
+.cta .status-dot {
+  background: #1b1b22;
+}
+.feature-accent p,
+.feature-accent .feature-index,
+.cta .eyebrow,
+.cta-copy p {
+  color: #343c16;
+}
+:root[data-theme='light'] h1 > span,
+:root[data-theme='light'] .step-no,
+:root[data-theme='light'] .metric strong,
+:root[data-theme='light'] .method,
+:root[data-theme='light'] .c-orange,
+:root[data-theme='light'] .provider-strip .strip-more {
+  color: #536515;
+}
+.hero > *,
+.section-heading > *,
+.steps li > * {
+  min-width: 0;
+}
+h1,
+h2,
+h3 {
+  overflow-wrap: anywhere;
+}
+h1 {
+  line-height: 1.08;
+  letter-spacing: -0.045em;
+}
+html:not([lang='en']) h1 {
+  font-size: clamp(2.6rem, 5vw, 4.8rem);
+}
+html:not([lang='en']) .metric {
+  flex-wrap: wrap;
+}
+html:not([lang='en']) .metric strong {
+  font-size: clamp(2.2rem, 5vw, 4rem);
+}
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
 }

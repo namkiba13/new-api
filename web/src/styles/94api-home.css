@@ -1,0 +1,59 @@
+.api94-shell > div {
+  background: var(--background);
+}
+.api94-shell header {
+  background: var(--background);
+  border-bottom: 1px solid var(--border);
+}
+.api94-shell header > div {
+  max-width: 1280px;
+  padding-top: 0;
+}
+.api94-shell header nav {
+  height: 64px;
+  border-radius: 0;
+  box-shadow: none;
+}
+.api94-shell header button,
+.api94-shell header a {
+  border-radius: 0;
+}
+.api94-shell .public-header-overlay a {
+  border-radius: 0;
+}
+.api94-shell header [data-slot='button']:not([data-variant='ghost']) {
+  background: #d7f542;
+  color: #1b1b22;
+}
+.api94-home-frame {
+  display: block;
+  margin-top: 64px;
+  width: 100%;
+  height: calc(100dvh - 64px);
+  border: 0;
+}
+@media (max-width: 1023px) {
+  .api94-shell .public-header-desktop {
+    display: none;
+  }
+  .api94-shell .public-header-mobile {
+    display: flex;
+  }
+  .api94-shell .public-header-overlay {
+    display: block;
+  }
+  .api94-shell .public-header-overlay:not([inert]) {
+    pointer-events: auto;
+  }
+}
+@media (max-width: 400px) {
+  .api94-shell header > div {
+    padding-inline: 4px;
+  }
+  .api94-shell header nav {
+    padding-inline: 4px;
+  }
+  .api94-shell header nav > div {
+    gap: 0;
+  }
+}

@@ -26,6 +26,8 @@ import { isLikelyHtml } from '@/lib/content-format'
 
 import { useHomePageContent } from './hooks'
 
+import '@/styles/94api-home.css'
+
 export function Home() {
   const { i18n, t } = useTranslation()
   const iframeRef = useRef<HTMLIFrameElement>(null)
@@ -39,19 +41,17 @@ export function Home() {
         '*'
       )
       iframeRef.current?.contentWindow?.postMessage(
-        { lang: i18n.language },
+        { lang: i18n.resolvedLanguage || i18n.language },
         '*'
       )
     } catch {
       // Cross-origin frames may reject access while navigating.
     }
-  }, [i18n.language, resolvedTheme])
+  }, [i18n.language, i18n.resolvedLanguage, resolvedTheme])
 
   useEffect(() => {
-    if (isUrl) {
-      syncIframePreferences()
-    }
-  }, [isUrl, syncIframePreferences])
+    syncIframePreferences()
+  }, [isLoaded, syncIframePreferences])
 
   if (!isLoaded) {
     return (
@@ -63,7 +63,12 @@ export function Home() {
     )
   }
 
-  if (content) {
+  const isBundledHome =
+    content === '' ||
+    content === '/94api-theme/home.html' ||
+    content === `${window.location.origin}/94api-theme/home.html`
+
+  if (content && !isBundledHome) {
     if (isUrl) {
       return (
         <PublicLayout showMainContainer={false}>
@@ -116,12 +121,18 @@ export function Home() {
   }
 
   return (
-    // eslint-disable-next-line react/iframe-missing-sandbox -- Bundled first-party document, not custom HTML; Clipboard API needs its real origin.
-    <iframe
-      src='/94api-theme/home.html'
-      title={t('Home')}
-      className='block h-dvh w-full border-0'
-      allow='clipboard-write'
-    />
+    <div className='api94-shell'>
+      <PublicLayout showMainContainer={false}>
+        {/* eslint-disable-next-line react/iframe-missing-sandbox -- Bundled first-party document; custom URLs remain sandboxed above. */}
+        <iframe
+          ref={iframeRef}
+          src='/94api-theme/home.html?embedded=1&v=20260913-sync1'
+          title={t('Home')}
+          className='api94-home-frame'
+          allow='clipboard-write'
+          onLoad={syncIframePreferences}
+        />
+      </PublicLayout>
+    </div>
   )
 }
