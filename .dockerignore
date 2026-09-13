@@ -10,3 +10,9 @@ docs
 /web/node_modules
 /web/dist
 !THIRD-PARTY-LICENSES.md
+**/preview.local.*
+**/preview-live*
+**/.env.local
+**/.env.*.local
+/e2e
+**/__tests__

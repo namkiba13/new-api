@@ -196,7 +196,7 @@ export function CreateDeploymentDrawer({
         map.set(key, { label: String(name), value: key })
       }
     })
-    return Array.from(map.values())
+    return [...map.values()]
   }, [replicasData])
 
   const { data: priceData, isLoading: _isLoadingPrice } = useQuery({
@@ -373,6 +373,10 @@ export function CreateDeploymentDrawer({
     return `${total} ${currency}`.trim()
   }, [priceData])
   void priceSummary
+  let nameMessage = ''
+  if (isCheckingName) nameMessage = t('Checking name...')
+  else if (nameAvailable === true) nameMessage = t('Name is available')
+  else if (nameAvailable === false) nameMessage = t('Name is not available')
 
   return (
     <Sheet
@@ -417,13 +421,7 @@ export function CreateDeploymentDrawer({
                     </FormControl>
                     {open && field.value?.trim() ? (
                       <div className='text-muted-foreground text-xs'>
-                        {isCheckingName
-                          ? t('Checking name...')
-                          : nameAvailable === true
-                            ? t('Name is available')
-                            : nameAvailable === false
-                              ? t('Name is not available')
-                              : ''}
+                        {nameMessage}
                       </div>
                     ) : null}
                     <FormMessage />
@@ -460,12 +458,10 @@ export function CreateDeploymentDrawer({
                     <FormItem>
                       <FormLabel>{t('Hardware type')}</FormLabel>
                       <Select
-                        items={[
-                          ...hardwareOptions.map((opt) => ({
-                            value: opt.value,
-                            label: opt.label,
-                          })),
-                        ]}
+                        items={hardwareOptions.map((opt) => ({
+                          value: opt.value,
+                          label: opt.label,
+                        }))}
                         value={field.value}
                         onValueChange={(v) => field.onChange(v)}
                         disabled={isLoadingHardware}

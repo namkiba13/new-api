@@ -128,7 +128,7 @@ export function AppHeader({
 
       {rightContent ?? (
         <div className='ms-auto flex items-center gap-1 sm:gap-2'>
-          {showSearch && <Search />}
+          {showSearch && <Search className='lg:w-40 xl:w-64' />}
           {showNotifications && (
             <NotificationPopover
               open={notifications.popoverOpen}
