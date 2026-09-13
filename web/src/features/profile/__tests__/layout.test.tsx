@@ -246,3 +246,12 @@ it('shows a retry action when profile loading fails and recovers on retry', asyn
     await screen.findByRole('heading', { name: 'Profile Test' })
   ).toBeVisible()
 })
+
+it('hides sidebar settings when the account response does not grant permission', async () => {
+  useAuthStore.getState().auth.setUser({ ...profile })
+  renderProfile()
+  await screen.findByRole('heading', { name: 'Profile Test' })
+  expect(
+    screen.queryByText('Sidebar Personal Settings', { exact: true })
+  ).not.toBeInTheDocument()
+})

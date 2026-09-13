@@ -49,7 +49,7 @@ export function Profile() {
     status?.turnstile_check && status?.turnstile_site_key
   )
   const turnstileSiteKey = status?.turnstile_site_key || ''
-  const canConfigureSidebar = permissions?.sidebar_settings !== false
+  const canConfigureSidebar = permissions?.sidebar_settings === true
 
   return (
     <Main>
