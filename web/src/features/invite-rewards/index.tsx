@@ -1,12 +1,16 @@
+import {
+  WalletCardsIcon,
+  FileClockIcon,
+  GiftIcon,
+  Link01Icon,
+  CheckmarkCircle02Icon,
+  CancelCircleIcon,
+  UserGroupIcon,
+  Coins01Icon,
+} from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/react'
 /* Copyright (C) 2023-2026 QuantumNous */
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import {
-  Clock,
-  Gift,
-  Link as LinkIcon,
-  ShieldCheck,
-  Wallet,
-} from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -14,6 +18,7 @@ import { CopyButton } from '@/components/copy-button'
 import { SectionPageLayout } from '@/components/layout/components/section-page-layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { IconBadge } from '@/components/ui/icon-badge'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { toIntlLocale } from '@/i18n/languages'
@@ -44,9 +49,7 @@ export function InviteRewards() {
   let headline = 'Invite friends'
   if (data?.program.enabled) {
     headline =
-      data.program.mode === 'first'
-        ? 'Invite friends. You both get {{rate}} of the first eligible credit in Credits.'
-        : 'Invite friends. You both get {{rate}} of every eligible credit in Credits.'
+      'Invite friends. You both get {{rate}} of the first eligible credit in Credits.'
   }
   const link = data?.code
     ? new URL(
@@ -105,7 +108,7 @@ export function InviteRewards() {
     <SectionPageLayout>
       <SectionPageLayout.Title>{t('Invite friends')}</SectionPageLayout.Title>
       <SectionPageLayout.Content>
-        <div className='invite-rewards-page flex min-w-0 flex-col gap-6'>
+        <div className='invite-rewards-page @container/invite flex min-w-0 flex-col gap-6'>
           {query.isPending && <Skeleton className='h-72 w-full' />}
           {query.isError && (
             <div role='alert' className='space-y-3 rounded-lg border p-6'>
@@ -121,10 +124,18 @@ export function InviteRewards() {
                 </div>
               )}
               <Card className='gap-0 overflow-hidden py-0'>
-                <div className='grid min-w-0 xl:grid-cols-[1.35fr_1fr]'>
+                <div
+                  data-slot='invite-hero'
+                  className='grid min-w-0 @5xl/invite:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.65fr)]'
+                >
                   <div className='flex min-w-0 flex-col gap-6 p-5 sm:p-8'>
-                    <span className='flex items-center gap-2 text-sm'>
-                      <Gift className='size-4' aria-hidden='true' />
+                    <span className='bg-muted/40 flex w-fit items-center gap-2 rounded-md border px-2.5 py-1 text-xs font-medium'>
+                      <HugeiconsIcon
+                        icon={GiftIcon}
+                        className='size-4'
+                        strokeWidth={1.5}
+                        aria-hidden='true'
+                      />
                       {t('Friend invitation campaign')}
                     </span>
                     <h2 className='max-w-2xl text-3xl leading-tight font-semibold tracking-tight sm:text-4xl'>
@@ -143,12 +154,20 @@ export function InviteRewards() {
                         {t('Invite link')}
                       </label>
                       <div className='flex min-w-0 flex-wrap gap-2'>
-                        <Input
-                          id='invite-link'
-                          readOnly
-                          value={link}
-                          className='min-w-0 flex-1 font-mono text-xs'
-                        />
+                        <div className='relative min-w-0 flex-1'>
+                          <HugeiconsIcon
+                            icon={Link01Icon}
+                            className='text-muted-foreground pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2'
+                            strokeWidth={1.5}
+                            aria-hidden='true'
+                          />
+                          <Input
+                            id='invite-link'
+                            readOnly
+                            value={link}
+                            className='min-w-0 ps-9 font-mono text-xs'
+                          />
+                        </div>
                         {link ? (
                           <CopyButton
                             value={link}
@@ -171,7 +190,7 @@ export function InviteRewards() {
                       </div>
                     </div>
                   </div>
-                  <div className='bg-muted/40 flex min-w-0 flex-col justify-center gap-6 border-t p-5 sm:p-8 xl:border-t-0 xl:border-l'>
+                  <div className='bg-muted/40 flex min-w-0 flex-col justify-center gap-6 border-t p-5 sm:p-8 @5xl/invite:border-t-0 @5xl/invite:border-l'>
                     <div>
                       <p className='text-muted-foreground text-sm'>
                         {t('Each of you receives')}
@@ -202,7 +221,12 @@ export function InviteRewards() {
                         ))}
                       </dl>
                       <p className='flex items-center gap-2 text-sm'>
-                        <Clock className='size-4 shrink-0' aria-hidden='true' />
+                        <HugeiconsIcon
+                          icon={FileClockIcon}
+                          strokeWidth={1.5}
+                          className='size-4 shrink-0'
+                          aria-hidden='true'
+                        />
                         {data.program.hold_hours === 0
                           ? t('Available immediately')
                           : t('Released after {{hours}} hours', {
@@ -225,9 +249,16 @@ export function InviteRewards() {
                   </div>
                   <Button
                     variant='outline'
+                    className='w-full sm:w-auto'
                     disabled={busy || data.balance <= 0 || data.debt > 0}
                     onClick={() => void transfer()}
                   >
+                    <HugeiconsIcon
+                      icon={WalletCardsIcon}
+                      className='size-4'
+                      strokeWidth={1.5}
+                      aria-hidden='true'
+                    />
                     {t(
                       data.balance > 0
                         ? 'Transfer all rewards'
@@ -236,28 +267,68 @@ export function InviteRewards() {
                   </Button>
                 </CardHeader>
                 <CardContent>
-                  <dl className='grid gap-3 sm:grid-cols-2 xl:grid-cols-3'>
+                  <dl
+                    data-slot='invite-stats'
+                    className='grid gap-3 sm:grid-cols-2 @5xl/invite:grid-cols-4'
+                  >
                     {[
-                      ['Qualified credits', number.format(data.qualified)],
-                      [
-                        'Rewards in safety period',
-                        `${number.format(data.pending)} · ${formatQuota(data.pending_quota)}`,
-                      ],
-                      ['Rewards released', number.format(data.released)],
-                      ['Rewards reversed', number.format(data.reversed)],
-                      ['Reward balance', formatQuota(data.balance)],
-                      ['Lifetime rewards', formatQuota(data.lifetime)],
-                    ].map(([label, value]) => (
+                      {
+                        label: 'Qualified credits',
+                        value: number.format(data.qualified),
+                        icon: UserGroupIcon,
+                      },
+                      {
+                        label: 'Rewards in safety period',
+                        value: number.format(data.pending),
+                        icon: FileClockIcon,
+                        detail: t('{{amount}} pending Credits', {
+                          amount: formatQuota(data.pending_quota),
+                        }),
+                      },
+                      {
+                        label: 'Rewards released',
+                        value: number.format(data.released),
+                        icon: GiftIcon,
+                      },
+                      {
+                        label: 'Rewards reversed',
+                        value: number.format(data.reversed),
+                        icon: CancelCircleIcon,
+                      },
+                      {
+                        label: 'Reward balance',
+                        value: formatQuota(data.balance),
+                        icon: Coins01Icon,
+                      },
+                      {
+                        label: 'Lifetime rewards',
+                        value: formatQuota(data.lifetime),
+                        icon: GiftIcon,
+                      },
+                    ].map((item) => (
                       <div
-                        key={label}
-                        className='bg-muted/30 min-w-0 rounded-md border p-4'
+                        key={item.label}
+                        className='bg-muted/30 flex min-w-0 items-start gap-3 rounded-md border p-4'
                       >
-                        <dt className='text-muted-foreground text-sm'>
-                          {t(label)}
-                        </dt>
-                        <dd className='mt-2 font-mono text-xl font-semibold break-words'>
-                          {value}
-                        </dd>
+                        <IconBadge
+                          size='lg'
+                          className='bg-background text-foreground size-9 rounded-md [&>svg]:size-4'
+                        >
+                          <HugeiconsIcon icon={item.icon} strokeWidth={1.5} />
+                        </IconBadge>
+                        <div className='min-w-0'>
+                          <dt className='text-muted-foreground text-sm'>
+                            {t(item.label)}
+                          </dt>
+                          <dd className='mt-1 font-mono text-lg font-semibold break-words'>
+                            {item.value}
+                          </dd>
+                          {item.detail && (
+                            <dd className='text-muted-foreground mt-1 text-xs'>
+                              {item.detail}
+                            </dd>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </dl>
@@ -276,38 +347,54 @@ export function InviteRewards() {
                   )}
                 </CardContent>
               </Card>
-              <div className='grid gap-6 xl:grid-cols-[1.35fr_1fr]'>
+              <div className='grid gap-6 @5xl/invite:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.65fr)]'>
                 <Card>
                   <CardHeader>
                     <CardTitle>{t('How It Works')}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <ol className='grid gap-6 md:grid-cols-3'>
+                    <ol
+                      data-slot='invite-steps'
+                      className='grid gap-6 @3xl/invite:grid-cols-3'
+                    >
                       {[
                         {
-                          icon: LinkIcon,
+                          icon: Link01Icon,
                           text: 'Get and share your personal invitation link',
+                          description:
+                            'Your link records who invited your friend when they register.',
                         },
                         {
-                          icon: Wallet,
+                          icon: UserGroupIcon,
                           text: 'Your friend registers and receives an eligible credit',
+                          description:
+                            'Only their first eligible credit earns rewards for both of you.',
                         },
                         {
-                          icon: Clock,
+                          icon: FileClockIcon,
                           text: 'After the waiting period, both of you receive rewards',
+                          description:
+                            'Your reward becomes transferable; your friend receives usable Credits.',
                         },
                       ].map((step, index) => (
-                        <li key={step.text} className='space-y-3'>
-                          <step.icon
-                            className='bg-muted size-8 rounded-full p-1.5'
-                            aria-hidden='true'
-                          />
-                          <span className='text-muted-foreground block text-xs'>
-                            {number.format(index + 1).padStart(2, '0')}
-                          </span>
-                          <p className='text-sm leading-relaxed'>
-                            {t(step.text)}
-                          </p>
+                        <li key={step.text} className='flex items-start gap-3'>
+                          <IconBadge
+                            size='lg'
+                            className='text-foreground rounded-full [&>svg]:size-4'
+                          >
+                            <HugeiconsIcon icon={step.icon} strokeWidth={1.5} />
+                          </IconBadge>
+                          <div className='min-w-0 space-y-1.5'>
+                            <span className='text-muted-foreground block text-xs'>
+                              {number.format(index + 1).padStart(2, '0')}
+                            </span>
+                            <p className='text-sm leading-relaxed'>
+                              {t(step.text)}
+                            </p>
+                            <p className='text-muted-foreground text-xs leading-5'>
+                              {t(step.description)}
+                            </p>
+                          </div>
                         </li>
                       ))}
                     </ol>
@@ -315,7 +402,16 @@ export function InviteRewards() {
                 </Card>
                 <Card>
                   <CardHeader>
-                    <CardTitle>{t('Program rules')}</CardTitle>
+                    <span className='mb-2 inline-flex w-fit items-center gap-2 rounded-md border px-2 py-1 text-xs'>
+                      <HugeiconsIcon
+                        icon={CheckmarkCircle02Icon}
+                        className='size-3.5'
+                        strokeWidth={1.5}
+                        aria-hidden='true'
+                      />
+                      {t('Program rules')}
+                    </span>
+                    <CardTitle>{t('Clear and fair rewards')}</CardTitle>
                     <p className='text-muted-foreground text-sm'>
                       {t('Credits, not cash')}
                     </p>
@@ -323,9 +419,7 @@ export function InviteRewards() {
                   <CardContent>
                     <ul className='space-y-4'>
                       {[
-                        data.program.mode === 'first'
-                          ? 'Only the first eligible credit across all three sources earns rewards.'
-                          : 'Every eligible credit across all three sources earns rewards.',
+                        'Only the first eligible credit across all three sources earns rewards.',
                         'Refunded credits cause the related rewards to be recovered.',
                         'Rewards, transfers, API refunds, signup gifts and check-ins do not earn referral rewards.',
                         'Only the direct inviter and the referred friend receive rewards.',
@@ -334,10 +428,12 @@ export function InviteRewards() {
                           key={rule}
                           className='flex gap-3 text-sm leading-relaxed'
                         >
-                          <ShieldCheck
-                            className='text-muted-foreground mt-0.5 size-4 shrink-0'
-                            aria-hidden='true'
-                          />
+                          <IconBadge className='text-foreground rounded-full'>
+                            <HugeiconsIcon
+                              icon={CheckmarkCircle02Icon}
+                              strokeWidth={1.5}
+                            />
+                          </IconBadge>
                           <span>{t(rule)}</span>
                         </li>
                       ))}

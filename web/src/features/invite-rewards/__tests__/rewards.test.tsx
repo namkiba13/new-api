@@ -21,7 +21,7 @@ let client: QueryClient
 const summary: InviteSummary = {
   program: {
     enabled: true,
-    mode: 'all',
+    mode: 'first',
     rate_bps: 0,
     hold_hours: 0,
     revision: 1,
@@ -66,7 +66,7 @@ it('renders a zero rate and immediate release honestly without administrator con
   await show()
   expect(
     await screen.findByRole('heading', {
-      name: 'Invite friends. You both get 0% of every eligible credit in Credits.',
+      name: 'Invite friends. You both get 0% of the first eligible credit in Credits.',
     })
   ).toBeVisible()
   expect(screen.getByText('Available immediately')).toBeVisible()
