@@ -48,7 +48,7 @@ type SystemBrandProps = {
 export function SystemBrand(props: SystemBrandProps) {
   const { t } = useTranslation()
   const { status } = useStatus()
-  const { logo } = useSystemConfig()
+  const { logo, logoWordmark } = useSystemConfig()
 
   const variant = props.variant ?? 'sidebar'
   const name = status?.system_name || props.defaultName || 'New API'
@@ -61,18 +61,22 @@ export function SystemBrand(props: SystemBrandProps) {
         to='/'
         aria-label={t('Go to home')}
         className={cn(
-          'text-foreground inline-flex h-7 items-center gap-1.5 rounded-md px-1.5 text-sm font-medium transition-colors outline-none select-none',
+          'text-foreground inline-flex h-9 items-center gap-1.5 rounded-md px-1.5 text-sm font-medium transition-colors outline-none select-none',
           'hover:bg-accent focus-visible:ring-ring/40 focus-visible:ring-2'
         )}
       >
-        <div className='flex size-5 items-center justify-center overflow-hidden rounded-md'>
+        {logoWordmark ? (
           <img
-            src={logo}
-            alt={t('Logo')}
-            className='size-full rounded-md object-cover'
+            src={logoWordmark}
+            alt={name}
+            className='h-7 w-[92px] object-contain sm:h-8 sm:w-[104px]'
           />
-        </div>
-        <span className='max-w-[12rem] truncate'>{name}</span>
+        ) : (
+          <>
+            <img src={logo} alt={t('Logo')} className='size-5 object-contain' />
+            <span className='max-w-[12rem] truncate'>{name}</span>
+          </>
+        )}
       </Link>
     )
   }
