@@ -35,6 +35,15 @@ const summary: InviteSummary = {
   balance: 400000,
   lifetime: 400000,
   debt: 0,
+  received: {
+    pending: 0,
+    pending_quota: 0,
+    released: 0,
+    released_quota: 0,
+    reversed: 0,
+    credited_quota: 0,
+    offset_quota: 0,
+  },
 }
 beforeEach(async () => {
   sessionStorage.clear()
@@ -59,7 +68,7 @@ async function show() {
     </QueryClientProvider>
   )
 }
-it('renders a zero rate and immediate release honestly without administrator controls', async () => {
+it('renders User reward summaries without detailed history or administrator controls', async () => {
   vi.spyOn(api, 'get').mockImplementation(
     async (url) =>
       ({
@@ -77,6 +86,12 @@ it('renders a zero rate and immediate release honestly without administrator con
   ).toBeVisible()
   expect(screen.getByText('Available immediately')).toBeVisible()
   expect(screen.queryByLabelText('Reward mode')).not.toBeInTheDocument()
+  expect(screen.queryByText('Referral reward history')).not.toBeInTheDocument()
+  expect(screen.getAllByText('Rewards from my referrals')).toHaveLength(1)
+  expect(screen.getAllByText('My reward for being invited')).toHaveLength(1)
+  expect(
+    screen.queryByRole('button', { name: 'Details' })
+  ).not.toBeInTheDocument()
 })
 it('shows a retry rather than a zero balance when the rewards API fails', async () => {
   vi.spyOn(api, 'get').mockRejectedValue(new Error('unavailable'))
