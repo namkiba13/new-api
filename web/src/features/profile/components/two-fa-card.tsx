@@ -21,15 +21,10 @@ import { useTranslation } from 'react-i18next'
 
 import { StatusBadge } from '@/components/status-badge'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { IconBadge } from '@/components/ui/icon-badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import { TitledCard } from '@/components/ui/titled-card'
 import { useDialogs } from '@/hooks/use-dialog'
 
 import { useTwoFA } from '../hooks'
@@ -68,95 +63,99 @@ export function TwoFACard({ loading: pageLoading }: TwoFACardProps) {
 
   return (
     <>
-      <Card data-card-hover='false' className='gap-0 overflow-hidden py-0'>
-        <CardHeader className='p-3 sm:p-5'>
-          <CardTitle className='text-lg tracking-tight sm:text-xl'>
-            {t('Two-Factor Authentication')}
-          </CardTitle>
-          <CardDescription className='text-xs sm:text-sm'>
-            {t('Add an extra layer of security to your account')}
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent className='p-3 sm:p-5'>
-          <div className='space-y-6'>
-            {/* Status Section */}
-            <div className='flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between xl:flex-col 2xl:flex-row'>
-              <div className='flex items-start gap-4'>
-                <IconBadge tone='success' size='sm'>
-                  <Shield />
-                </IconBadge>
-                <div className='space-y-1'>
-                  <div className='flex items-center gap-2'>
-                    <p className='font-medium'>{t('Two-Step Verification')}</p>
-                    {status.enabled ? (
-                      <StatusBadge
-                        label={t('Enabled')}
-                        variant='success'
-                        showDot
-                        copyable={false}
-                      />
-                    ) : (
-                      <StatusBadge
-                        label={t('Disabled')}
-                        variant='neutral'
-                        showDot
-                        copyable={false}
-                      />
-                    )}
-                    {status.locked && (
-                      <StatusBadge
-                        label={t('Locked')}
-                        variant='danger'
-                        showDot
-                        copyable={false}
-                      />
-                    )}
-                  </div>
-                  <p className='text-muted-foreground text-sm'>
-                    {status.enabled
-                      ? t('Backup codes remaining: {{count}}', {
-                          count: status.backup_codes_remaining,
-                        })
-                      : t('Add an extra layer of security to your account')}
+      <TitledCard
+        title={t('Two-Factor Authentication')}
+        description={t('Add an extra layer of security to your account')}
+        icon={<Shield className='size-4' />}
+        iconTone='neutral'
+        titleClassName='text-base sm:text-base'
+        disableHoverEffect
+      >
+        <div className='space-y-4'>
+          {/* Status Section */}
+          <div className='bg-muted/20 flex flex-col gap-4 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between'>
+            <div className='flex min-w-0 items-start gap-3'>
+              <IconBadge
+                tone={status.enabled ? 'success' : 'neutral'}
+                size='md'
+              >
+                <Shield />
+              </IconBadge>
+              <div className='space-y-1'>
+                <div className='flex flex-wrap items-center gap-2'>
+                  <p className='text-sm font-medium'>
+                    {t('Two-Step Verification')}
                   </p>
+                  {status.enabled ? (
+                    <StatusBadge
+                      label={t('Enabled')}
+                      variant='success'
+                      showDot
+                      copyable={false}
+                    />
+                  ) : (
+                    <StatusBadge
+                      label={t('Disabled')}
+                      variant='neutral'
+                      showDot
+                      copyable={false}
+                    />
+                  )}
+                  {status.locked && (
+                    <StatusBadge
+                      label={t('Locked')}
+                      variant='danger'
+                      showDot
+                      copyable={false}
+                    />
+                  )}
                 </div>
+                <p className='text-muted-foreground text-xs leading-relaxed'>
+                  {status.enabled
+                    ? t('Backup codes remaining: {{count}}', {
+                        count: status.backup_codes_remaining,
+                      })
+                    : t('Add an extra layer of security to your account')}
+                </p>
               </div>
-
-              {!status.enabled && (
-                <Button
-                  className='w-full sm:w-auto xl:w-full 2xl:w-auto'
-                  onClick={() => dialogs.open('setup')}
-                >
-                  {t('Enable')}
-                </Button>
-              )}
             </div>
 
-            {/* Actions Section - Only show when enabled */}
-            {status.enabled && (
-              <div className='flex flex-col gap-3 border-t pt-6 sm:flex-row xl:flex-col 2xl:flex-row'>
-                <Button
-                  variant='outline'
-                  className='flex-1'
-                  onClick={() => dialogs.open('backup')}
-                >
-                  <RefreshCw className='mr-2 h-4 w-4' />
-                  {t('Regenerate Backup Codes')}
-                </Button>
-                <Button
-                  variant='destructive'
-                  className='flex-1'
-                  onClick={() => dialogs.open('disable')}
-                >
-                  <AlertTriangle className='mr-2 h-4 w-4' />
-                  {t('Disable 2FA')}
-                </Button>
-              </div>
+            {!status.enabled && (
+              <Button
+                size='sm'
+                className='w-full shrink-0 sm:w-auto'
+                onClick={() => dialogs.open('setup')}
+              >
+                {t('Enable')}
+              </Button>
             )}
           </div>
-        </CardContent>
-      </Card>
+
+          {/* Actions Section - Only show when enabled */}
+          {status.enabled && (
+            <div className='flex flex-col gap-3 border-t pt-4 sm:flex-row sm:justify-end'>
+              <Button
+                variant='outline'
+                size='sm'
+                className='w-full sm:w-auto'
+                onClick={() => dialogs.open('backup')}
+              >
+                <RefreshCw className='mr-2 h-4 w-4' />
+                {t('Regenerate Backup Codes')}
+              </Button>
+              <Button
+                variant='destructive'
+                size='sm'
+                className='w-full sm:w-auto'
+                onClick={() => dialogs.open('disable')}
+              >
+                <AlertTriangle className='mr-2 h-4 w-4' />
+                {t('Disable 2FA')}
+              </Button>
+            </div>
+          )}
+        </div>
+      </TitledCard>
 
       {/* Dialogs */}
       <TwoFASetupDialog

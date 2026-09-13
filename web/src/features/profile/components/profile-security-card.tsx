@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Shield, Key, Trash2 } from 'lucide-react'
+import { Shield, Key, Trash2, ChevronRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -55,9 +55,14 @@ export function ProfileSecurityCard({
           <Skeleton className='h-6 w-32' />
           <Skeleton className='mt-2 h-4 w-48' />
         </CardHeader>
-        <CardContent className='space-y-3 p-3 sm:p-5'>
+        <CardContent className='grid grid-cols-1 gap-3 p-3 sm:p-5 md:grid-cols-2'>
           {['password', 'token', 'delete'].map((key) => (
-            <Skeleton key={key} className='h-16 w-full' />
+            <Skeleton
+              key={key}
+              className={
+                key === 'delete' ? 'h-20 w-full md:col-span-2' : 'h-20 w-full'
+              }
+            />
           ))}
         </CardContent>
       </Card>
@@ -101,25 +106,40 @@ export function ProfileSecurityCard({
         iconTone='neutral'
         disableHoverEffect
       >
-        <div className='grid grid-cols-1 gap-2.5 sm:gap-3'>
+        <div className='grid grid-cols-1 gap-3 md:grid-cols-2'>
           {securityActions.map((item) => (
             <button
               key={item.title}
               type='button'
               onClick={item.action}
-              className={`flex items-center gap-3 rounded-lg border p-3 text-left sm:p-4 ${
-                item.variant === 'destructive' ? 'border-destructive/30' : ''
+              className={`group focus-visible:ring-ring flex min-w-0 items-center gap-3 rounded-lg border p-4 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
+                item.variant === 'destructive'
+                  ? 'border-destructive/20 bg-destructive/5 hover:bg-destructive/10 md:col-span-2'
+                  : 'hover:bg-muted/50'
               }`}
             >
-              <IconBadge tone='neutral' size='sm'>
+              <IconBadge
+                tone={
+                  item.variant === 'destructive' ? 'destructive' : 'neutral'
+                }
+                size='md'
+              >
                 <item.icon />
               </IconBadge>
-              <div className='min-w-0'>
-                <p className='text-sm font-medium'>{item.title}</p>
-                <p className='text-muted-foreground text-xs'>
+              <div className='min-w-0 flex-1'>
+                <p
+                  className={`text-sm font-medium ${item.variant === 'destructive' ? 'text-destructive' : ''}`}
+                >
+                  {item.title}
+                </p>
+                <p className='text-muted-foreground mt-1 text-xs leading-relaxed'>
                   {item.description}
                 </p>
               </div>
+              <ChevronRight
+                className='text-muted-foreground size-4 shrink-0 transition-transform group-hover:translate-x-0.5'
+                aria-hidden='true'
+              />
             </button>
           ))}
         </div>
