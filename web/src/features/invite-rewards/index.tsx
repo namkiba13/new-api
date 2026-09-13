@@ -28,7 +28,6 @@ import { useAuthStore } from '@/stores/auth-store'
 import { useSystemConfigStore } from '@/stores/system-config-store'
 
 import { getInviteRewards } from './api'
-import { InviteHistory } from './history'
 
 export function InviteRewards() {
   const { t, i18n } = useTranslation()
@@ -421,7 +420,6 @@ export function InviteRewards() {
                   </CardContent>
                 </Card>
               )}
-              <InviteHistory />
               <div className='grid gap-6 @5xl/invite:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.65fr)]'>
                 <Card>
                   <CardHeader>
