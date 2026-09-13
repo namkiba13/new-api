@@ -83,7 +83,7 @@ type AppHeaderProps = {
   showNotifications?: boolean
   /**
    * Whether to show config drawer
-   * @default true
+   * @default false
    */
   showConfigDrawer?: boolean
   /**
@@ -100,7 +100,7 @@ export function AppHeader({
   showSearch = true,
   rightContent,
   showNotifications = true,
-  showConfigDrawer = true,
+  showConfigDrawer = false,
   showProfileDropdown = true,
 }: AppHeaderProps) {
   // Prioritize dynamically generated links from backend
