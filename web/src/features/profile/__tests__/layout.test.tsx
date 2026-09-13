@@ -156,7 +156,6 @@ it('exposes bindings, language, notifications and security in document order wit
     'Language Preferences',
     'Notifications',
     'Security',
-    'Two-Factor Authentication',
     'Login sessions',
   ]
   const nodes = []
@@ -175,7 +174,9 @@ it('exposes bindings, language, notifications and security in document order wit
   expect(screen.getByLabelText('Quota Warning Threshold')).toBeVisible()
   expect(screen.getByText('42', { exact: true })).toBeVisible()
   expect(screen.getByRole('button', { name: /Change Password/ })).toBeVisible()
-  expect(screen.getByRole('button', { name: /Delete Account/ })).toBeVisible()
+  expect(
+    screen.queryByRole('button', { name: /Delete Account/ })
+  ).not.toBeInTheDocument()
   expect(
     screen.queryByText('Sidebar Personal Settings', { exact: true })
   ).not.toBeInTheDocument()
@@ -253,5 +254,24 @@ it('hides sidebar settings when the account response does not grant permission',
   await screen.findByRole('heading', { name: 'Profile Test' })
   expect(
     screen.queryByText('Sidebar Personal Settings', { exact: true })
+  ).not.toBeInTheDocument()
+})
+
+it('groups two-step verification inside Security without passkey or access-token controls', async () => {
+  renderProfile()
+  const security = await screen.findByRole('region', { name: 'Security' })
+  expect(
+    await within(security).findByText('Two-Step Verification')
+  ).toBeVisible()
+  expect(within(security).getByText('Disabled', { exact: true })).toBeVisible()
+  expect(within(security).getByRole('button', { name: 'Enable' })).toBeVisible()
+  expect(
+    screen.queryByText('Passkey Login', { exact: true })
+  ).not.toBeInTheDocument()
+  expect(
+    screen.queryByRole('button', { name: /Access Token/ })
+  ).not.toBeInTheDocument()
+  expect(
+    screen.queryByText('Two-Factor Authentication', { exact: true })
   ).not.toBeInTheDocument()
 })

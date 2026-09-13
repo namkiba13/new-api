@@ -16,158 +16,82 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Shield, Key, Trash2, ChevronRight } from 'lucide-react'
+import { Shield, KeyRound } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { IconBadge } from '@/components/ui/icon-badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { TitledCard } from '@/components/ui/titled-card'
 import { useDialogs } from '@/hooks/use-dialog'
 
 import type { UserProfile } from '../types'
-import { AccessTokenDialog } from './dialogs/access-token-dialog'
 import { ChangePasswordDialog } from './dialogs/change-password-dialog'
-import { DeleteAccountDialog } from './dialogs/delete-account-dialog'
-
-// ============================================================================
-// Profile Security Card Component
-// ============================================================================
+import { TwoFACard } from './two-fa-card'
 
 interface ProfileSecurityCardProps {
   profile: UserProfile | null
   loading: boolean
 }
 
-type DialogKey = 'password' | 'token' | 'delete'
-
 export function ProfileSecurityCard({
   profile,
   loading,
 }: ProfileSecurityCardProps) {
   const { t } = useTranslation()
-  const dialogs = useDialogs<DialogKey>()
-
-  if (loading) {
-    return (
-      <Card data-card-hover='false' className='gap-0 overflow-hidden py-0'>
-        <CardHeader className='border-b p-3 !pb-3 sm:p-5 sm:!pb-5'>
-          <Skeleton className='h-6 w-32' />
-          <Skeleton className='mt-2 h-4 w-48' />
-        </CardHeader>
-        <CardContent className='grid grid-cols-1 gap-3 p-3 sm:p-5 md:grid-cols-2'>
-          {['password', 'token', 'delete'].map((key) => (
-            <Skeleton
-              key={key}
-              className={
-                key === 'delete' ? 'h-20 w-full md:col-span-2' : 'h-20 w-full'
-              }
-            />
-          ))}
-        </CardContent>
-      </Card>
-    )
-  }
-
-  if (!profile) return null
-
-  const securityActions = [
-    {
-      icon: Shield,
-      title: t('Change Password'),
-      description: t('Update your password to keep your account secure'),
-      action: () => dialogs.open('password'),
-      variant: 'default' as const,
-    },
-    {
-      icon: Key,
-      title: t('Access Token'),
-      description: t('Generate and manage your API access token'),
-      action: () => dialogs.open('token'),
-      variant: 'default' as const,
-    },
-    {
-      icon: Trash2,
-      title: t('Delete Account'),
-      description: t('Permanently delete your account and all data'),
-      action: () => dialogs.open('delete'),
-      variant: 'destructive' as const,
-    },
-  ]
-
+  const dialogs = useDialogs<'password'>()
+  if (!loading && !profile) return null
   return (
     <>
       <TitledCard
         titleClassName='text-base sm:text-base'
-        headerClassName='sm:p-5 sm:!pb-5'
         title={t('Security')}
         description={t('Manage your security settings and account access')}
-        icon={<Shield className='h-4 w-4' />}
+        icon={<Shield className='size-4' />}
         iconTone='neutral'
         disableHoverEffect
       >
-        <div className='grid grid-cols-1 gap-3 md:grid-cols-2'>
-          {securityActions.map((item) => (
-            <button
-              key={item.title}
-              type='button'
-              onClick={item.action}
-              className={`group focus-visible:ring-ring flex min-w-0 items-center gap-3 rounded-lg border p-4 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
-                item.variant === 'destructive'
-                  ? 'border-destructive/20 bg-destructive/5 hover:bg-destructive/10 md:col-span-2'
-                  : 'hover:bg-muted/50'
-              }`}
-            >
-              <IconBadge
-                tone={
-                  item.variant === 'destructive' ? 'destructive' : 'neutral'
-                }
-                size='md'
-              >
-                <item.icon />
-              </IconBadge>
-              <div className='min-w-0 flex-1'>
-                <p
-                  className={`text-sm font-medium ${item.variant === 'destructive' ? 'text-destructive' : ''}`}
-                >
-                  {item.title}
-                </p>
-                <p className='text-muted-foreground mt-1 text-xs leading-relaxed'>
-                  {item.description}
-                </p>
+        {loading ? (
+          <div className='space-y-3'>
+            <Skeleton className='h-20 w-full rounded-lg' />
+            <Skeleton className='h-20 w-full rounded-lg' />
+          </div>
+        ) : (
+          <section aria-label={t('Security')} className='space-y-3'>
+            <div className='flex flex-col gap-4 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between'>
+              <div className='flex min-w-0 items-start gap-3'>
+                <IconBadge tone='neutral' size='md'>
+                  <KeyRound />
+                </IconBadge>
+                <div className='space-y-1'>
+                  <p className='text-sm font-medium'>{t('Change Password')}</p>
+                  <p className='text-muted-foreground text-xs leading-relaxed'>
+                    {t('Update your password to keep your account secure')}
+                  </p>
+                </div>
               </div>
-              <ChevronRight
-                className='text-muted-foreground size-4 shrink-0 transition-transform group-hover:translate-x-0.5'
-                aria-hidden='true'
-              />
-            </button>
-          ))}
-        </div>
+              <Button
+                variant='outline'
+                size='sm'
+                className='w-full shrink-0 sm:w-auto'
+                onClick={() => dialogs.open('password')}
+              >
+                {t('Change Password')}
+              </Button>
+            </div>
+            <TwoFACard loading={loading} />
+          </section>
+        )}
       </TitledCard>
-
-      {/* Dialogs */}
-      <ChangePasswordDialog
-        open={dialogs.isOpen('password')}
-        onOpenChange={(open) =>
-          open ? dialogs.open('password') : dialogs.close('password')
-        }
-        username={profile.username}
-      />
-
-      <AccessTokenDialog
-        open={dialogs.isOpen('token')}
-        onOpenChange={(open) =>
-          open ? dialogs.open('token') : dialogs.close('token')
-        }
-      />
-
-      <DeleteAccountDialog
-        open={dialogs.isOpen('delete')}
-        onOpenChange={(open) =>
-          open ? dialogs.open('delete') : dialogs.close('delete')
-        }
-        username={profile.username}
-      />
+      {profile && (
+        <ChangePasswordDialog
+          open={dialogs.isOpen('password')}
+          onOpenChange={(open) =>
+            open ? dialogs.open('password') : dialogs.close('password')
+          }
+          username={profile.username}
+        />
+      )}
     </>
   )
 }
