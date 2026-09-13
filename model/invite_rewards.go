@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/QuantumNous/new-api/common"
+	mysqldriver "github.com/go-sql-driver/mysql"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -181,7 +182,11 @@ func MigrateInviteRewards(db *gorm.DB) error {
 	if err := db.AutoMigrate(&InviteProgram{}, &InviteFunding{}, &InviteDebt{}, &InviteTransfer{}); err != nil {
 		return err
 	}
-	return db.Clauses(clause.OnConflict{DoNothing: true}).Create(&InviteProgram{ID: 1, Mode: "first", RateBps: 800, HoldHours: 24}).Error
+	if err := db.Clauses(clause.OnConflict{DoNothing: true}).Create(&InviteProgram{ID: 1, Mode: "first", RateBps: 800, HoldHours: 24}).Error; err != nil {
+		return err
+	}
+	// Retire repeat awards without changing earned/pending rewards or other settings.
+	return db.Model(&InviteProgram{}).Where("id = ? AND (mode IS NULL OR mode <> ?)", 1, "first").Updates(map[string]interface{}{"mode": "first", "revision": gorm.Expr("COALESCE(revision, 0) + 1")}).Error
 }
 
 func GetInviteProgram() (InviteProgram, error) {
@@ -205,8 +210,35 @@ func lockInviteProgram(tx *gorm.DB) (InviteProgram, error) {
 	return p, err
 }
 
+// Lock before reading a funding row: SQLite cannot upgrade an older read
+// snapshot when a concurrent writer has committed. Retry only errors that
+// guarantee transaction rollback, including mixed-version rollout deadlocks.
+func inviteFundingTransaction(fn func(*gorm.DB) error) error {
+	for attempt := 0; ; attempt++ {
+		err := DB.Transaction(func(tx *gorm.DB) error {
+			if _, err := lockInviteProgram(tx); err != nil {
+				return err
+			}
+			return fn(tx)
+		})
+		if err == nil || attempt == 3 {
+			return err
+		}
+		var sqliteErr interface{ Code() int }
+		var pgErr interface{ SQLState() string }
+		var myErr *mysqldriver.MySQLError
+		retry := (errors.As(err, &sqliteErr) && (sqliteErr.Code()&255 == 5 || sqliteErr.Code()&255 == 6)) ||
+			(errors.As(err, &pgErr) && (pgErr.SQLState() == "40001" || pgErr.SQLState() == "40P01")) ||
+			(errors.As(err, &myErr) && (myErr.Number == 1213 || myErr.Number == 1205))
+		if !retry {
+			return err
+		}
+		time.Sleep(time.Duration(10<<attempt) * time.Millisecond)
+	}
+}
+
 func SaveInviteProgram(p InviteProgram) error {
-	if (p.Mode != "first" && p.Mode != "all") || p.RateBps < 0 || p.RateBps > 10000 || p.HoldHours < 0 || p.HoldHours > 8760 {
+	if p.Mode != "first" || p.RateBps < 0 || p.RateBps > 10000 || p.HoldHours < 0 || p.HoldHours > 8760 {
 		return ErrInviteRequest
 	}
 	return DB.Transaction(func(tx *gorm.DB) error {
@@ -255,7 +287,7 @@ func RecordInviteFunding(tx *gorm.DB, source string, userID, quota int) (bool, e
 	}
 	now := common.GetTimestamp()
 	event := InviteFunding{Source: source, UserID: userID, InviterID: user.InviterId, Quota: quota, CreatedAt: now}
-	if p.Enabled && p.HistoryReady && p.RateBps > 0 && (p.Mode == "all" || count == 0) && user.InviterId > 0 && user.InviterId != userID && user.Status == common.UserStatusEnabled {
+	if p.Enabled && p.HistoryReady && p.RateBps > 0 && count == 0 && user.InviterId > 0 && user.InviterId != userID && user.Status == common.UserStatusEnabled {
 		var inviter User
 		if err := tx.First(&inviter, user.InviterId).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			return false, err

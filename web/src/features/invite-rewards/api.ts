@@ -3,7 +3,7 @@ import { api } from '@/lib/api'
 
 export type InviteProgram = {
   enabled: boolean
-  mode: 'first' | 'all'
+  mode: 'first'
   rate_bps: number
   hold_hours: number
   revision: number

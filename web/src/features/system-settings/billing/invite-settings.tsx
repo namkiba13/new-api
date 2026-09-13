@@ -136,22 +136,10 @@ export function InviteSettings() {
             {t('Enable Invite friends')}
           </label>
           <div className='space-y-2'>
-            <label htmlFor='invite-mode'>{t('Reward mode')}</label>
-            <select
-              id='invite-mode'
-              className='bg-background h-10 w-full rounded-md border px-3'
-              value={value.mode}
-              onChange={(e) =>
-                setDraft({
-                  ...value,
-                  mode: e.target.value as InviteProgram['mode'],
-                })
-              }
-              disabled={busy}
-            >
-              <option value='first'>{t('First eligible credit only')}</option>
-              <option value='all'>{t('Every eligible credit')}</option>
-            </select>
+            <p className='font-medium'>{t('Reward mode')}</p>
+            <p className='text-muted-foreground text-sm'>
+              {t('First eligible credit only')}
+            </p>
           </div>
           <div className='space-y-2'>
             <label htmlFor='invite-rate'>

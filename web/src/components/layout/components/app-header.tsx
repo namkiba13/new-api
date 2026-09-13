@@ -21,6 +21,7 @@ import { LanguageSwitcher } from '@/components/language-switcher'
 import { NotificationPopover } from '@/components/notification-popover'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
+import { ThemeSwitch } from '@/components/theme-switch'
 import { useNotifications } from '@/hooks/use-notifications'
 import { useTopNavLinks } from '@/hooks/use-top-nav-links'
 
@@ -127,8 +128,10 @@ export function AppHeader({
       )}
 
       {rightContent ?? (
-        <div className='ms-auto flex items-center gap-1 sm:gap-2'>
-          {showSearch && <Search className='lg:w-40 xl:w-64' />}
+        <div className='ms-auto flex items-center gap-0.5 sm:gap-2 max-sm:[&>button]:size-7 max-sm:[&>button]:px-0'>
+          {showSearch && (
+            <Search className='w-7 flex-none sm:w-40 lg:w-32 xl:w-64 [&>span]:hidden sm:[&>span]:inline' />
+          )}
           {showNotifications && (
             <NotificationPopover
               open={notifications.popoverOpen}
@@ -142,6 +145,7 @@ export function AppHeader({
             />
           )}
           <LanguageSwitcher />
+          <ThemeSwitch />
           {showConfigDrawer && <ConfigDrawer />}
           {showProfileDropdown && <ProfileDropdown />}
         </div>
