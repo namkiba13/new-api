@@ -191,6 +191,17 @@ func StripeWebhook(c *gin.Context) {
 	callerIp := c.ClientIP()
 	logger.LogInfo(ctx, fmt.Sprintf("Stripe webhook 验签成功 event_type=%s client_ip=%s path=%q", string(event.Type), callerIp, c.Request.RequestURI))
 	switch event.Type {
+	case stripe.EventTypeChargeRefunded:
+		refunded, err1 := strconv.ParseInt(event.GetObjectValue("amount_refunded"), 10, 64)
+		total, err2 := strconv.ParseInt(event.GetObjectValue("amount"), 10, 64)
+		if err1 != nil || err2 != nil {
+			c.Status(http.StatusBadRequest)
+			return
+		}
+		if err := model.ReverseInvitePayment(event.GetObjectValue("payment_intent"), refunded, total); err != nil {
+			c.Status(http.StatusInternalServerError)
+			return
+		}
 	case stripe.EventTypeCheckoutSessionCompleted:
 		sessionCompleted(ctx, event, callerIp)
 	case stripe.EventTypeCheckoutSessionExpired:
@@ -295,7 +306,7 @@ func fulfillOrder(ctx context.Context, event stripe.Event, referenceId string, c
 		return
 	}
 
-	err := model.Recharge(referenceId, customerId, callerIp)
+	err := model.Recharge(referenceId, customerId, callerIp, event.GetObjectValue("payment_intent"))
 	if err != nil {
 		logger.LogError(ctx, fmt.Sprintf("Stripe 充值处理失败 trade_no=%s event_type=%s client_ip=%s error=%q", referenceId, string(event.Type), callerIp, err.Error()))
 		return

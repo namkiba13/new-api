@@ -31,6 +31,7 @@ func setupManageUserTestDB(t *testing.T) *gorm.DB {
 	db, err := gorm.Open(sqlite.Open(dsn), &gorm.Config{})
 	require.NoError(t, err)
 	model.DB, model.LOG_DB = db, db
+	require.NoError(t, model.MigrateInviteRewards(db))
 	require.NoError(t, db.AutoMigrate(
 		&model.User{}, &model.UserSession{}, &model.Log{}, &model.CasbinRule{}, &model.AuthzRole{},
 	))
@@ -54,6 +55,7 @@ func performManageUserRequest(t *testing.T, body string) *httptest.ResponseRecor
 	c, _ := gin.CreateTestContext(recorder)
 	c.Request = httptest.NewRequest(http.MethodPost, "/api/user/manage", strings.NewReader(body))
 	c.Request.Header.Set("Content-Type", "application/json")
+	c.Request.Header.Set("Idempotency-Key", common.GetRandomString(32))
 	c.Set("id", 9999)
 	c.Set("role", common.RoleRootUser)
 	c.Set("username", "root-operator")

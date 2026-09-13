@@ -1,0 +1,26 @@
+name: invite-rewards-lab
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: invite-lab-only
+      MYSQL_DATABASE: invite_lab
+    ports:
+      - "127.0.0.1:13316:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-pinvite-lab-only"]
+      interval: 3s
+      timeout: 3s
+      retries: 40
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_PASSWORD: invite-lab-only
+      POSTGRES_DB: invite_lab
+    ports:
+      - "127.0.0.1:15446:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "invite_lab"]
+      interval: 3s
+      timeout: 3s
+      retries: 40
