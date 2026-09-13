@@ -23,6 +23,13 @@ const url = process.argv[2] || "https://94api.dev";
           ? await page.locator('iframe[src="/94api-theme/home.html"]').contentFrame()
           : page;
         await frame.locator("h1").waitFor();
+        await frame.locator("body").evaluate(
+          () =>
+            new Promise((resolve) => {
+              if (document.readyState === "complete") resolve();
+              else window.addEventListener("load", resolve, { once: true });
+            }),
+        );
         assert.match(await frame.locator("h1").innerText(), /Every AI model/);
         for (const protocol of ["Responses", "Chat", "Claude", "Gemini"]) {
           const tab = frame.getByRole("tab", { name: protocol, exact: true });
