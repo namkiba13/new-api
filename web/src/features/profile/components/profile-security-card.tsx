@@ -16,10 +16,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Shield, KeyRound } from 'lucide-react'
+import { Shield } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
-import { Button } from '@/components/ui/button'
 import { IconBadge } from '@/components/ui/icon-badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { TitledCard } from '@/components/ui/titled-card'
@@ -52,33 +51,30 @@ export function ProfileSecurityCard({
         disableHoverEffect
       >
         {loading ? (
-          <div className='space-y-3'>
-            <Skeleton className='h-20 w-full rounded-lg' />
-            <Skeleton className='h-20 w-full rounded-lg' />
+          <div className='grid grid-cols-1 items-stretch gap-3 md:grid-cols-2'>
+            <Skeleton className='h-40 w-full rounded-sm' />
+            <Skeleton className='h-40 w-full rounded-sm' />
           </div>
         ) : (
-          <section aria-label={t('Security')} className='space-y-3'>
-            <div className='flex flex-col gap-4 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between'>
-              <div className='flex min-w-0 items-start gap-3'>
-                <IconBadge tone='neutral' size='md'>
-                  <KeyRound />
-                </IconBadge>
-                <div className='space-y-1'>
-                  <p className='text-sm font-medium'>{t('Change Password')}</p>
-                  <p className='text-muted-foreground text-xs leading-relaxed'>
-                    {t('Update your password to keep your account secure')}
-                  </p>
-                </div>
+          <section
+            aria-label={t('Security')}
+            className='grid grid-cols-1 items-stretch gap-3 md:grid-cols-2'
+          >
+            <button
+              type='button'
+              onClick={() => dialogs.open('password')}
+              className='hover:bg-muted/40 focus-visible:ring-ring flex min-h-40 min-w-0 flex-col items-center justify-start gap-3 rounded-sm border p-4 text-center transition-colors focus-visible:ring-2 focus-visible:outline-none'
+            >
+              <IconBadge tone='neutral' size='md' className='rounded-sm'>
+                <Shield />
+              </IconBadge>
+              <div className='space-y-1'>
+                <p className='text-sm font-medium'>{t('Change Password')}</p>
+                <p className='text-muted-foreground text-xs leading-relaxed'>
+                  {t('Update your password to keep your account secure')}
+                </p>
               </div>
-              <Button
-                variant='outline'
-                size='sm'
-                className='w-full shrink-0 sm:w-auto'
-                onClick={() => dialogs.open('password')}
-              >
-                {t('Change Password')}
-              </Button>
-            </div>
+            </button>
             <TwoFACard loading={loading} />
           </section>
         )}

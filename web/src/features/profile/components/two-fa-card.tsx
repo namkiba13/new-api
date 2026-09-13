@@ -46,20 +46,24 @@ export function TwoFACard({ loading: pageLoading }: TwoFACardProps) {
   const dialogs = useDialogs<DialogKey>()
 
   if (pageLoading || loading) {
-    return <Skeleton className='h-20 w-full rounded-lg' />
+    return <Skeleton className='h-40 w-full rounded-sm' />
   }
 
   return (
     <>
-      <div className='space-y-4'>
+      <div className='flex min-h-40 min-w-0 flex-col gap-4 rounded-sm border p-4 text-center'>
         {/* Status Section */}
-        <div className='bg-muted/20 flex flex-col gap-4 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between'>
-          <div className='flex min-w-0 items-start gap-3'>
-            <IconBadge tone={status.enabled ? 'success' : 'neutral'} size='md'>
+        <div className='flex flex-1 flex-col gap-4'>
+          <div className='flex min-w-0 flex-col items-center gap-3'>
+            <IconBadge
+              tone={status.enabled ? 'success' : 'neutral'}
+              size='md'
+              className='rounded-sm'
+            >
               <Shield />
             </IconBadge>
             <div className='space-y-1'>
-              <div className='flex flex-wrap items-center gap-2'>
+              <div className='flex flex-wrap items-center justify-center gap-2'>
                 <p className='text-sm font-medium'>
                   {t('Two-Step Verification')}
                 </p>
@@ -100,7 +104,7 @@ export function TwoFACard({ loading: pageLoading }: TwoFACardProps) {
           {!status.enabled && (
             <Button
               size='sm'
-              className='w-full shrink-0 sm:w-auto'
+              className='mt-auto w-full shrink-0 !rounded-sm'
               onClick={() => dialogs.open('setup')}
             >
               {t('Enable')}
@@ -110,7 +114,7 @@ export function TwoFACard({ loading: pageLoading }: TwoFACardProps) {
 
         {/* Actions Section - Only show when enabled */}
         {status.enabled && (
-          <div className='flex flex-col gap-3 border-t pt-4 sm:flex-row sm:justify-end'>
+          <div className='flex flex-wrap justify-center gap-3 border-t pt-4'>
             <Button
               variant='outline'
               size='sm'
