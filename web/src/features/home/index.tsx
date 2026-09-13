@@ -118,7 +118,7 @@ export function Home() {
   return (
     // eslint-disable-next-line react/iframe-missing-sandbox -- Bundled first-party document, not custom HTML; Clipboard API needs its real origin.
     <iframe
-      src='/94api-theme/index.html'
+      src='/94api-theme/home.html'
       title={t('Home')}
       className='block h-dvh w-full border-0'
       allow='clipboard-write'

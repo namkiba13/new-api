@@ -2,6 +2,9 @@
 
 Source: user-supplied `94api-theme.zip` (2026-09-12).
 
+The entry is named `home.html`: Go's file server redirects `index.html` to a
+directory, which conflicts with Gin's trailing-slash redirects in production.
+
 The default Home route embeds these trusted, same-origin static assets. The
 document owns its header, footer, styles, and scrolling. Application links use
 `target="_top"`; section anchors remain inside the page. Admin-configured custom

@@ -18,9 +18,9 @@ const url = process.argv[2] || "https://94api.dev";
         page.on("pageerror", (error) => errors.push(error.message));
         assert.equal((await page.goto(url)).status(), 200);
         const embedded = !url.endsWith(".html");
-        if (embedded) await page.locator('iframe[src="/94api-theme/index.html"]').waitFor();
+        if (embedded) await page.locator('iframe[src="/94api-theme/home.html"]').waitFor();
         const frame = embedded
-          ? await page.locator('iframe[src="/94api-theme/index.html"]').contentFrame()
+          ? await page.locator('iframe[src="/94api-theme/home.html"]').contentFrame()
           : page;
         await frame.locator("h1").waitFor();
         assert.match(await frame.locator("h1").innerText(), /Every AI model/);
@@ -102,7 +102,7 @@ const url = process.argv[2] || "https://94api.dev";
         if (embedded) {
           await frame.locator('.hero-actions a[href="/keys"]').click();
           await page.waitForURL(/\/(sign-in|keys)/);
-          assert.equal(await page.locator('iframe[src="/94api-theme/index.html"]').count(), 0);
+          assert.equal(await page.locator('iframe[src="/94api-theme/home.html"]').count(), 0);
           assert.equal(
             await page
               .locator("body")
