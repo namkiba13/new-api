@@ -23,7 +23,7 @@ func TestInviteHistoryBothRecipientsPendingRateAndRelease(t *testing.T) {
 	require.NoError(t, err)
 	assert.EqualValues(t, 1, b.Received.Pending)
 	assert.EqualValues(t, 400000, b.Received.PendingQuota)
-	assert.Zero(t, b.Pending)
+	assert.EqualValues(t, 1, b.Pending)
 	p, err := GetInviteProgram()
 	require.NoError(t, err)
 	p.RateBps = 1000
@@ -169,6 +169,7 @@ func TestInviteJournalDebtRecoveryAndLegacyUnknown(t *testing.T) {
 	summary, err := GetInviteSummary(4)
 	require.NoError(t, err)
 	assert.Nil(t, summary.Received.CreditedQuota)
+	assert.Nil(t, summary.Lifetime)
 	require.NoError(t, DB.Create(&InviteTransfer{ID: "transfer:1:legacy-transfer", UserID: 1, Quota: 123, CreatedAt: 1}).Error)
 	require.NoError(t, MigrateInviteRewards(DB))
 	require.NoError(t, MigrateInviteRewards(DB))

@@ -17,7 +17,7 @@ export type InviteSummary = {
   released: number
   reversed: number
   balance: number
-  lifetime: number
+  lifetime: number | null
   debt: number
   received?: {
     pending: number

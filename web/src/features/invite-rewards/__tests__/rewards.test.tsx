@@ -88,7 +88,9 @@ it('renders User reward summaries without detailed history or administrator cont
   expect(screen.queryByLabelText('Reward mode')).not.toBeInTheDocument()
   expect(screen.queryByText('Referral reward history')).not.toBeInTheDocument()
   expect(screen.getAllByText('Rewards from my referrals')).toHaveLength(1)
-  expect(screen.getAllByText('My reward for being invited')).toHaveLength(1)
+  expect(
+    screen.queryByText('My reward for being invited')
+  ).not.toBeInTheDocument()
   expect(
     screen.queryByRole('button', { name: 'Details' })
   ).not.toBeInTheDocument()
@@ -98,7 +100,7 @@ it('shows a retry rather than a zero balance when the rewards API fails', async 
   await show()
   expect(await screen.findByRole('alert')).toHaveTextContent('Failed to load')
   expect(screen.getByRole('button', { name: 'Retry' })).toBeVisible()
-  expect(screen.queryByText('Reward balance')).not.toBeInTheDocument()
+  expect(screen.queryByText('Transferable rewards')).not.toBeInTheDocument()
 })
 it('keeps the transfer idempotency key after an ambiguous failure', async () => {
   vi.spyOn(api, 'get').mockImplementation(
@@ -136,4 +138,13 @@ it('translates every new message and preserves interpolation tokens in all seven
       )
     }
   }
+})
+
+it('shows an unknown historical lifetime as unavailable rather than zero', async () => {
+  vi.spyOn(api, 'get').mockResolvedValue({
+    data: { success: true, data: { ...summary, lifetime: null } },
+  })
+  await show()
+  const label = await screen.findByText('Lifetime rewards')
+  expect(label.parentElement).toHaveTextContent('—')
 })
