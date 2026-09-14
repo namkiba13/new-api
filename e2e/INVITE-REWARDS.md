@@ -28,6 +28,14 @@
 
 ## Repeatable local verification (Windows PowerShell)
 
+### Published copy reference
+
+The owner requested Modelflare's corresponding language text, not independently rewritten copy. `node e2e/invite-copy-reference.mjs` parses the public reference bundle as data and compares 39 mapped messages across all seven locales. It never executes reference JavaScript or authenticates to that service. Reference checked: `/static/js/index.5092919179.js`, SHA-256 `c285acbc6664e028049113a2e9b01c2dc8f902e22ac5057c652b95b03e564577`.
+
+The Vietnamese headline and first-payment rule use the owner's exact wording. Rates, example amounts, pending amounts and hold hours remain dynamic; the reference's US$100 example and `quota` placeholder map to the existing amount parameter. Singular-hour forms and the immediate-release state are covered separately. The explanatory rules now use first-payment, release-time, refund and direct-invitation wording. The 94API-specific paused state, immediate state, recovery-debt message and direct-only rule were reviewed separately; the reference's reused-payment-source restriction is not asserted by this UI. Accounting still uses all three eligible sources and combines both roles.
+
+Frontend tests restore the actual Invite locale resources instead of relying on English-key fallback. They check the owner's exact Vietnamese sentences and rendered placeholders at 0/1/24 hours in each locale. The HTTP/browser LAB also checks first-payment and release-time copy on the page in every language.
+
 Run from the repository root. Requires Go, Bun, Node, Docker, Edge and Playwright available to Node (the existing workstation installation was used).
 
 ```powershell

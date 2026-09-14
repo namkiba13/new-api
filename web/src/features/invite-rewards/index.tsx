@@ -234,6 +234,7 @@ export function InviteRewards() {
                           ? t('Available immediately')
                           : t('Released after {{hours}} hours', {
                               hours: number.format(data.program.hold_hours),
+                              count: data.program.hold_hours,
                             })}
                       </p>
                     </div>
@@ -378,7 +379,10 @@ export function InviteRewards() {
                         },
                         {
                           icon: FileClockIcon,
-                          text: 'After the waiting period, both of you receive rewards',
+                          text:
+                            data.program.hold_hours === 0
+                              ? 'Available immediately'
+                              : 'After the waiting period, both of you receive rewards',
                           description:
                             'Your reward becomes transferable; your friend receives usable Credits.',
                         },
@@ -395,7 +399,10 @@ export function InviteRewards() {
                               {number.format(index + 1).padStart(2, '0')}
                             </span>
                             <p className='text-sm leading-relaxed'>
-                              {t(step.text)}
+                              {t(step.text, {
+                                hours: number.format(data.program.hold_hours),
+                                count: data.program.hold_hours,
+                              })}
                             </p>
                             <p className='text-muted-foreground text-xs leading-5'>
                               {t(step.description)}
@@ -426,8 +433,10 @@ export function InviteRewards() {
                     <ul className='space-y-4'>
                       {[
                         'Only the first eligible credit across all three sources earns rewards.',
+                        data.program.hold_hours === 0
+                          ? 'Available immediately'
+                          : 'After the waiting period, both of you receive rewards',
                         'Refunded credits cause the related rewards to be recovered.',
-                        'Rewards, transfers, API refunds, signup gifts and check-ins do not earn referral rewards.',
                         'Only the direct inviter and the referred friend receive rewards.',
                       ].map((rule) => (
                         <li
@@ -440,7 +449,12 @@ export function InviteRewards() {
                               strokeWidth={1.5}
                             />
                           </IconBadge>
-                          <span>{t(rule)}</span>
+                          <span>
+                            {t(rule, {
+                              hours: number.format(data.program.hold_hours),
+                              count: data.program.hold_hours,
+                            })}
+                          </span>
                         </li>
                       ))}
                     </ul>
