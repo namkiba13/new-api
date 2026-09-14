@@ -1,5 +1,8 @@
 {
   "en": {
+    "Both invitation roles are included. Rewards already added to Credits cannot be transferred again.": "Both invitation roles are included. Rewards already added to Credits cannot be transferred again.",
+    "Transferable rewards": "Transferable rewards",
+    "No transferable rewards": "No transferable rewards",
     "Reward recorded": "Reward recorded",
     "Reward released": "Reward released",
     "Reward transferred": "Reward transferred",
@@ -104,6 +107,9 @@
     "Could not save invite settings. Reload before retrying.": "Could not save invite settings. Reload before retrying."
   },
   "vi": {
+    "Both invitation roles are included. Rewards already added to Credits cannot be transferred again.": "Thống kê thưởng của cả người mời và người được mời. Thưởng đã vào Credits không thể chuyển lại.",
+    "Transferable rewards": "Thưởng có thể chuyển",
+    "No transferable rewards": "Chưa có thưởng để chuyển",
     "Reward recorded": "Đã ghi nhận thưởng",
     "Reward released": "Đã phát thưởng",
     "Reward transferred": "Đã chuyển thưởng",
@@ -208,6 +214,9 @@
     "Could not save invite settings. Reload before retrying.": "Không lưu được cài đặt. Hãy tải lại trước khi thử tiếp."
   },
   "fr": {
+    "Both invitation roles are included. Rewards already added to Credits cannot be transferred again.": "Les deux rôles sont inclus. Les récompenses déjà ajoutées aux Credits ne peuvent pas être transférées à nouveau.",
+    "Transferable rewards": "Récompenses transférables",
+    "No transferable rewards": "Aucune récompense transférable",
     "Reward recorded": "Récompense enregistrée",
     "Reward released": "Récompense versée",
     "Reward transferred": "Récompense transférée",
@@ -312,6 +321,9 @@
     "Could not save invite settings. Reload before retrying.": "Impossible d’enregistrer les paramètres. Rechargez avant de réessayer."
   },
   "ru": {
+    "Both invitation roles are included. Rewards already added to Credits cannot be transferred again.": "Учтены обе роли. Награды, уже зачисленные в Credits, нельзя перевести повторно.",
+    "Transferable rewards": "Доступно для перевода",
+    "No transferable rewards": "Нет наград для перевода",
     "Reward recorded": "Награда зарегистрирована",
     "Reward released": "Награда начислена",
     "Reward transferred": "Награда переведена",
@@ -416,6 +428,9 @@
     "Could not save invite settings. Reload before retrying.": "Не удалось сохранить настройки. Обновите страницу перед повтором."
   },
   "ja": {
+    "Both invitation roles are included. Rewards already added to Credits cannot be transferred again.": "紹介した側・された側の両方の報酬を集計します。Creditsに加算済みの報酬は再度移行できません。",
+    "Transferable rewards": "移行可能な報酬",
+    "No transferable rewards": "移行可能な報酬はありません",
     "Reward recorded": "報酬を記録",
     "Reward released": "報酬を付与",
     "Reward transferred": "報酬を移行",
@@ -520,6 +535,9 @@
     "Could not save invite settings. Reload before retrying.": "設定を保存できませんでした。再読み込みしてから再試行してください。"
   },
   "zhCN": {
+    "Both invitation roles are included. Rewards already added to Credits cannot be transferred again.": "统计邀请人和被邀请人的奖励。已加入 Credits 的奖励不能重复转入。",
+    "Transferable rewards": "可转入奖励",
+    "No transferable rewards": "暂无可转入奖励",
     "Reward recorded": "已记录奖励",
     "Reward released": "已发放奖励",
     "Reward transferred": "已转入奖励",
@@ -624,6 +642,9 @@
     "Could not save invite settings. Reload before retrying.": "无法保存设置，请重新加载后重试。"
   },
   "zhTW": {
+    "Both invitation roles are included. Rewards already added to Credits cannot be transferred again.": "統計邀請人與被邀請人的獎勵。已加入 Credits 的獎勵不能重複轉入。",
+    "Transferable rewards": "可轉入獎勵",
+    "No transferable rewards": "尚無可轉入獎勵",
     "Reward recorded": "已記錄獎勵",
     "Reward released": "已發放獎勵",
     "Reward transferred": "已轉入獎勵",

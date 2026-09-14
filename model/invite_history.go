@@ -302,6 +302,7 @@ type InviteReceivedSummary struct {
 	ReleasedQuota int64  `json:"released_quota"`
 	CreditedQuota *int64 `json:"credited_quota"`
 	OffsetQuota   *int64 `json:"offset_quota"`
+	GrossQuota    *int64 `json:"-"`
 	Reversed      int64  `json:"reversed"`
 }
 
@@ -326,14 +327,16 @@ func getInviteReceived(tx *gorm.DB, userID int) (InviteReceivedSummary, error) {
 	var totals struct {
 		Count    int64
 		Credited int64
+		Gross    int64
 		Offset   int64 `gorm:"column:debt_offset"`
 	}
-	if err := tx.Model(&InviteJournal{}).Where("user_id = ? AND role = ? AND action = ?", userID, "invitee", "released").Select("COUNT(*) AS count, COALESCE(SUM(wallet_delta),0) AS credited, COALESCE(SUM(debt_offset),0) AS debt_offset").Scan(&totals).Error; err != nil {
+	if err := tx.Model(&InviteJournal{}).Where("user_id = ? AND role = ? AND action = ?", userID, "invitee", "released").Select("COUNT(*) AS count, COALESCE(SUM(wallet_delta),0) AS credited, COALESCE(SUM(gross),0) AS gross, COALESCE(SUM(debt_offset),0) AS debt_offset").Scan(&totals).Error; err != nil {
 		return out, err
 	}
 	if totals.Count == out.Released {
 		out.CreditedQuota = &totals.Credited
 		out.OffsetQuota = &totals.Offset
+		out.GrossQuota = &totals.Gross
 	}
 	return out, nil
 }

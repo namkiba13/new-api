@@ -646,7 +646,7 @@ type InviteSummary struct {
 	Released     int64                 `json:"released"`
 	Reversed     int64                 `json:"reversed"`
 	Balance      int                   `json:"balance"`
-	Lifetime     int                   `json:"lifetime"`
+	Lifetime     *int64                `json:"lifetime"`
 	Debt         int                   `json:"debt"`
 	Received     InviteReceivedSummary `json:"received"`
 }
@@ -665,7 +665,6 @@ func GetInviteSummary(userID int) (InviteSummary, error) {
 		}
 		result.Code = u.AffCode
 		result.Balance = u.AffQuota
-		result.Lifetime = u.AffHistoryQuota
 		debt, err := inviteDebt(tx, userID)
 		if err != nil {
 			return err
@@ -675,8 +674,14 @@ func GetInviteSummary(userID int) (InviteSummary, error) {
 		if err != nil {
 			return err
 		}
+		// Both roles contribute to lifetime gross awards. Invitee wallet credits
+		// never enter the transferable balance. Missing old release evidence stays unknown.
+		if result.Received.GrossQuota != nil {
+			lifetime := int64(u.AffHistoryQuota) + *result.Received.GrossQuota
+			result.Lifetime = &lifetime
+		}
 		q := func() *gorm.DB {
-			return tx.Model(&InviteFunding{}).Where("inviter_id = ? AND reward_quota > 0", userID)
+			return tx.Model(&InviteFunding{}).Where("(inviter_id = ? OR user_id = ?) AND reward_quota > 0", userID, userID)
 		}
 		if err := q().Count(&result.Qualified).Error; err != nil {
 			return err
