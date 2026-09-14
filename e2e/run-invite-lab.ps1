@@ -1,4 +1,4 @@
-param([switch]$SkipBuild)
+param([switch]$SkipBuild, [ValidateSet('invite-rewards.mjs','api-info.mjs')][string]$Scenario='invite-rewards.mjs')
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot
 $temp = Join-Path ([IO.Path]::GetTempPath()) 'opencode'
@@ -16,8 +16,8 @@ try {
         try { $null = Invoke-RestMethod 'http://127.0.0.1:4198/api/setup' -TimeoutSec 2; $ready=$true; break } catch { Start-Sleep -Seconds 1 }
     }
     if (-not $ready) { throw 'Local lab did not start' }
-    & node (Join-Path $PSScriptRoot 'invite-rewards.mjs') 'http://127.0.0.1:4198'
-    if ($LASTEXITCODE) { throw 'Invite rewards HTTP/browser lab failed' }
+    & node (Join-Path $PSScriptRoot $Scenario) 'http://127.0.0.1:4198'
+    if ($LASTEXITCODE) { throw "HTTP/browser lab failed: $Scenario" }
 } finally {
     if (-not $process.HasExited) { Stop-Process -Id $process.Id }
     $env:INVITE_LAB=$null
