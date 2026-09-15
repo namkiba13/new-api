@@ -103,7 +103,10 @@ export function Turnstile({
   return (
     <div
       ref={ref}
-      className={cn('flex w-full min-w-0 justify-center', className)}
+      className={cn(
+        'flex w-full min-w-0 justify-center [contain:inline-size]',
+        className
+      )}
     />
   )
 }
