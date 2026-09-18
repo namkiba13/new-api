@@ -19,6 +19,16 @@ For commercial licensing, please contact support@quantumnous.com
 // Static translation keys that don't get picked up by the t('...') regex.
 // These cover dynamic labels (e.g. constants, configs) that are passed into t at runtime.
 export const STATIC_I18N_KEYS = [
+  // Complete legal sentences preserve word order around document links.
+  'By signing in, you agree to the <agreement>User Agreement</agreement> and <privacy>Privacy Policy</privacy> of {{systemName}}.',
+  'By signing in, you agree to the <agreement>User Agreement</agreement> of {{systemName}}.',
+  'By signing in, you agree to the <privacy>Privacy Policy</privacy> of {{systemName}}.',
+  'By creating an account, you agree to the <agreement>User Agreement</agreement> and <privacy>Privacy Policy</privacy> of {{systemName}}.',
+  'By creating an account, you agree to the <agreement>User Agreement</agreement> of {{systemName}}.',
+  'By creating an account, you agree to the <privacy>Privacy Policy</privacy> of {{systemName}}.',
+  'I have read and agree to the <agreement>User Agreement</agreement> and <privacy>Privacy Policy</privacy>.',
+  'I have read and agree to the <agreement>User Agreement</agreement>.',
+  'I have read and agree to the <privacy>Privacy Policy</privacy>.',
   // Header navigation
   'Home',
   'Console',

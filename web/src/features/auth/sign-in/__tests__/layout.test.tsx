@@ -24,7 +24,13 @@ import {
   createRouter,
   RouterProvider,
 } from '@tanstack/react-router'
-import { cleanup, render, screen, within } from '@testing-library/react'
+import {
+  cleanup,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -144,7 +150,7 @@ describe('login-03 layout', () => {
       'href',
       '/sign-up'
     )
-    const footer = screen.getByText(/By clicking sign in/)
+    const footer = screen.getByText(/By signing in/)
     expect(card).not.toContainElement(footer)
     expect(
       card.compareDocumentPosition(footer) & Node.DOCUMENT_POSITION_FOLLOWING
@@ -177,7 +183,7 @@ describe('login-03 layout', () => {
     ).not.toBeInTheDocument()
   })
 
-  it('supports keyboard entry, password visibility and required legal consent inside the card', async () => {
+  it('supports keyboard entry and password visibility without a login consent checkbox', async () => {
     const user = userEvent.setup()
     await renderSignIn({ user_agreement_enabled: true })
     const username = screen.getByLabelText('Username or Email')
@@ -185,7 +191,8 @@ describe('login-03 layout', () => {
     const submit = screen.getByRole('button', { name: 'Sign in' })
     expect(username).toHaveAttribute('autocomplete', 'username')
     expect(password).toHaveAttribute('autocomplete', 'current-password')
-    expect(submit).toBeDisabled()
+    expect(submit).toBeEnabled()
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
     await user.click(username)
     await user.keyboard('demo')
     await user.tab()
@@ -200,8 +207,57 @@ describe('login-03 layout', () => {
     await user.keyboard('{Enter}')
     expect(password).toHaveAttribute('type', 'text')
     expect(password).toHaveValue('example-password')
-    await user.click(screen.getByRole('checkbox'))
     expect(submit).toBeEnabled()
+  })
+
+  it('allows OAuth and WeChat sign-in while legal documents are enabled', async () => {
+    const user = userEvent.setup()
+    await renderSignIn({
+      user_agreement_enabled: true,
+      privacy_policy_enabled: true,
+      github_oauth: true,
+      wechat_login: true,
+      custom_oauth_providers: [
+        {
+          id: 1,
+          name: 'Google',
+          slug: 'google',
+          icon: 'Google',
+          client_id: 'lab-client',
+          authorization_endpoint:
+            'https://accounts.google.com/o/oauth2/v2/auth',
+          scopes: 'openid email profile',
+        },
+      ],
+    })
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Continue with Google' })
+    ).toBeEnabled()
+    expect(
+      screen.getByRole('button', { name: /Continue with GitHub/ })
+    ).toBeEnabled()
+    await user.click(
+      screen.getByRole('button', { name: /Continue with WeChat/ })
+    )
+    expect(
+      await screen.findByRole('dialog', { name: 'WeChat sign in' })
+    ).toBeVisible()
+  })
+
+  it('enables supported Passkey sign-in without a consent checkbox', async () => {
+    vi.stubGlobal('PublicKeyCredential', class {})
+    await renderSignIn({
+      user_agreement_enabled: true,
+      privacy_policy_enabled: true,
+      passkey_login: true,
+    })
+    await waitFor(() =>
+      expect(
+        screen.getByRole('button', { name: 'Sign in with Passkey' })
+      ).toBeEnabled()
+    )
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
   })
 
   it('uses the original auth layout after following the forgot-password link', async () => {

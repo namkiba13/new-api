@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
@@ -45,6 +45,16 @@ export function LegalConsent({
     return null
   }
 
+  let message =
+    'I have read and agree to the <agreement>User Agreement</agreement> and <privacy>Privacy Policy</privacy>.'
+  if (!hasPrivacyPolicy) {
+    message =
+      'I have read and agree to the <agreement>User Agreement</agreement>.'
+  }
+  if (!hasUserAgreement) {
+    message = 'I have read and agree to the <privacy>Privacy Policy</privacy>.'
+  }
+
   const handleChange = (value: boolean) => {
     onCheckedChange(value === true)
   }
@@ -67,29 +77,28 @@ export function LegalConsent({
         className='text-muted-foreground items-start gap-1 text-left text-xs leading-5 font-normal'
       >
         <span>
-          {t('I have read and agree to the')}{' '}
-          {hasUserAgreement && (
-            <a
-              href='/user-agreement'
-              target='_blank'
-              rel='noopener noreferrer'
-              className='text-primary hover:underline'
-            >
-              {t('User Agreement')}
-            </a>
-          )}
-          {hasUserAgreement && hasPrivacyPolicy && ' and the '}
-          {hasPrivacyPolicy && (
-            <a
-              href='/privacy-policy'
-              target='_blank'
-              rel='noopener noreferrer'
-              className='text-primary hover:underline'
-            >
-              {t('Privacy Policy')}
-            </a>
-          )}
-          .
+          <Trans
+            t={t}
+            i18nKey={message}
+            components={{
+              agreement: (
+                <a
+                  href='/user-agreement'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='text-primary hover:underline'
+                />
+              ),
+              privacy: (
+                <a
+                  href='/privacy-policy'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='text-primary hover:underline'
+                />
+              ),
+            }}
+          />
         </span>
       </Label>
     </div>
