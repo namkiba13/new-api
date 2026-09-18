@@ -28,6 +28,7 @@ import { EMAIL_VERIFICATION_COUNTDOWN } from '../constants'
 interface UseEmailVerificationOptions {
   turnstileToken?: string
   validateTurnstile?: () => boolean
+  onAttemptComplete?: () => void
 }
 
 /**
@@ -71,6 +72,7 @@ export function useEmailVerification(options?: UseEmailVerificationOptions) {
       // Errors are handled by global interceptor
       return false
     } finally {
+      options?.onAttemptComplete?.()
       setIsSending(false)
     }
   }

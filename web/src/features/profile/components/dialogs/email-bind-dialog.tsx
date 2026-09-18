@@ -17,14 +17,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { Loader2 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
 import { Dialog } from '@/components/dialog'
+import { Turnstile } from '@/components/turnstile'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useTurnstile } from '@/features/auth/hooks/use-turnstile'
 import { useCountdown } from '@/hooks/use-countdown'
 
 import { sendEmailVerification, bindEmail } from '../../api'
@@ -52,6 +54,19 @@ export function EmailBindDialog({
   const [email, setEmail] = useState('')
   const [code, setCode] = useState('')
   const {
+    isTurnstileEnabled,
+    turnstileSiteKey,
+    turnstileToken,
+    setTurnstileToken,
+    turnstileWidgetKey,
+    resetTurnstile,
+    validateTurnstile,
+  } = useTurnstile()
+  const turnstileReady = !isTurnstileEnabled || Boolean(turnstileToken)
+  useEffect(() => {
+    if (!open) resetTurnstile()
+  }, [open, resetTurnstile])
+  const {
     secondsLeft,
     isActive,
     start: startCountdown,
@@ -65,10 +80,11 @@ export function EmailBindDialog({
       toast.error(t('Please enter a valid email address'))
       return
     }
+    if (!validateTurnstile()) return
 
     try {
       setSendingCode(true)
-      const response = await sendEmailVerification(email)
+      const response = await sendEmailVerification(email, turnstileToken)
 
       if (response.success) {
         toast.success(t('Verification code sent! Please check your email.'))
@@ -79,6 +95,7 @@ export function EmailBindDialog({
     } catch {
       toast.error(t('Failed to send verification code'))
     } finally {
+      resetTurnstile()
       setSendingCode(false)
     }
   }
@@ -187,13 +204,23 @@ export function EmailBindDialog({
               type='button'
               variant='outline'
               onClick={handleSendCode}
-              disabled={sendingCode || isActive || !email}
+              disabled={
+                loading || sendingCode || isActive || !email || !turnstileReady
+              }
             >
               {isActive && `${secondsLeft}s`}
               {!isActive && (sendingCode ? t('Sending...') : t('Send'))}
             </Button>
           </div>
         </div>
+        {open && isTurnstileEnabled && (
+          <Turnstile
+            key={turnstileWidgetKey}
+            siteKey={turnstileSiteKey}
+            onVerify={setTurnstileToken}
+            onExpire={() => setTurnstileToken('')}
+          />
+        )}
       </div>
     </Dialog>
   )

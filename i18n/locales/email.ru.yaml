@@ -1,0 +1,30 @@
+email.verification.subject: "{{.SystemName}} — Подтвердите адрес электронной почты"
+email.verification.body: |
+  <p>Здравствуйте!</p><p>Используйте этот код для подтверждения адреса электронной почты в {{.SystemName}}:</p>
+  <p><strong>{{.Code}}</strong></p><p>Код действителен в течение {{.Minutes}} мин. Если вы не отправляли этот запрос, проигнорируйте письмо.</p>
+email.password_reset.subject: "{{.SystemName}} — Сброс пароля"
+email.password_reset.body: |
+  <p>Здравствуйте!</p><p>Мы получили запрос на сброс пароля вашей учётной записи {{.SystemName}}.</p>
+  <p><a href="{{.Link}}">Сбросить пароль</a></p><p>Если ссылка не работает, скопируйте этот адрес и откройте его в браузере:<br>{{.Link}}</p>
+  <p>Ссылка действительна в течение {{.Minutes}} мин. Если вы не отправляли этот запрос, проигнорируйте письмо.</p>
+email.wallet_low.subject: "{{.SystemName}} — На вашем балансе осталось мало средств"
+email.wallet_low.body: |
+  <p>На балансе вашего кошелька {{.SystemName}} осталось мало средств.</p><p>Текущий баланс: <strong>{{.Amount}}</strong>.</p>
+  <p>Пополните баланс, чтобы избежать перерывов в работе сервиса.</p><p><a href="{{.Link}}">Открыть кошелёк</a></p>
+email.subscription_low.subject: "{{.SystemName}} — Квота подписки почти исчерпана"
+email.subscription_low.body: |
+  <p>Квота вашей подписки {{.SystemName}} почти исчерпана.</p><p>Остаток квоты: <strong>{{.Amount}}</strong>.</p>
+  <p>Проверьте использование и доступные тарифы, чтобы избежать перерывов в работе сервиса.</p><p><a href="{{.Link}}">Управление балансом и подписками</a></p>
+email.channel_disabled.subject: "{{.SystemName}} — Канал {{.Name}} (№ {{.ID}}) отключён"
+email.channel_disabled.body: "<p>Канал <strong>{{.Name}}</strong> (№ {{.ID}}) отключён.</p><p>Причина: {{.Reason}}</p>"
+email.channel_enabled.subject: "{{.SystemName}} — Канал {{.Name}} (№ {{.ID}}) включён"
+email.channel_enabled.body: "<p>Канал <strong>{{.Name}}</strong> (№ {{.ID}}) включён.</p>"
+email.channel_test.subject: "{{.SystemName}} — Проверка каналов завершена"
+email.channel_test.body: "<p>Проверка всех выбранных каналов завершена.</p>"
+email.upstream_update.subject: "{{.SystemName}} — Отчёт о проверке моделей провайдеров"
+email.upstream_update.body: |
+  <p>Проверка моделей провайдеров: проверено каналов — {{.Checked}}; с изменениями — {{.Changed}}; добавлено моделей — {{.Added}}; удалено — {{.Removed}}; автоматически добавлено — {{.AutoAdded}}; каналов с ошибками — {{.Failed}}.</p>
+  {{if .Channels}}<p>Каналы с изменениями ({{len .Channels}}/{{.ChannelCount}}):</p><ul>{{range .Channels}}<li>{{.ChannelName}} (+{{.AddCount}} / -{{.RemoveCount}})</li>{{end}}</ul>{{if .ChannelOmitted}}<p>Других каналов не показано: {{.ChannelOmitted}}.</p>{{end}}{{end}}
+  {{if .AddedModels}}<p>Примеры добавленных моделей ({{len .AddedModels}}/{{.AddedCount}}):</p><ul>{{range .AddedModels}}<li>{{.}}</li>{{end}}</ul>{{if .AddedOmitted}}<p>Других моделей не показано: {{.AddedOmitted}}.</p>{{end}}{{end}}
+  {{if .RemovedModels}}<p>Примеры удалённых моделей ({{len .RemovedModels}}/{{.RemovedCount}}):</p><ul>{{range .RemovedModels}}<li>{{.}}</li>{{end}}</ul>{{if .RemovedOmitted}}<p>Других моделей не показано: {{.RemovedOmitted}}.</p>{{end}}{{end}}
+  {{if .FailedIDs}}<p>ID каналов с ошибками ({{len .FailedIDs}}/{{.Failed}}): {{range .FailedIDs}}{{.}}; {{end}}</p>{{if .FailedOmitted}}<p>Других каналов с ошибками не показано: {{.FailedOmitted}}.</p>{{end}}{{end}}

@@ -1,0 +1,30 @@
+email.verification.subject: "{{.SystemName}} — 驗證電子郵件地址"
+email.verification.body: |
+  <p>您好：</p><p>請使用以下驗證碼驗證您在 {{.SystemName}} 的電子郵件地址：</p>
+  <p><strong>{{.Code}}</strong></p><p>驗證碼在 {{.Minutes}} 分鐘內有效。如果不是您本人操作，請忽略此郵件。</p>
+email.password_reset.subject: "{{.SystemName}} — 重設密碼"
+email.password_reset.body: |
+  <p>您好：</p><p>我們收到了重設您的 {{.SystemName}} 帳戶密碼的請求。</p>
+  <p><a href="{{.Link}}">重設密碼</a></p><p>如果連結無法開啟，請複製以下網址並在瀏覽器中開啟：<br>{{.Link}}</p>
+  <p>連結在 {{.Minutes}} 分鐘內有效。如果不是您本人操作，請忽略此郵件。</p>
+email.wallet_low.subject: "{{.SystemName}} — 您的餘額即將用盡"
+email.wallet_low.body: |
+  <p>您的 {{.SystemName}} 錢包餘額即將用盡。</p><p>目前餘額：<strong>{{.Amount}}</strong>。</p>
+  <p>請及時儲值，以免影響服務使用。</p><p><a href="{{.Link}}">開啟錢包</a></p>
+email.subscription_low.subject: "{{.SystemName}} — 您的訂閱額度即將用盡"
+email.subscription_low.body: |
+  <p>您的 {{.SystemName}} 訂閱額度即將用盡。</p><p>剩餘額度：<strong>{{.Amount}}</strong>。</p>
+  <p>請查看使用情況與可用方案，以免影響服務使用。</p><p><a href="{{.Link}}">管理餘額與訂閱方案</a></p>
+email.channel_disabled.subject: "{{.SystemName}} — 通道 {{.Name}}（#{{.ID}}）已停用"
+email.channel_disabled.body: "<p>通道 <strong>{{.Name}}</strong>（#{{.ID}}）已停用。</p><p>原因：{{.Reason}}</p>"
+email.channel_enabled.subject: "{{.SystemName}} — 通道 {{.Name}}（#{{.ID}}）已啟用"
+email.channel_enabled.body: "<p>通道 <strong>{{.Name}}</strong>（#{{.ID}}）已啟用。</p>"
+email.channel_test.subject: "{{.SystemName}} — 通道測試完成"
+email.channel_test.body: "<p>所有選定通道的測試均已完成。</p>"
+email.upstream_update.subject: "{{.SystemName}} — 上游模型巡檢報告"
+email.upstream_update.body: |
+  <p>上游模型巡檢摘要：檢查通道 {{.Checked}} 個，發現變更 {{.Changed}} 個，新增模型 {{.Added}} 個，刪除 {{.Removed}} 個，自動新增 {{.AutoAdded}} 個，失敗通道 {{.Failed}} 個。</p>
+  {{if .Channels}}<p>變更通道明細（{{len .Channels}}/{{.ChannelCount}}）：</p><ul>{{range .Channels}}<li>{{.ChannelName}}（+{{.AddCount}} / -{{.RemoveCount}}）</li>{{end}}</ul>{{if .ChannelOmitted}}<p>省略的其他通道：{{.ChannelOmitted}} 個。</p>{{end}}{{end}}
+  {{if .AddedModels}}<p>新增模型範例（{{len .AddedModels}}/{{.AddedCount}}）：</p><ul>{{range .AddedModels}}<li>{{.}}</li>{{end}}</ul>{{if .AddedOmitted}}<p>省略的其他模型：{{.AddedOmitted}} 個。</p>{{end}}{{end}}
+  {{if .RemovedModels}}<p>刪除模型範例（{{len .RemovedModels}}/{{.RemovedCount}}）：</p><ul>{{range .RemovedModels}}<li>{{.}}</li>{{end}}</ul>{{if .RemovedOmitted}}<p>省略的其他模型：{{.RemovedOmitted}} 個。</p>{{end}}{{end}}
+  {{if .FailedIDs}}<p>失敗通道 ID（{{len .FailedIDs}}/{{.Failed}}）：{{range .FailedIDs}}{{.}}; {{end}}</p>{{if .FailedOmitted}}<p>省略的其他失敗通道：{{.FailedOmitted}} 個。</p>{{end}}{{end}}

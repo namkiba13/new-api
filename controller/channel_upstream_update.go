@@ -15,6 +15,7 @@ import (
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/constant"
+	"github.com/QuantumNous/new-api/i18n"
 	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/pkg/jsplugin"
 	"github.com/QuantumNous/new-api/relay/channel/advancedcustom"
@@ -834,7 +835,7 @@ scanLoop:
 			))
 			return summary
 		}
-		service.NotifyUpstreamModelUpdateWatchers(
+		notification := dto.NewNotify(dto.NotifyTypeChannelUpdate,
 			"上游模型巡检通知",
 			buildUpstreamModelUpdateTaskNotificationContent(
 				checkedChannels,
@@ -847,7 +848,24 @@ scanLoop:
 				addModelSamples,
 				removeModelSamples,
 			),
+			nil,
 		)
+		notification.EmailTemplate = i18n.EmailUpstreamUpdate
+		addedSamples := normalizeModelNames(addModelSamples)
+		removedSamples := normalizeModelNames(removeModelSamples)
+		channelLimit := min(len(channelSummaries), channelUpstreamModelUpdateNotifyMaxChannelDetails)
+		addedLimit := min(len(addedSamples), channelUpstreamModelUpdateNotifyMaxModelDetails)
+		removedLimit := min(len(removedSamples), channelUpstreamModelUpdateNotifyMaxModelDetails)
+		failedLimit := min(len(failedChannelIDs), channelUpstreamModelUpdateNotifyMaxFailedChannelIDs)
+		notification.EmailData = map[string]any{
+			"Checked": checkedChannels, "Changed": changedChannels, "Added": detectedAddModels,
+			"Removed": detectedRemoveModels, "AutoAdded": autoAddedModels, "Failed": failedChannels,
+			"Channels": channelSummaries[:channelLimit], "ChannelCount": len(channelSummaries), "ChannelOmitted": len(channelSummaries) - channelLimit,
+			"AddedModels": addedSamples[:addedLimit], "AddedCount": len(addedSamples), "AddedOmitted": len(addedSamples) - addedLimit,
+			"RemovedModels": removedSamples[:removedLimit], "RemovedCount": len(removedSamples), "RemovedOmitted": len(removedSamples) - removedLimit,
+			"FailedIDs": failedChannelIDs[:failedLimit], "FailedOmitted": len(failedChannelIDs) - failedLimit,
+		}
+		service.NotifyUpstreamModelUpdateWatchers(notification)
 	}
 	return summary
 }

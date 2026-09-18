@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/QuantumNous/new-api/common"
+	"github.com/QuantumNous/new-api/i18n"
 	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/relaykit/dto"
 	"github.com/QuantumNous/new-api/relaykit/types"
@@ -29,7 +30,10 @@ func DisableChannel(channelError types.ChannelError, reason string) {
 	if success {
 		subject := fmt.Sprintf("通道「%s」（#%d）已被禁用", channelError.ChannelName, channelError.ChannelId)
 		content := fmt.Sprintf("通道「%s」（#%d）已被禁用，原因：%s", channelError.ChannelName, channelError.ChannelId, reason)
-		NotifyRootUser(formatNotifyType(channelError.ChannelId, common.ChannelStatusAutoDisabled), subject, content)
+		notification := dto.NewNotify(formatNotifyType(channelError.ChannelId, common.ChannelStatusAutoDisabled), subject, content, nil)
+		notification.EmailTemplate = i18n.EmailChannelDisabled
+		notification.EmailData = map[string]any{"Name": channelError.ChannelName, "ID": channelError.ChannelId, "Reason": reason}
+		NotifyRootUser(notification)
 	}
 }
 
@@ -38,7 +42,10 @@ func EnableChannel(channelId int, usingKey string, channelName string) {
 	if success {
 		subject := fmt.Sprintf("通道「%s」（#%d）已被启用", channelName, channelId)
 		content := fmt.Sprintf("通道「%s」（#%d）已被启用", channelName, channelId)
-		NotifyRootUser(formatNotifyType(channelId, common.ChannelStatusEnabled), subject, content)
+		notification := dto.NewNotify(formatNotifyType(channelId, common.ChannelStatusEnabled), subject, content, nil)
+		notification.EmailTemplate = i18n.EmailChannelEnabled
+		notification.EmailData = map[string]any{"Name": channelName, "ID": channelId}
+		NotifyRootUser(notification)
 	}
 }
 

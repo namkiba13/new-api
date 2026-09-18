@@ -65,7 +65,6 @@ export function SignUpForm({
   const [wechatCode, setWeChatCode] = useState('')
   const [isWeChatDialogOpen, setIsWeChatDialogOpen] = useState(false)
   const [isWeChatSubmitting, setIsWeChatSubmitting] = useState(false)
-  const [turnstileWidgetKey, setTurnstileWidgetKey] = useState(0)
   const legalConsentErrorMessage = t('Please agree to the legal terms first')
 
   const { status } = useStatus()
@@ -74,6 +73,8 @@ export function SignUpForm({
     turnstileSiteKey,
     turnstileToken,
     setTurnstileToken,
+    turnstileWidgetKey,
+    resetTurnstile,
     validateTurnstile,
   } = useTurnstile()
   const { redirectToLogin, handleLoginSuccess } = useAuthRedirect()
@@ -85,6 +86,7 @@ export function SignUpForm({
   } = useEmailVerification({
     turnstileToken,
     validateTurnstile,
+    onAttemptComplete: resetTurnstile,
   })
 
   const form = useForm<z.infer<typeof registerFormSchema>>({
@@ -178,15 +180,13 @@ export function SignUpForm({
     } catch {
       // Errors are handled by global interceptor
     } finally {
+      resetTurnstile()
       setIsLoading(false)
     }
   }
 
   async function handleSendVerificationCode() {
-    if (await sendCode(emailValue || '')) {
-      setTurnstileToken('')
-      setTurnstileWidgetKey((current) => current + 1)
-    }
+    await sendCode(emailValue || '')
   }
 
   const handleOpenWeChatDialog = () => {

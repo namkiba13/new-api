@@ -5,6 +5,9 @@ type Notify struct {
 	Title   string        `json:"title"`
 	Content string        `json:"content"`
 	Values  []interface{} `json:"values"`
+	// Email-only localization metadata; other notification transports retain their payload.
+	EmailTemplate string         `json:"-"`
+	EmailData     map[string]any `json:"-"`
 }
 
 const ContentValueParam = "{{value}}"

@@ -11,10 +11,14 @@ import (
 	"strings"
 
 	"github.com/QuantumNous/new-api/common"
+	"github.com/QuantumNous/new-api/constant"
+	"github.com/QuantumNous/new-api/e2e/fixtures/smtpcapture"
 	"github.com/QuantumNous/new-api/i18n"
 	"github.com/QuantumNous/new-api/middleware"
 	"github.com/QuantumNous/new-api/model"
+	"github.com/QuantumNous/new-api/relaykit/dto"
 	"github.com/QuantumNous/new-api/router"
+	"github.com/QuantumNous/new-api/service"
 	"github.com/QuantumNous/new-api/service/authz"
 	"github.com/QuantumNous/new-api/setting"
 	"github.com/gin-gonic/gin"
@@ -22,6 +26,7 @@ import (
 
 func main() {
 	web := flag.String("web", "web/dist", "production frontend directory")
+	emailLab := flag.Bool("email-lab", false, "enable loopback SMTP capture and email fixtures")
 	flag.Parse()
 	if os.Getenv("INVITE_LAB") != "1" || os.Getenv("SQL_DSN") != "" || os.Getenv("LOG_SQL_DSN") != "" {
 		log.Fatal("Local lab requires INVITE_LAB=1 and no database DSNs")
@@ -48,6 +53,46 @@ func main() {
 	r := gin.New()
 	r.Use(gin.Recovery(), middleware.RequestId(), middleware.I18n())
 	router.SetApiRouter(r)
+	if *emailLab {
+		installEmailLabCaptcha(r)
+		smtp, err := smtpcapture.Start()
+		must(err)
+		defer smtp.Close()
+		common.SMTPServer, common.SMTPPort, common.SMTPFrom = smtp.Host, smtp.Port, "94api@lab.test"
+		constant.NotifyLimitCount, constant.NotificationLimitDurationMinute = 10, 10
+		r.GET("/lab/emails", func(c *gin.Context) { c.JSON(200, smtp.Messages()) })
+		r.POST("/lab/email/fail-next", func(c *gin.Context) {
+			smtp.RejectNextMessage()
+			c.JSON(200, gin.H{"success": true})
+		})
+		r.POST("/lab/email/expiry", func(c *gin.Context) {
+			common.VerificationValidMinutes = 10
+			if c.Query("expired") == "true" {
+				common.VerificationValidMinutes = 0
+			}
+			c.JSON(200, gin.H{"success": true})
+		})
+		r.POST("/lab/email/notify", func(c *gin.Context) {
+			var input struct {
+				UserID int            `json:"user_id"`
+				Kind   string         `json:"kind"`
+				Data   map[string]any `json:"data"`
+			}
+			if c.ShouldBindJSON(&input) != nil {
+				c.Status(400)
+				return
+			}
+			var user model.User
+			if err := model.DB.First(&user, input.UserID).Error; err != nil {
+				c.Status(404)
+				return
+			}
+			notice := dto.NewNotify(input.Kind, "LAB legacy", "LAB legacy", nil)
+			notice.EmailTemplate, notice.EmailData = input.Kind, input.Data
+			err := service.NotifyUser(user.Id, user.Email, user.GetSetting(), notice)
+			c.JSON(200, gin.H{"success": err == nil})
+		})
+	}
 	// Fixtures and clock advancement exist only in this loopback lab executable.
 	r.POST("/lab/payment", func(c *gin.Context) {
 		var input struct {

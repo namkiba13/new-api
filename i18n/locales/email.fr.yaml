@@ -1,0 +1,30 @@
+email.verification.subject: "{{.SystemName}} — Vérifiez votre adresse e-mail"
+email.verification.body: |
+  <p>Bonjour,</p><p>Utilisez ce code pour vérifier votre adresse e-mail sur {{.SystemName}} :</p>
+  <p><strong>{{.Code}}</strong></p><p>Ce code expire dans {{.Minutes}} minutes. Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet e-mail.</p>
+email.password_reset.subject: "{{.SystemName}} — Réinitialisez votre mot de passe"
+email.password_reset.body: |
+  <p>Bonjour,</p><p>Nous avons reçu une demande de réinitialisation du mot de passe de votre compte {{.SystemName}}.</p>
+  <p><a href="{{.Link}}">Réinitialiser votre mot de passe</a></p><p>Si le lien ne fonctionne pas, copiez cette adresse et ouvrez-la dans votre navigateur :<br>{{.Link}}</p>
+  <p>Ce lien expire dans {{.Minutes}} minutes. Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet e-mail.</p>
+email.wallet_low.subject: "{{.SystemName}} — Votre solde est bientôt épuisé"
+email.wallet_low.body: |
+  <p>Le solde de votre portefeuille {{.SystemName}} est bientôt épuisé.</p><p>Solde actuel : <strong>{{.Amount}}</strong>.</p>
+  <p>Veuillez recharger votre portefeuille pour éviter toute interruption du service.</p><p><a href="{{.Link}}">Ouvrir votre portefeuille</a></p>
+email.subscription_low.subject: "{{.SystemName}} — Le quota de votre abonnement est bientôt épuisé"
+email.subscription_low.body: |
+  <p>Le quota de votre abonnement {{.SystemName}} est bientôt épuisé.</p><p>Quota restant : <strong>{{.Amount}}</strong>.</p>
+  <p>Consultez votre consommation et les offres disponibles pour éviter toute interruption du service.</p><p><a href="{{.Link}}">Gérer votre solde et vos abonnements</a></p>
+email.channel_disabled.subject: "{{.SystemName}} — Canal {{.Name}} (n° {{.ID}}) désactivé"
+email.channel_disabled.body: "<p>Le canal <strong>{{.Name}}</strong> (n° {{.ID}}) a été désactivé.</p><p>Motif : {{.Reason}}</p>"
+email.channel_enabled.subject: "{{.SystemName}} — Canal {{.Name}} (n° {{.ID}}) activé"
+email.channel_enabled.body: "<p>Le canal <strong>{{.Name}}</strong> (n° {{.ID}}) a été activé.</p>"
+email.channel_test.subject: "{{.SystemName}} — Tests des canaux terminés"
+email.channel_test.body: "<p>Les tests de tous les canaux sélectionnés sont terminés.</p>"
+email.upstream_update.subject: "{{.SystemName}} — Rapport de vérification des modèles en amont"
+email.upstream_update.body: |
+  <p>Vérification des modèles en amont : {{.Checked}} canaux vérifiés ; {{.Changed}} modifiés ; {{.Added}} modèles ajoutés ; {{.Removed}} supprimés ; {{.AutoAdded}} ajoutés automatiquement ; {{.Failed}} canaux en échec.</p>
+  {{if .Channels}}<p>Canaux modifiés ({{len .Channels}}/{{.ChannelCount}}) :</p><ul>{{range .Channels}}<li>{{.ChannelName}} (+{{.AddCount}} / -{{.RemoveCount}})</li>{{end}}</ul>{{if .ChannelOmitted}}<p>Autres canaux non affichés : {{.ChannelOmitted}}.</p>{{end}}{{end}}
+  {{if .AddedModels}}<p>Exemples de modèles ajoutés ({{len .AddedModels}}/{{.AddedCount}}) :</p><ul>{{range .AddedModels}}<li>{{.}}</li>{{end}}</ul>{{if .AddedOmitted}}<p>Autres modèles non affichés : {{.AddedOmitted}}.</p>{{end}}{{end}}
+  {{if .RemovedModels}}<p>Exemples de modèles supprimés ({{len .RemovedModels}}/{{.RemovedCount}}) :</p><ul>{{range .RemovedModels}}<li>{{.}}</li>{{end}}</ul>{{if .RemovedOmitted}}<p>Autres modèles non affichés : {{.RemovedOmitted}}.</p>{{end}}{{end}}
+  {{if .FailedIDs}}<p>Identifiants des canaux en échec ({{len .FailedIDs}}/{{.Failed}}) : {{range .FailedIDs}}{{.}}; {{end}}</p>{{if .FailedOmitted}}<p>Autres canaux en échec non affichés : {{.FailedOmitted}}.</p>{{end}}{{end}}

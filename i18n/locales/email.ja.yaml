@@ -1,0 +1,30 @@
+email.verification.subject: "{{.SystemName}} — メールアドレスの確認"
+email.verification.body: |
+  <p>こんにちは。</p><p>以下のコードを使用して、{{.SystemName}}のメールアドレスを確認してください。</p>
+  <p><strong>{{.Code}}</strong></p><p>コードの有効期限は{{.Minutes}}分です。この操作に心当たりがない場合は、このメールを無視してください。</p>
+email.password_reset.subject: "{{.SystemName}} — パスワードの再設定"
+email.password_reset.body: |
+  <p>こんにちは。</p><p>{{.SystemName}}アカウントのパスワード再設定リクエストを受け付けました。</p>
+  <p><a href="{{.Link}}">パスワードを再設定する</a></p><p>リンクが開かない場合は、以下のURLをコピーしてブラウザで開いてください。<br>{{.Link}}</p>
+  <p>リンクの有効期限は{{.Minutes}}分です。この操作に心当たりがない場合は、このメールを無視してください。</p>
+email.wallet_low.subject: "{{.SystemName}} — 残高が少なくなっています"
+email.wallet_low.body: |
+  <p>{{.SystemName}}ウォレットの残高が少なくなっています。</p><p>現在の残高：<strong>{{.Amount}}</strong></p>
+  <p>サービスの中断を避けるため、残高をチャージしてください。</p><p><a href="{{.Link}}">ウォレットを開く</a></p>
+email.subscription_low.subject: "{{.SystemName}} — サブスクリプションの利用枠が残りわずかです"
+email.subscription_low.body: |
+  <p>{{.SystemName}}サブスクリプションの利用枠が少なくなっています。</p><p>残りの利用枠：<strong>{{.Amount}}</strong></p>
+  <p>サービスの中断を避けるため、利用状況と利用可能なプランをご確認ください。</p><p><a href="{{.Link}}">残高とプランを管理する</a></p>
+email.channel_disabled.subject: "{{.SystemName}} — チャネル {{.Name}}（#{{.ID}}）が無効になりました"
+email.channel_disabled.body: "<p>チャネル <strong>{{.Name}}</strong>（#{{.ID}}）が無効になりました。</p><p>理由：{{.Reason}}</p>"
+email.channel_enabled.subject: "{{.SystemName}} — チャネル {{.Name}}（#{{.ID}}）が有効になりました"
+email.channel_enabled.body: "<p>チャネル <strong>{{.Name}}</strong>（#{{.ID}}）が有効になりました。</p>"
+email.channel_test.subject: "{{.SystemName}} — チャネルテストが完了しました"
+email.channel_test.body: "<p>選択されたすべてのチャネルのテストが完了しました。</p>"
+email.upstream_update.subject: "{{.SystemName}} — 上流モデルのチェック結果"
+email.upstream_update.body: |
+  <p>上流モデルのチェック結果：確認したチャネル {{.Checked}}件、変更あり {{.Changed}}件、追加モデル {{.Added}}件、削除モデル {{.Removed}}件、自動追加モデル {{.AutoAdded}}件、エラーのあったチャネル {{.Failed}}件。</p>
+  {{if .Channels}}<p>変更のあったチャネル（{{len .Channels}}/{{.ChannelCount}}件）：</p><ul>{{range .Channels}}<li>{{.ChannelName}}（+{{.AddCount}} / -{{.RemoveCount}}）</li>{{end}}</ul>{{if .ChannelOmitted}}<p>省略したチャネル：{{.ChannelOmitted}}件。</p>{{end}}{{end}}
+  {{if .AddedModels}}<p>追加モデルの例（{{len .AddedModels}}/{{.AddedCount}}件）：</p><ul>{{range .AddedModels}}<li>{{.}}</li>{{end}}</ul>{{if .AddedOmitted}}<p>省略したモデル：{{.AddedOmitted}}件。</p>{{end}}{{end}}
+  {{if .RemovedModels}}<p>削除モデルの例（{{len .RemovedModels}}/{{.RemovedCount}}件）：</p><ul>{{range .RemovedModels}}<li>{{.}}</li>{{end}}</ul>{{if .RemovedOmitted}}<p>省略したモデル：{{.RemovedOmitted}}件。</p>{{end}}{{end}}
+  {{if .FailedIDs}}<p>エラーのあったチャネルID（{{len .FailedIDs}}/{{.Failed}}件）：{{range .FailedIDs}}{{.}}; {{end}}</p>{{if .FailedOmitted}}<p>省略したエラーチャネル：{{.FailedOmitted}}件。</p>{{end}}{{end}}

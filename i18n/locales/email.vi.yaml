@@ -1,0 +1,30 @@
+email.verification.subject: "{{.SystemName}} — Xác minh địa chỉ email"
+email.verification.body: |
+  <p>Xin chào,</p><p>Sử dụng mã dưới đây để xác minh địa chỉ email của bạn trên {{.SystemName}}:</p>
+  <p><strong>{{.Code}}</strong></p><p>Mã có hiệu lực trong {{.Minutes}} phút. Nếu bạn không gửi yêu cầu này, vui lòng bỏ qua email.</p>
+email.password_reset.subject: "{{.SystemName}} — Đặt lại mật khẩu"
+email.password_reset.body: |
+  <p>Xin chào,</p><p>Chúng tôi đã nhận được yêu cầu đặt lại mật khẩu tài khoản {{.SystemName}} của bạn.</p>
+  <p><a href="{{.Link}}">Đặt lại mật khẩu</a></p><p>Nếu liên kết không hoạt động, hãy sao chép địa chỉ dưới đây và mở trong trình duyệt:<br>{{.Link}}</p>
+  <p>Liên kết có hiệu lực trong {{.Minutes}} phút. Nếu bạn không gửi yêu cầu này, vui lòng bỏ qua email.</p>
+email.wallet_low.subject: "{{.SystemName}} — Số dư của bạn sắp hết"
+email.wallet_low.body: |
+  <p>Số dư ví {{.SystemName}} của bạn sắp hết.</p><p>Số dư hiện tại: <strong>{{.Amount}}</strong>.</p>
+  <p>Vui lòng nạp thêm để tránh gián đoạn sử dụng dịch vụ.</p><p><a href="{{.Link}}">Mở ví của bạn</a></p>
+email.subscription_low.subject: "{{.SystemName}} — Hạn mức gói đăng ký sắp hết"
+email.subscription_low.body: |
+  <p>Hạn mức gói đăng ký {{.SystemName}} của bạn sắp hết.</p><p>Hạn mức còn lại: <strong>{{.Amount}}</strong>.</p>
+  <p>Vui lòng kiểm tra mức sử dụng và các gói hiện có để tránh gián đoạn dịch vụ.</p><p><a href="{{.Link}}">Quản lý số dư và gói đăng ký</a></p>
+email.channel_disabled.subject: "{{.SystemName}} — Kênh {{.Name}} (#{{.ID}}) đã bị vô hiệu hóa"
+email.channel_disabled.body: "<p>Kênh <strong>{{.Name}}</strong> (#{{.ID}}) đã bị vô hiệu hóa.</p><p>Lý do: {{.Reason}}</p>"
+email.channel_enabled.subject: "{{.SystemName}} — Kênh {{.Name}} (#{{.ID}}) đã được bật"
+email.channel_enabled.body: "<p>Kênh <strong>{{.Name}}</strong> (#{{.ID}}) đã được bật.</p>"
+email.channel_test.subject: "{{.SystemName}} — Đã hoàn tất kiểm tra kênh"
+email.channel_test.body: "<p>Đã hoàn tất kiểm tra tất cả các kênh được chọn.</p>"
+email.upstream_update.subject: "{{.SystemName}} — Báo cáo kiểm tra model upstream"
+email.upstream_update.body: |
+  <p>Kết quả kiểm tra model upstream: đã kiểm tra {{.Checked}} kênh; {{.Changed}} kênh có thay đổi; thêm {{.Added}} model; xóa {{.Removed}} model; tự động thêm {{.AutoAdded}} model; {{.Failed}} kênh gặp lỗi.</p>
+  {{if .Channels}}<p>Kênh có thay đổi ({{len .Channels}}/{{.ChannelCount}}):</p><ul>{{range .Channels}}<li>{{.ChannelName}} (+{{.AddCount}} / -{{.RemoveCount}})</li>{{end}}</ul>{{if .ChannelOmitted}}<p>Số kênh khác được lược bớt: {{.ChannelOmitted}}.</p>{{end}}{{end}}
+  {{if .AddedModels}}<p>Ví dụ model được thêm ({{len .AddedModels}}/{{.AddedCount}}):</p><ul>{{range .AddedModels}}<li>{{.}}</li>{{end}}</ul>{{if .AddedOmitted}}<p>Số model khác được lược bớt: {{.AddedOmitted}}.</p>{{end}}{{end}}
+  {{if .RemovedModels}}<p>Ví dụ model bị xóa ({{len .RemovedModels}}/{{.RemovedCount}}):</p><ul>{{range .RemovedModels}}<li>{{.}}</li>{{end}}</ul>{{if .RemovedOmitted}}<p>Số model khác được lược bớt: {{.RemovedOmitted}}.</p>{{end}}{{end}}
+  {{if .FailedIDs}}<p>ID kênh gặp lỗi ({{len .FailedIDs}}/{{.Failed}}): {{range .FailedIDs}}{{.}}; {{end}}</p>{{if .FailedOmitted}}<p>Số kênh lỗi khác được lược bớt: {{.FailedOmitted}}.</p>{{end}}{{end}}

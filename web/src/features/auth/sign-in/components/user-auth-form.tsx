@@ -72,7 +72,6 @@ export function UserAuthForm({
   const [isPasskeyLoading, setIsPasskeyLoading] = useState(false)
   const [isWeChatDialogOpen, setIsWeChatDialogOpen] = useState(false)
   const [isWeChatSubmitting, setIsWeChatSubmitting] = useState(false)
-  const [turnstileWidgetKey, setTurnstileWidgetKey] = useState(0)
   const legalConsentErrorMessage = t('Please agree to the legal terms first')
   const loginFailedMessage = t('Login failed')
 
@@ -89,6 +88,8 @@ export function UserAuthForm({
     turnstileSiteKey,
     turnstileToken,
     setTurnstileToken,
+    turnstileWidgetKey,
+    resetTurnstile,
     validateTurnstile,
   } = useTurnstile()
   const { handleLoginSuccess, redirectTo2FA } = useAuthRedirect()
@@ -161,8 +162,7 @@ export function UserAuthForm({
 
     const submittedTurnstileToken = turnstileToken
     if (isTurnstileEnabled) {
-      setTurnstileToken('')
-      setTurnstileWidgetKey((current) => current + 1)
+      resetTurnstile()
     }
 
     setIsLoading(true)

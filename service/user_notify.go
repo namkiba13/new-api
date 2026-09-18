@@ -8,20 +8,21 @@ import (
 	"strings"
 
 	"github.com/QuantumNous/new-api/common"
+	"github.com/QuantumNous/new-api/i18n"
 	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/relaykit/dto"
 	"github.com/QuantumNous/new-api/setting/system_setting"
 )
 
-func NotifyRootUser(t string, subject string, content string) {
+func NotifyRootUser(notification dto.Notify) {
 	user := model.GetRootUser().ToBaseUser()
-	err := NotifyUser(user.Id, user.Email, user.GetSetting(), dto.NewNotify(t, subject, content, nil))
+	err := NotifyUser(user.Id, user.Email, user.GetSetting(), notification)
 	if err != nil {
 		common.SysLog(fmt.Sprintf("failed to notify root user: %s", err.Error()))
 	}
 }
 
-func NotifyUpstreamModelUpdateWatchers(subject string, content string) {
+func NotifyUpstreamModelUpdateWatchers(notification dto.Notify) {
 	var users []model.User
 	if err := model.DB.
 		Select("id", "email", "role", "status", "setting").
@@ -31,7 +32,6 @@ func NotifyUpstreamModelUpdateWatchers(subject string, content string) {
 		return
 	}
 
-	notification := dto.NewNotify(dto.NotifyTypeChannelUpdate, subject, content, nil)
 	sentCount := 0
 	for _, user := range users {
 		userSetting := user.GetSetting()
@@ -74,7 +74,7 @@ func NotifyUser(userId int, userEmail string, userSetting dto.UserSetting, data 
 			common.SysLog(fmt.Sprintf("user %d has no email, skip sending email", userId))
 			return nil
 		}
-		return sendEmailNotify(emailToUse, data)
+		return sendEmailNotify(emailToUse, userSetting.Language, data)
 	case dto.NotifyTypeWebhook:
 		webhookURLStr := userSetting.WebhookUrl
 		if webhookURLStr == "" {
@@ -104,7 +104,18 @@ func NotifyUser(userId int, userEmail string, userSetting dto.UserSetting, data 
 	return nil
 }
 
-func sendEmailNotify(userEmail string, data dto.Notify) error {
+func SendLocalizedEmail(lang, kind, receiver string, data map[string]any) error {
+	subject, content, err := i18n.RenderEmail(lang, kind, data)
+	if err != nil {
+		return err
+	}
+	return common.SendEmail(subject, receiver, content)
+}
+
+func sendEmailNotify(userEmail, lang string, data dto.Notify) error {
+	if data.EmailTemplate != "" {
+		return SendLocalizedEmail(lang, data.EmailTemplate, userEmail, data.EmailData)
+	}
 	// make email content
 	content := data.Content
 	// 处理占位符
