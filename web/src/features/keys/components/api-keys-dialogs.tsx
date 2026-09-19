@@ -16,6 +16,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
+import { useEffect } from 'react'
+
+import { useStatus } from '@/hooks/use-status'
+
 import { ApiKeysDeleteDialog } from './api-keys-delete-dialog'
 import { ApiKeysMutateDrawer } from './api-keys-mutate-drawer'
 import { useApiKeys } from './api-keys-provider'
@@ -24,6 +28,12 @@ import { SmartApiKeyDrawer } from './smart-api-key-drawer'
 
 export function ApiKeysDialogs() {
   const { open, setOpen, currentRow, resolvedKey } = useApiKeys()
+  const { status } = useStatus()
+  const showSmartCreator = status?.smart_key_wizard_enabled === true
+
+  useEffect(() => {
+    if (!showSmartCreator && open === 'smart-create') setOpen(null)
+  }, [showSmartCreator, open, setOpen])
 
   return (
     <>
@@ -32,10 +42,12 @@ export function ApiKeysDialogs() {
         onOpenChange={(isOpen) => !isOpen && setOpen(null)}
         currentRow={open === 'update' ? currentRow || undefined : undefined}
       />
-      <SmartApiKeyDrawer
-        open={open === 'smart-create'}
-        onOpenChange={(isOpen) => !isOpen && setOpen(null)}
-      />
+      {showSmartCreator && (
+        <SmartApiKeyDrawer
+          open={open === 'smart-create'}
+          onOpenChange={(isOpen) => !isOpen && setOpen(null)}
+        />
+      )}
       <ApiKeysDeleteDialog />
       <CCSwitchDialog
         open={open === 'cc-switch'}

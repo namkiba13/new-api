@@ -20,23 +20,27 @@ import { Plus, Sparkles } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
+import { useStatus } from '@/hooks/use-status'
 
 import { useApiKeys } from './api-keys-provider'
 
 export function ApiKeysPrimaryButtons() {
   const { t } = useTranslation()
   const { setOpen } = useApiKeys()
+  const { status } = useStatus()
   return (
     <div className='flex gap-2'>
-      <Button
-        size='sm'
-        variant='outline'
-        className='border-[var(--pricing-accent)]'
-        onClick={() => setOpen('smart-create')}
-      >
-        <Sparkles className='h-4 w-4' />
-        {t('Create Smart API Key')}
-      </Button>
+      {status?.smart_key_wizard_enabled === true && (
+        <Button
+          size='sm'
+          variant='outline'
+          className='border-[var(--pricing-accent)]'
+          onClick={() => setOpen('smart-create')}
+        >
+          <Sparkles className='h-4 w-4' />
+          {t('Create Smart API Key')}
+        </Button>
+      )}
       <Button size='sm' onClick={() => setOpen('create')}>
         <Plus className='h-4 w-4' />
         {t('Create API Key')}

@@ -4268,6 +4268,8 @@
     "Shorten": "缩词",
     "Show": "显示",
     "Show All": "显示全部",
+    "Show Smart API Key creator": "显示智能 API Key 创建入口",
+    "Show the Smart API Key button and creation dialog. Existing keys and the standard key creator are unaffected.": "显示智能 API Key 的创建按钮和对话框。现有密钥和普通 API Key 创建功能不受影响。",
     "Show all providers including unbound": "显示所有提供商（包括未绑定）",
     "Show only bound providers": "仅显示已绑定的提供商",
     "Show or hide flow columns": "显示或隐藏分流列",

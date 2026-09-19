@@ -4,7 +4,8 @@ import "github.com/QuantumNous/new-api/setting/config"
 
 // TokenSetting 令牌相关配置
 type TokenSetting struct {
-	MaxUserTokens int `json:"max_user_tokens"` // 每用户最大令牌数量
+	MaxUserTokens         int  `json:"max_user_tokens"`          // 每用户最大令牌数量
+	SmartKeyWizardEnabled bool `json:"smart_key_wizard_enabled"` // UI visibility only; existing keys and token APIs are independent.
 }
 
 // 默认配置

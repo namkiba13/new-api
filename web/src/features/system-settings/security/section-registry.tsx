@@ -86,6 +86,8 @@ const SECURITY_SECTIONS = [
         defaultValues={{
           'token_setting.max_user_tokens':
             settings['token_setting.max_user_tokens'],
+          'token_setting.smart_key_wizard_enabled':
+            settings['token_setting.smart_key_wizard_enabled'],
         }}
       />
     ),

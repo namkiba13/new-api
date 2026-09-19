@@ -4268,6 +4268,8 @@
     "Shorten": "短縮",
     "Show": "表示",
     "Show All": "すべて表示",
+    "Show Smart API Key creator": "Smart API Key作成機能を表示",
+    "Show the Smart API Key button and creation dialog. Existing keys and the standard key creator are unaffected.": "Smart API Keyの作成ボタンとダイアログを表示します。既存のキーと通常のAPIキー作成機能には影響しません。",
     "Show all providers including unbound": "未バインドを含むすべてのプロバイダーを表示",
     "Show only bound providers": "バインド済みのプロバイダーのみ表示",
     "Show or hide flow columns": "フロー列の表示・非表示",

@@ -4268,6 +4268,8 @@
     "Shorten": "Rút gọn",
     "Show": "Hiển thị",
     "Show All": "Hiển thị tất cả",
+    "Show Smart API Key creator": "Hiển thị trình tạo Smart API Key",
+    "Show the Smart API Key button and creation dialog. Existing keys and the standard key creator are unaffected.": "Hiển thị nút và hộp thoại tạo Smart API Key. Các key hiện có và trình tạo API key thông thường vẫn hoạt động như trước.",
     "Show all providers including unbound": "Hiển thị tất cả nhà cung cấp (bao gồm chưa liên kết)",
     "Show only bound providers": "Chỉ hiển thị nhà cung cấp đã liên kết",
     "Show or hide flow columns": "Hiện hoặc ẩn các cột luồng",

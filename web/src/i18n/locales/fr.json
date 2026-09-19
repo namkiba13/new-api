@@ -4268,6 +4268,8 @@
     "Shorten": "Raccourcir",
     "Show": "Afficher",
     "Show All": "Tout afficher",
+    "Show Smart API Key creator": "Afficher la création de Smart API Key",
+    "Show the Smart API Key button and creation dialog. Existing keys and the standard key creator are unaffected.": "Affiche le bouton et la fenêtre de création de Smart API Key. Les clés existantes et la création de clés API classiques restent inchangées.",
     "Show all providers including unbound": "Afficher tous les fournisseurs (y compris non liés)",
     "Show only bound providers": "Afficher uniquement les fournisseurs liés",
     "Show or hide flow columns": "Afficher ou masquer les colonnes du flux",
