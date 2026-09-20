@@ -74,9 +74,7 @@ try {
           await page.waitForFunction(value => document.documentElement.classList.contains(value), theme)
           await page.waitForFunction(() => document.documentElement.scrollWidth <= innerWidth + 1)
           if (route === 'sign-up') {
-            const oauthBox = await google.boundingBox()
-            const usernameBox = await page.locator('input[name="username"]').boundingBox()
-            assert(oauthBox.y + oauthBox.height <= usernameBox.y)
+            assert(await google.evaluate(button => button.getBoundingClientRect().bottom <= document.querySelector('input[name="username"]').getBoundingClientRect().top))
           }
           await notice.scrollIntoViewIfNeeded()
           assert.equal(await notice.isVisible(), true)
