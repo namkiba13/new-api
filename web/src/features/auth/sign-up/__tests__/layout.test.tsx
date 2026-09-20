@@ -136,7 +136,7 @@ it('puts the OAuth block before inputs in document and keyboard order, with one 
     turnstile_check: true,
     turnstile_site_key: 'test-key',
   })
-  const google = screen.getByRole('button', { name: 'Continue with Google' })
+  const google = screen.getByRole('button', { name: 'Sign up with Google' })
   const controls = [
     screen.getByRole('heading', { name: 'Create an account' }),
     screen.getByText('Or continue with'),
@@ -164,7 +164,7 @@ it('puts the OAuth block before inputs in document and keyboard order, with one 
 it('starts Google signup with the existing OAuth state flow without consent', async () => {
   const open = vi.spyOn(window, 'open').mockReturnValue(null)
   const user = await renderSignUp()
-  await user.click(screen.getByRole('button', { name: 'Continue with Google' }))
+  await user.click(screen.getByRole('button', { name: 'Sign up with Google' }))
   await waitFor(() => expect(open).toHaveBeenCalled())
   expect(requests.map((request) => request.url)).toEqual([
     '/api/user/auth/logout',
@@ -178,6 +178,30 @@ it('starts Google signup with the existing OAuth state flow without consent', as
   expect(url.searchParams.get('redirect_uri')).toBe(
     `${window.location.origin}/oauth/google`
   )
+})
+
+it('disables Google while authentication starts and restores the button after failure', async () => {
+  let finishRequest = () => {}
+  const pending = new Promise<void>((resolve) => {
+    finishRequest = resolve
+  })
+  api.defaults.adapter = async (config) => {
+    await pending
+    return {
+      config,
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+      data: { success: false, message: 'Please retry' },
+    }
+  }
+  const user = await renderSignUp()
+  const google = screen.getByRole('button', { name: 'Sign up with Google' })
+  await user.click(google)
+  expect(google).toBeDisabled()
+  expect(google).toHaveAccessibleName('Sign up with Google')
+  act(() => finishRequest())
+  await waitFor(() => expect(google).toBeEnabled())
 })
 
 it('allows WeChat signup without consent while still requiring a verification code', async () => {
@@ -251,7 +275,7 @@ it.each([{ oauth_register_enabled: false }, { custom_oauth_providers: [] }])(
   async (status) => {
     await renderSignUp(status)
     expect(
-      screen.queryByRole('button', { name: 'Continue with Google' })
+      screen.queryByRole('button', { name: 'Sign up with Google' })
     ).not.toBeInTheDocument()
     expect(screen.queryByText('Or continue with')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Create account' })).toBeEnabled()

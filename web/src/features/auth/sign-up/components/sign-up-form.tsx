@@ -225,6 +225,7 @@ export function SignUpForm({
       >
         {oauthRegisterEnabled && (
           <OAuthProviders
+            variant='sign-up'
             status={status}
             disabled={isLoading}
             onWeChatLogin={hasWeChatLogin ? handleOpenWeChatDialog : undefined}

@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next'
 import {
   IconDiscord,
   IconGithub,
+  IconGoogle,
   IconLinuxDo,
   IconTelegram,
   IconWeChat,
@@ -35,6 +36,7 @@ import { TelegramLoginDialog } from './telegram-login-dialog'
 
 type OAuthProvidersProps = {
   status: SystemStatus | null
+  variant?: 'sign-in' | 'sign-up'
   disabled?: boolean
   className?: string
   onWeChatLogin?: () => void
@@ -53,6 +55,7 @@ type ProviderButton = {
 
 export function OAuthProviders({
   status,
+  variant = 'sign-in',
   disabled = false,
   className,
   onWeChatLogin,
@@ -141,9 +144,25 @@ export function OAuthProviders({
   const customProviders = status?.custom_oauth_providers
   if (customProviders && customProviders.length > 0) {
     for (const provider of customProviders) {
+      const isGoogle = provider.slug === 'google'
       providerButtons.push({
         key: `custom-${provider.slug}`,
-        label: t('Continue with {{name}}', { name: provider.name }),
+        label:
+          isGoogle && variant === 'sign-up'
+            ? t('Sign up with Google')
+            : t('Continue with {{name}}', { name: provider.name }),
+        icon: isGoogle ? (
+          <span
+            aria-hidden='true'
+            className='flex shrink-0 rounded-sm bg-white p-1'
+          >
+            <IconGoogle
+              className='size-5'
+              aria-hidden='true'
+              focusable='false'
+            />
+          </span>
+        ) : undefined,
         onClick: () => handleCustomOAuthLogin(provider),
       })
     }
@@ -176,10 +195,14 @@ export function OAuthProviders({
                 type='button'
                 disabled={disabled || isLoading || extraDisabled}
                 onClick={onClick}
-                className='h-11 w-full justify-center gap-2 rounded-lg'
+                className={cn(
+                  'h-11 w-full justify-center gap-2 rounded-lg',
+                  key === 'custom-google' &&
+                    'h-auto min-h-12 min-w-0 gap-3 rounded-[8px] border-[#8E918F] bg-[#131314] px-4 py-2 text-[#E3E3E3] whitespace-normal shadow-sm hover:bg-[#252526] hover:text-[#E3E3E3] focus-visible:ring-[#131314] focus-visible:ring-offset-2 ring-offset-background disabled:opacity-60 dark:border-[#747775] dark:bg-white dark:text-[#1F1F1F] dark:hover:bg-[#F2F2F2] dark:hover:text-[#1F1F1F] dark:focus-visible:ring-white'
+                )}
               >
                 {icon}
-                {label}
+                <span className='min-w-0'>{label}</span>
               </Button>
             )
           )}
