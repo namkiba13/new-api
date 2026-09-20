@@ -60,7 +60,29 @@ describe('embedded homepage preferences', () => {
               .querySelector('.copy-button')
               ?.getAttribute('aria-label')
           ).not.toBe('Copy request')
+          const footer = dom.window.document.querySelector('footer')
+          expect(footer?.textContent).not.toContain(
+            'Access AI models, manage API keys'
+          )
+          expect(footer?.textContent).not.toContain('Resources')
+          expect(footer?.textContent).not.toContain('Terms of Use')
+          expect(footer?.textContent).not.toContain('Privacy Policy')
         }
+        const footer = dom.window.document.querySelector('footer')
+        const links = [...(footer?.querySelectorAll('nav a') ?? [])]
+        expect(links.map((link) => link.getAttribute('href'))).toEqual([
+          '/docs',
+          '/docs/quickstart',
+          '/pricing',
+          'mailto:support@94api.dev',
+          '/user-agreement',
+          '/privacy-policy',
+        ])
+        expect(
+          links.every((link) => link.getAttribute('target') === '_top')
+        ).toBe(true)
+        expect(footer?.textContent).toContain('New API')
+        expect(footer?.textContent).toContain('© 2023–2026 QuantumNous')
       }
     } finally {
       dom.window.close()

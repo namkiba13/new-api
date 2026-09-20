@@ -126,7 +126,7 @@ export function Home() {
         {/* eslint-disable-next-line react/iframe-missing-sandbox -- Bundled first-party document; custom URLs remain sandboxed above. */}
         <iframe
           ref={iframeRef}
-          src='/94api-theme/home.html?embedded=1&v=20260913-sync1'
+          src='/94api-theme/home.html?embedded=1&v=20260920-footer1'
           title={t('Home')}
           className='api94-home-frame'
           allow='clipboard-write'

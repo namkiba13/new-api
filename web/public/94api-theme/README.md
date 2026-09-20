@@ -29,3 +29,20 @@ account from `/pricing`; the production API base is `https://94api.dev`.
 Browser regression check: `node e2e/94api-home.mjs https://94api.dev`
 (requires Playwright and Microsoft Edge). Pass a local preview URL to check
 before deployment.
+
+## Home footer
+
+The Home footer uses the existing theme-aware 94API wordmarks, a short service
+description, and two link groups: Resources (Docs, Quick start, Models & pricing)
+and Support (email, Terms of Use, Privacy Policy). The original New API /
+QuantumNous attribution is retained. Customer navigation does not expose the raw
+`/api/status` JSON endpoint. Internal links leave the iframe with `target="_top"`.
+
+On 2026-09-20, `node e2e/home-footer.mjs http://127.0.0.1:4186` passed all 70
+locale/width/theme cases (seven locales, 320/390/768/1024/1440 px, Light/Dark),
+including readable links, 44 px navigation targets, correct logos, and eight
+keyboard navigations out of the iframe. Six Home tests, typecheck, production
+build, and changed-file formatting passed; full frontend lint had no errors and
+19 existing warnings. The five public destination routes returned HTTP 200.
+Run the same footer check with `https://94api.dev` for anonymous production
+verification; API fixtures are enabled only for loopback previews.
