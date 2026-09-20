@@ -109,7 +109,7 @@ try {
         .locator('.profile-page h2')
         .filter({ hasText: 'Profile Test' })
         .waitFor()
-      await page.locator('#threshold').waitFor()
+      assert.equal(await page.locator('#threshold').count(), 0)
       const locale = { zhCN: 'zh', zhTW: 'zh-TW' }[lang] || lang
       const copy = JSON.parse(
         readFileSync(
@@ -131,7 +131,7 @@ try {
             })
             .filter((rect) => rect.width > 0)
         )
-      assert(cards.length >= 7)
+      assert(cards.length >= 5)
       assert(
         cards.every(
           (card) =>
@@ -177,10 +177,8 @@ try {
         .locator('.profile-page')
         .getByText(copy['Account Bindings'], { exact: true })
         .waitFor()
-      await page
-        .locator('.profile-page')
-        .getByText(copy.Notifications, { exact: true })
-        .waitFor()
+      assert.equal(await page.locator('.profile-page').getByText(copy.Notifications, { exact: true }).count(), 0)
+      assert.equal(await page.locator('.profile-page').getByText(copy.Preferences, { exact: true }).count(), 0)
       await page
         .locator('.profile-page')
         .getByRole('button', { name: new RegExp(copy['Change Password']) })

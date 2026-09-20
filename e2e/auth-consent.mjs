@@ -49,21 +49,14 @@ try {
       await notice.waitFor()
       await page.locator('input[name="cf-turnstile-response"]').waitFor({ state: 'attached' })
       const google = page.getByRole('button', { name: /Google/ })
+      assert.equal(await page.getByRole('checkbox').count(), 0)
+      assert.equal(await google.isDisabled(), false)
       if (route === 'sign-in') {
-        assert.equal(await page.getByRole('checkbox').count(), 0)
-        assert.equal(await google.isDisabled(), false)
         assert.equal(await page.locator('button[type="submit"]').isDisabled(), false)
       } else {
-        const checkbox = page.getByRole('checkbox')
-        assert.equal(await checkbox.isChecked(), false)
-        assert.equal(await google.isDisabled(), true)
-        assert.equal(await page.locator('button[type="submit"]').isDisabled(), true)
-        await checkbox.focus()
-        await page.keyboard.press('Space')
-        assert.equal(await checkbox.isChecked(), true)
-        assert.equal(await google.isDisabled(), false)
-        await page.keyboard.press('Space')
-        assert.equal(await google.isDisabled(), true)
+        assert(await google.evaluate(button => Boolean(button.compareDocumentPosition(document.querySelector('input[name="username"]')) & Node.DOCUMENT_POSITION_FOLLOWING)))
+        const token = await page.locator('input[name="cf-turnstile-response"]').inputValue()
+        assert.equal(await page.locator('button[type="submit"]').isDisabled(), !token)
       }
       for (const path of ['/user-agreement', '/privacy-policy']) {
         const link = notice.locator(`a[href="${path}"]`)
@@ -80,6 +73,11 @@ try {
           await page.emulateMedia({ colorScheme: theme })
           await page.waitForFunction(value => document.documentElement.classList.contains(value), theme)
           await page.waitForFunction(() => document.documentElement.scrollWidth <= innerWidth + 1)
+          if (route === 'sign-up') {
+            const oauthBox = await google.boundingBox()
+            const usernameBox = await page.locator('input[name="username"]').boundingBox()
+            assert(oauthBox.y + oauthBox.height <= usernameBox.y)
+          }
           await notice.scrollIntoViewIfNeeded()
           assert.equal(await notice.isVisible(), true)
           assert.equal(await notice.innerText(), expected)

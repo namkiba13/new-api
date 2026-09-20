@@ -13,7 +13,6 @@ import { expect, it } from 'vitest'
 
 import { resources } from '@/i18n/config'
 
-import { LegalConsent } from '../legal-consent'
 import { TermsFooter } from '../terms-footer'
 
 const loginCopy = {
@@ -61,7 +60,7 @@ it.each(Object.entries(loginCopy))(
 )
 
 it.each(Object.keys(loginCopy))(
-  'translates signup text and keeps its explicit checkbox in %s',
+  'translates signup notice and links without a checkbox in %s',
   async (lng) => {
     const i18n = createInstance()
     await i18n.init({
@@ -79,14 +78,12 @@ it.each(Object.keys(loginCopy))(
     const { container } = render(
       <I18nextProvider i18n={i18n}>
         <TermsFooter variant='sign-up' status={status} />
-        <LegalConsent
-          status={status}
-          checked={false}
-          onCheckedChange={() => {}}
-        />
       </I18nextProvider>
     )
-    expect(screen.getByRole('checkbox')).not.toBeChecked()
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
+    expect(
+      screen.getAllByRole('link').map((link) => link.getAttribute('href'))
+    ).toEqual(['/user-agreement', '/privacy-policy'])
     expect(container.textContent).not.toMatch(/<agreement>|<privacy>|\{\{/)
     if (lng !== 'en') {
       expect(container.textContent).not.toContain('By creating an account')

@@ -25,6 +25,7 @@ import {
   CardStaggerItem,
 } from '@/components/page-transition'
 import { useStatus } from '@/hooks/use-status'
+import { ROLE } from '@/lib/roles'
 import { useAuthStore } from '@/stores/auth-store'
 
 import { CheckinCalendarCard } from './components/checkin-calendar-card'
@@ -41,6 +42,7 @@ export function Profile() {
   const { profile, loading, refreshProfile, fetchProfile } = useProfile()
   const { status } = useStatus()
   const permissions = useAuthStore((s) => s.auth.user?.permissions)
+  const isAdmin = useAuthStore((s) => (s.auth.user?.role ?? 0) >= ROLE.ADMIN)
 
   const checkinEnabled = status?.checkin_enabled === true
   const turnstileEnabled = !!(
@@ -81,14 +83,16 @@ export function Profile() {
                   onProfileUpdate={refreshProfile}
                 />
               </CardStaggerItem>
-              <CardStaggerItem>
-                <ProfileSettingsCard
-                  section='notifications'
-                  profile={profile}
-                  loading={loading}
-                  onProfileUpdate={refreshProfile}
-                />
-              </CardStaggerItem>
+              {isAdmin && (
+                <CardStaggerItem>
+                  <ProfileSettingsCard
+                    section='notifications'
+                    profile={profile}
+                    loading={loading}
+                    onProfileUpdate={refreshProfile}
+                  />
+                </CardStaggerItem>
+              )}
               <CardStaggerItem>
                 <ProfileSecurityCard profile={profile} loading={loading} />
               </CardStaggerItem>

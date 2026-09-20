@@ -143,7 +143,7 @@ function renderProfile() {
   return userEvent.setup()
 }
 
-it('exposes bindings, language, notifications and security in document order without hidden settings tabs', async () => {
+it('exposes bindings, language and security while hiding notification preferences for users', async () => {
   renderProfile()
   await waitFor(() =>
     expect(screen.getByRole('heading', { name: 'Profile Test' })).toBeVisible()
@@ -154,7 +154,6 @@ it('exposes bindings, language, notifications and security in document order wit
   const sections = [
     'Account Bindings',
     'Language Preferences',
-    'Notifications',
     'Security',
     'Login sessions',
   ]
@@ -171,7 +170,15 @@ it('exposes bindings, language, notifications and security in document order wit
   expect(
     screen.queryByRole('tab', { name: /Settings/ })
   ).not.toBeInTheDocument()
-  expect(screen.getByLabelText('Quota Warning Threshold')).toBeVisible()
+  expect(
+    screen.queryByText('Notifications', { exact: true })
+  ).not.toBeInTheDocument()
+  expect(
+    screen.queryByText('Preferences', { exact: true })
+  ).not.toBeInTheDocument()
+  expect(
+    screen.queryByLabelText('Quota Warning Threshold')
+  ).not.toBeInTheDocument()
   expect(screen.getByText('42', { exact: true })).toBeVisible()
   expect(screen.getByRole('button', { name: /Change Password/ })).toBeVisible()
   expect(
@@ -195,21 +202,27 @@ it('keeps sidebar configuration available when the server grants that permission
   )
 })
 
-it('saves the visible notification controls through the existing settings API', async () => {
-  const user = renderProfile()
-  const threshold = await screen.findByLabelText('Quota Warning Threshold')
-  await user.clear(threshold)
-  await user.type(threshold, '20')
-  await user.click(screen.getByRole('button', { name: /Save/ }))
-  await waitFor(() =>
-    expect(writes).toEqual([
-      expect.objectContaining({
-        url: '/api/user/setting',
-        data: expect.objectContaining({ quota_warning_threshold: 20 }),
-      }),
-    ])
-  )
-})
+it.each([10, 100])(
+  'keeps notification preferences editable through the existing API for role %s',
+  async (role) => {
+    profile.role = role
+    useAuthStore.getState().auth.setUser({ ...profile })
+    const user = renderProfile()
+    const threshold = await screen.findByLabelText('Quota Warning Threshold')
+    expect(screen.getByText('Notifications', { exact: true })).toBeVisible()
+    await user.clear(threshold)
+    await user.type(threshold, '20')
+    await user.click(screen.getByRole('button', { name: /Save/ }))
+    await waitFor(() =>
+      expect(writes).toEqual([
+        expect.objectContaining({
+          url: '/api/user/setting',
+          data: expect.objectContaining({ quota_warning_threshold: 20 }),
+        }),
+      ])
+    )
+  }
+)
 
 it('offers seven languages and persists the selected language through the existing profile API', async () => {
   const user = renderProfile()
