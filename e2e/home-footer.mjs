@@ -17,20 +17,23 @@ page.on('pageerror', error => errors.push(error.message))
 let cases = 0
 try {
   await context.addCookies([{ name: 'vite-ui-theme', value: 'system', url: base.origin }])
-  if (local) await context.route(`${base.origin}/api/**`, route => {
-    const path = new URL(route.request().url()).pathname
-    if (path === '/api/user/auth/refresh') return route.fulfill({ status: 401, json: { success: false, code: 'AUTH_UNAUTHORIZED' } })
-    let data = []
-    if (path === '/api/status') data = { setup: true, system_name: '94API', logo: '/94api-logo-transparent.png', user_agreement_enabled: true, privacy_policy_enabled: true, custom_oauth_providers: [], announcements: [] }
-    if (path === '/api/setup') data = { status: true }
-    if (['/api/notice', '/api/home_page_content'].includes(path)) data = ''
-    if (['/api/user-agreement', '/api/privacy-policy'].includes(path)) data = '# Legal document\nLocal navigation fixture.'
-    return route.fulfill({ json: { success: true, data } })
-  })
+  if (local) {
+    await context.route(`${base.origin}/api/**`, route => {
+      const path = new URL(route.request().url()).pathname
+      if (path === '/api/user/auth/refresh') return route.fulfill({ status: 401, json: { success: false, code: 'AUTH_UNAUTHORIZED' } })
+      let data = []
+      if (path === '/api/status') data = { setup: true, system_name: '94API', logo: '/94api-logo-transparent.png', user_agreement_enabled: true, privacy_policy_enabled: true, custom_oauth_providers: [], announcements: [] }
+      if (path === '/api/setup') data = { status: true }
+      if (['/api/notice', '/api/home_page_content'].includes(path)) data = ''
+      if (['/api/user-agreement', '/api/privacy-policy'].includes(path)) data = '# Legal document\nLocal navigation fixture.'
+      return route.fulfill({ json: { success: true, data } })
+    })
+  }
   await page.goto(base.href)
   const frame = page.frameLocator('iframe[src^="/94api-theme/home.html"]')
   const footer = frame.getByRole('contentinfo')
   await footer.waitFor()
+  await frame.locator('html[data-theme]').waitFor({ state: 'attached' })
   let current = 'en'
   for (const [language, label] of Object.entries(languages)) {
     const file = { zhCN: 'zh', zhTW: 'zh-TW' }[current] || current
