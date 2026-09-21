@@ -1,4 +1,35 @@
-# Docs browser validation — 2026-09-20
+# Docs validation and production release
+
+## Current status — deployed on 2026-09-21
+
+- **Production Docs are deployed and verified**, not pending local work.
+- Runtime commit: `23013c37646e7db96ae47a8d929d4974bd09dba0` on `theme/94api`.
+- Coolify deployment: `0jgbmz7lxguzzkjdn6muiub7`, finished at `2026-09-21T18:48:41Z`; application `running:healthy`.
+- Release checkout: `C:\Users\94media\AppData\Local\Temp\opencode\94api-docs-release-20260921`, based on `69c229b` (the latest production-branch code plus the existing test-only commit).
+- The release carries the reviewed eight-guide content, complete seven-language prose, corrected client configuration, official references, and responsive/mobile navigation fixes.
+
+### Release checks
+
+- Bun `1.4.0`, Node `24.20.0`, Python `3.13.15`; frozen dependency installation passed.
+- `bun run test --maxWorkers=4`: **304 tests in 54 files passed**.
+- `bun run build:check`: type checking and production build passed.
+- Full lint passed with no errors and 19 pre-existing warnings. Direct scoped oxfmt checking passed for all 13 changed frontend files. The existing full-format wrapper still reports 15 unrelated baseline files.
+- `e2e/docs-examples.ts`: 35 distinct code blocks syntax-checked; four Bash/PowerShell HTTP examples and six JavaScript/Python SDK examples passed against loopback. All 17 official-reference URLs returned HTTP 200.
+- `node e2e/docs-browser.mjs http://127.0.0.1:4192`: 560 guide cases and 70 index cases passed.
+- `node e2e/docs-browser.mjs https://94api.dev`: the same **630 cases passed against real production responses, with fixtures disabled**. This includes all eight guides, seven locales, 320/390/768/1024/1440 px, Light/Dark, complete translated prose, exact code/clipboard, source links, search/reset, and keyboard/mobile-menu behavior; no overflow or JavaScript page errors.
+- Live Home/footer, sign-in, sign-up, pricing and favicon checks passed. Anonymous Dashboard/Profile redirected to sign-in. Registration, email verification, Google and Turnstile remained enabled; Smart creator remained disabled. Completed user/Google authentication and production inference were not part of this Docs release check.
+- Local and live screenshots were visually reviewed. Artifacts are in sibling directories `94api-docs-release-20260921-local` and `94api-docs-release-20260921-live`. The loopback preview was stopped and browser contexts were closed.
+
+### Preservation and rollback
+
+- Verified encrypted configuration snapshot: `C:\Users\94media\.config\coolify\94api-before-docs-20260921.dpapi`.
+- Post-deploy verification confirmed all eight environment entries, 232 returned options, and storage unchanged.
+- Backend, schema and billing code are unchanged; this frontend-only release did not create a new SQLite snapshot or claim a database restore test.
+- Previous production image: `83ffe0c2005c20e68e54cac434d2de642c7be846`, confirmed available before deployment.
+- Rollback uses the existing `94api-release-ops.ps1 -Action rollback -Previous 83ffe0c2005c20e68e54cac434d2de642c7be846`, preserving persistent data.
+- This release report is recorded after deployment; a report-only follow-up commit does not change runtime assets.
+
+## Archived pre-release validation — 2026-09-20
 
 ## Checkout and runtime
 
