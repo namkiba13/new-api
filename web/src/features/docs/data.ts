@@ -28,7 +28,10 @@ export type DocsGuide = {
   baseUrl: string
   model?: string
   icon: LucideIcon
+  references: { label: string; href: string }[]
 }
+
+export const DOCS_REVIEW_DATE = '2026-09-20'
 
 export const DOCS_GUIDES: DocsGuide[] = [
   {
@@ -37,47 +40,88 @@ export const DOCS_GUIDES: DocsGuide[] = [
     title: '94API Quick Start',
     subtitle: 'OpenAI-compatible API',
     description:
-      'Create an API key, send your first request, and connect any OpenAI-compatible application to 94API.',
-    protocols: ['Chat Completions', 'Responses API'],
+      'Prepare balance and key permissions, select an available model, and send a Chat Completions request.',
+    protocols: ['Chat Completions'],
     baseUrl: 'https://94api.dev/v1',
-    model: 'gpt-5',
+    model: 'gpt-5.5',
     icon: Sparkles,
+    references: [
+      {
+        label: 'OpenAI SDK',
+        href: 'https://github.com/openai/openai-node#usage',
+      },
+    ],
   },
   {
     slug: 'codex',
     eyebrow: 'Codex / OpenAI',
-    title: 'Codex Quick Start',
+    title: 'Codex Provider Reference',
     subtitle: 'Codex / Responses API',
     description:
-      'Install Codex on Windows, macOS, or Linux and connect it to 94API with a provider configuration.',
+      'Configure a custom Codex provider after confirming Responses support for the selected model and route.',
     protocols: ['Responses API'],
     baseUrl: 'https://94api.dev/v1',
-    model: 'gpt-5',
     icon: TerminalSquare,
+    references: [
+      {
+        label: 'Codex CLI',
+        href: 'https://github.com/openai/codex#quickstart',
+      },
+      {
+        label: 'Codex configuration',
+        href: 'https://developers.openai.com/codex/config-file/config-advanced#custom-model-providers',
+      },
+    ],
   },
   {
     slug: 'claude-code',
     eyebrow: 'Claude Code',
-    title: 'Claude Code Quick Start',
+    title: 'Claude Code Gateway Reference',
     subtitle: 'Anthropic Messages',
     description:
-      'Configure Claude Code with an 94API key, supported Claude model names, and the Anthropic endpoint.',
+      'Review Claude Code gateway requirements and credential setup without assuming Claude model availability.',
     protocols: ['Anthropic Messages'],
     baseUrl: 'https://94api.dev',
-    model: 'claude-opus-5',
     icon: Bot,
+    references: [
+      {
+        label: 'Claude Code setup',
+        href: 'https://code.claude.com/docs/en/setup',
+      },
+      {
+        label: 'Claude Code gateway',
+        href: 'https://code.claude.com/docs/en/llm-gateway-connect',
+      },
+      {
+        label: 'Claude Code model configuration',
+        href: 'https://code.claude.com/docs/en/model-config',
+      },
+    ],
   },
   {
     slug: 'gemini-cli',
     eyebrow: 'Gemini CLI',
-    title: 'Gemini CLI Quick Start',
+    title: 'Gemini CLI Gateway Reference',
     subtitle: 'Gemini / Native API',
     description:
-      'Install Gemini CLI, configure the 94API Gemini endpoint, and verify the connection.',
+      'Review Gemini CLI authentication, custom endpoints and model requirements before testing this integration.',
     protocols: ['Gemini API'],
     baseUrl: 'https://94api.dev',
-    model: 'gemini-3.5-flash',
     icon: Command,
+    references: [
+      {
+        label: 'Gemini CLI installation',
+        href: 'https://geminicli.com/docs/get-started/installation/',
+      },
+      {
+        label: 'Gemini CLI authentication',
+        href: 'https://geminicli.com/docs/get-started/authentication/',
+      },
+      {
+        label: 'Gemini CLI configuration',
+        href: 'https://geminicli.com/docs/reference/configuration/',
+      },
+    ],
   },
   {
     slug: 'openai-sdk',
@@ -85,23 +129,41 @@ export const DOCS_GUIDES: DocsGuide[] = [
     title: 'OpenAI SDK Setup',
     subtitle: 'JavaScript & Python',
     description:
-      'Use official OpenAI client libraries with 94API for chat completions and Responses API requests.',
+      'Use official JavaScript or Python clients for Chat Completions, with a separately qualified Responses example.',
     protocols: ['Chat Completions', 'Responses API'],
     baseUrl: 'https://94api.dev/v1',
-    model: 'gpt-5-mini',
     icon: Braces,
+    references: [
+      {
+        label: 'OpenAI JavaScript SDK',
+        href: 'https://github.com/openai/openai-node',
+      },
+      {
+        label: 'OpenAI Python SDK',
+        href: 'https://github.com/openai/openai-python',
+      },
+    ],
   },
   {
     slug: 'anthropic-sdk',
     eyebrow: 'Anthropic SDK',
-    title: 'Anthropic SDK Setup',
+    title: 'Anthropic SDK Reference',
     subtitle: 'JavaScript & Python',
     description:
-      'Connect official Anthropic libraries to 94API while keeping the native Messages API format.',
+      'Configure the official JavaScript and Python SDKs for a model and route confirmed to support Messages.',
     protocols: ['Anthropic Messages'],
     baseUrl: 'https://94api.dev',
-    model: 'claude-opus-4-7',
     icon: MessagesSquare,
+    references: [
+      {
+        label: 'Anthropic JavaScript SDK',
+        href: 'https://github.com/anthropics/anthropic-sdk-typescript',
+      },
+      {
+        label: 'Anthropic Python SDK',
+        href: 'https://github.com/anthropics/anthropic-sdk-python',
+      },
+    ],
   },
   {
     slug: 'cc-switch',
@@ -109,10 +171,17 @@ export const DOCS_GUIDES: DocsGuide[] = [
     title: 'CC-Switch Setup',
     subtitle: 'Local profile switching',
     description:
-      'Create and switch 94API profiles for Codex, Claude Code, Gemini CLI, and other coding tools.',
-    protocols: ['Responses API', 'Anthropic Messages', 'Gemini API'],
-    baseUrl: 'https://94api.dev',
+      'Manage custom OpenCode or Codex connection settings and verify the selected client configuration.',
+    protocols: ['Chat Completions', 'Responses API'],
+    baseUrl: 'https://94api.dev/v1',
     icon: Network,
+    references: [
+      { label: 'CC Switch', href: 'https://ccswitch.io' },
+      {
+        label: 'CC Switch user manual',
+        href: 'https://github.com/farion1231/cc-switch/blob/main/docs/user-manual/en/README.md',
+      },
+    ],
   },
   {
     slug: 'opencode',
@@ -120,11 +189,17 @@ export const DOCS_GUIDES: DocsGuide[] = [
     title: 'OpenCode Setup',
     subtitle: 'OpenAI-compatible provider',
     description:
-      'Connect OpenCode to 94API as a custom provider and switch between available model groups.',
+      'Add a custom Chat Completions provider and select an accessible model in OpenCode.',
     protocols: ['Chat Completions'],
     baseUrl: 'https://94api.dev/v1',
-    model: 'gpt-5-mini',
     icon: Code2,
+    references: [
+      { label: 'OpenCode installation', href: 'https://opencode.ai/docs/' },
+      {
+        label: 'OpenCode custom provider',
+        href: 'https://opencode.ai/docs/providers/#custom-provider',
+      },
+    ],
   },
 ]
 

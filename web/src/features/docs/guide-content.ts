@@ -20,357 +20,590 @@ export type GuideSection = {
   note?: string
 }
 
-const verifyCurl = `curl https://94api.dev/v1/chat/completions \\
-  -H "Authorization: Bearer YOUR_94API_KEY" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "model": "gpt-5-mini",
-    "messages": [{"role": "user", "content": "Reply with: 94API connected"}]
-  }'`
+const account: GuideSection = {
+  id: 'account',
+  title: 'Prepare your account and key',
+  paragraphs: [
+    'Sign in, check your wallet balance, then open API Keys and select Create API Key. Creating a key does not add funds.',
+    'At the 20 September 2026 review, enabled channels used stable; default and low had no enabled channels. Select stable explicitly and check the current catalog before choosing another group.',
+    'Use an exact model ID available to your key and the required API format. A model name, protocol compatibility and support for every client feature are different things.',
+    'To add funds, use a method currently offered in your wallet or contact support@94api.dev. This guide does not assume online checkout is enabled.',
+  ],
+  note: 'Keep API keys out of browser-side code, public repositories, screenshots and support messages.',
+}
+
+const environment: GuideSection = {
+  id: 'environment',
+  title: 'Set the key and model',
+  paragraphs: [
+    'Replace YOUR_94API_KEY with your 94API key and YOUR_MODEL_ID with the exact model ID you selected. These are placeholders, not working credentials or model names.',
+    'Run the commands for your shell. Environment variables apply to this terminal and programs launched from it; start the client from the same terminal.',
+  ],
+  code: [
+    {
+      label: 'Bash / Zsh',
+      language: 'bash',
+      value: `export API94_KEY='YOUR_94API_KEY'
+export API94_MODEL='YOUR_MODEL_ID'`,
+    },
+    {
+      label: 'Windows PowerShell',
+      language: 'powershell',
+      value: `$env:API94_KEY = 'YOUR_94API_KEY'
+$env:API94_MODEL = 'YOUR_MODEL_ID'`,
+    },
+  ],
+}
+
+const verify: GuideSection = {
+  id: 'verify',
+  title: 'Verify the request',
+  paragraphs: [
+    'Send a short prompt, then inspect Usage Logs in 94API. Match the time, key, model, group and charged usage; do not rely on the model describing its own identity.',
+    'A successful text request does not verify streaming, tool calls, images or every client feature. Test each feature you intend to use.',
+  ],
+  note: 'Inference requests can consume paid balance. An HTTP 200 response from /api/status or a model listing is not a successful inference test.',
+}
+
+const responsesRequirement =
+  'Codex requires the Responses API. Confirm that your selected 94API model and route support /v1/responses; a successful Chat Completions request alone is not enough.'
+
+export const GUIDE_TROUBLESHOOTING = [
+  [
+    '401 / Unauthorized',
+    'Check that the complete 94API key is loaded, enabled and not expired. Check the authentication header before replacing a key.',
+  ],
+  [
+    '403 / model_not_found',
+    'Check key permissions, its group and the exact model ID. The selected group may have no available channel; contact support if the catalog and routing disagree.',
+  ],
+  [
+    'Insufficient quota / 429',
+    'Read the returned error: check account balance, key quota and request limits. For rate limiting, reduce concurrency and wait before retrying.',
+  ],
+  [
+    'Connection timeout',
+    'Check the endpoint, network and returned error. Verify the configured API format and avoid duplicating /v1; a timeout can also come from the upstream service.',
+  ],
+] as const
 
 export const GUIDE_CONTENT: Record<string, GuideSection[]> = {
   quickstart: [
+    account,
+    environment,
     {
-      id: 'create-key',
-      title: '1. Create an API key',
+      id: 'models',
+      title: 'Check the current model list',
       paragraphs: [
-        'Sign in to the 94API console, open API Keys, and create a key for the model groups you want to use.',
-        'Copy the key now and store it securely. 94API never needs your upstream provider key in client applications.',
+        'Models & pricing lists the current catalog. GET /v1/models checks which model IDs are visible to this key; it does not generate an answer.',
+        'gpt-5.5 was listed in stable on 20 September 2026. It is an example, not a permanent default. Update API94_MODEL to a currently accessible ID.',
+      ],
+      code: [
+        {
+          label: 'Bash / Zsh',
+          language: 'bash',
+          value: `curl --show-error --include 'https://94api.dev/v1/models' \\
+  -H "Authorization: Bearer $API94_KEY"`,
+        },
+        {
+          label: 'Windows PowerShell',
+          language: 'powershell',
+          value: `$headers = @{ Authorization = "Bearer $env:API94_KEY" }
+(Invoke-RestMethod -Uri 'https://94api.dev/v1/models' -Headers $headers).data`,
+        },
       ],
     },
     {
       id: 'first-request',
-      title: '2. Send your first request',
+      title: 'Send a Chat Completions request',
       paragraphs: [
-        'Use the OpenAI-compatible endpoint below. Replace the placeholder with your 94API API key.',
-      ],
-      code: [{ label: 'cURL', language: 'bash', value: verifyCurl }],
-      note: 'Never expose a production API key in browser-side code or a public repository.',
-    },
-    {
-      id: 'next',
-      title: '3. Choose your integration',
-      paragraphs: [
-        'The same key works with supported SDKs and coding tools. Continue with the dedicated guide for Codex, Claude Code, Gemini CLI, OpenCode, or CC-Switch.',
-      ],
-    },
-  ],
-  codex: [
-    {
-      id: 'create-key',
-      title: '1. Create an API key',
-      paragraphs: [
-        'Create an 94API key with access to your preferred OpenAI-compatible model. Keep the key ready for the local credential file.',
-      ],
-    },
-    {
-      id: 'install',
-      title: '2. Install Codex',
-      paragraphs: [
-        'Install Codex for your operating system, then open a new terminal.',
+        'The SDK base URL is https://94api.dev/v1. This raw HTTP example posts to https://94api.dev/v1/chat/completions and reads the variables set above.',
+        'Check the HTTP status and response body. A successful chat response contains choices and message content; report the actual error and request ID if it fails.',
       ],
       code: [
         {
-          label: 'Windows PowerShell',
-          language: 'powershell',
-          value:
-            'irm https://chatgpt.com/codex/install.ps1 | iex\ncodex --version',
+          label: 'Bash / Zsh',
+          language: 'bash',
+          value: String.raw`curl --show-error --include 'https://94api.dev/v1/chat/completions' \
+  -H "Authorization: Bearer $API94_KEY" \
+  -H 'Content-Type: application/json' \
+  --data "{\"model\":\"$API94_MODEL\",\"messages\":[{\"role\":\"user\",\"content\":\"Reply with: 94API connected\"}]}"`,
         },
         {
-          label: 'macOS / Linux',
-          language: 'bash',
-          value:
-            'curl -fsSL https://chatgpt.com/codex/install.sh | sh\ncodex --version',
+          label: 'Windows PowerShell',
+          language: 'powershell',
+          value: `$headers = @{ Authorization = "Bearer $env:API94_KEY" }
+$body = @{
+  model = $env:API94_MODEL
+  messages = @(@{ role = 'user'; content = 'Reply with: 94API connected' })
+} | ConvertTo-Json -Depth 4
+$response = Invoke-RestMethod -Method Post \`
+  -Uri 'https://94api.dev/v1/chat/completions' \`
+  -Headers $headers -ContentType 'application/json; charset=utf-8' \`
+  -Body ([System.Text.Encoding]::UTF8.GetBytes($body))
+$response.choices[0].message.content`,
         },
       ],
     },
+    verify,
+  ],
+  codex: [
+    account,
+    {
+      id: 'requirements',
+      title: 'Confirm client requirements',
+      paragraphs: [responsesRequirement],
+      note: 'This is a documentation-based configuration reference. End-to-end Codex compatibility with 94API has not been established by this guide.',
+    },
+    {
+      id: 'install',
+      title: 'Install the client',
+      paragraphs: [
+        'Install Codex from its official instructions. With a supported Node.js installation, the npm method below works in Bash and PowerShell. Record the installed version.',
+      ],
+      code: [
+        {
+          label: 'Bash / PowerShell',
+          language: 'shell',
+          value: 'npm install -g @openai/codex\ncodex --version',
+        },
+      ],
+    },
+    environment,
     {
       id: 'configure',
-      title: '3. Configure the 94API provider',
+      title: 'Configure the provider',
       paragraphs: [
-        'Create config.toml inside your user-level .codex directory. Store the API key in the separate 94api_key file.',
+        'Merge this configuration into the user-level ~/.codex/config.toml, or $HOME\\.codex\\config.toml in PowerShell. If CODEX_HOME is set, use its config.toml instead. Preserve unrelated settings.',
+        'The provider ID api94 must match in model_provider and the table name. env_key reads API94_KEY; the launch command below selects API94_MODEL. No ChatGPT login is required for this custom-provider credential.',
       ],
       code: [
         {
           label: 'config.toml',
           language: 'toml',
-          value: `model_provider = "94API"
-model = "gpt-5"
-model_reasoning_effort = "high"
-disable_response_storage = true
+          value: `model_provider = "api94"
 
-[model_providers.apimore]
+[model_providers.api94]
 name = "94API"
 base_url = "https://94api.dev/v1"
-wire_api = "responses"
-
-[model_providers.apimore.auth]
-command = "sh"
-args = ["-lc", "cat ~/.codex/94api_key"]`,
+env_key = "API94_KEY"
+wire_api = "responses"`,
         },
       ],
-      note: 'On Windows, use PowerShell to read $HOME\\.codex\\94api_key in the auth command.',
+      note: 'Current Codex documentation places provider settings in user configuration, not project-local .codex/config.toml. This example makes no data-retention or context-window guarantee.',
     },
     {
-      id: 'verify',
-      title: '4. Verify the connection',
+      id: 'start',
+      title: 'Start the client',
       paragraphs: [
-        'Open a new project directory and start Codex with the configured model.',
+        'Open a terminal in the project you intend to use. Start Codex with the model whose Responses support you confirmed.',
       ],
       code: [
         {
-          label: 'Terminal',
+          label: 'Bash / Zsh',
           language: 'bash',
-          value:
-            'mkdir my-94api-project\ncd my-94api-project\ncodex --model gpt-5',
-        },
-      ],
-    },
-  ],
-  'claude-code': [
-    {
-      id: 'create-key',
-      title: '1. Create an API key',
-      paragraphs: [
-        'Create an 94API key that can access a Claude model such as claude-opus-5.',
-      ],
-    },
-    {
-      id: 'install',
-      title: '2. Install Claude Code',
-      paragraphs: [
-        'Install the official Claude Code CLI and confirm that the command is available.',
-      ],
-      code: [
-        {
-          label: 'Terminal',
-          language: 'bash',
-          value: 'npm install -g @anthropic-ai/claude-code\nclaude --version',
-        },
-      ],
-    },
-    {
-      id: 'configure',
-      title: '3. Configure 94API',
-      paragraphs: [
-        'Set the Anthropic base URL and your 94API key in the terminal session that launches Claude Code.',
-      ],
-      code: [
-        {
-          label: 'macOS / Linux',
-          language: 'bash',
-          value: `export ANTHROPIC_BASE_URL="https://94api.dev"
-export ANTHROPIC_AUTH_TOKEN="YOUR_94API_KEY"
-export ANTHROPIC_MODEL="claude-opus-5"
-claude`,
+          value: 'codex --model "$API94_MODEL"',
         },
         {
           label: 'Windows PowerShell',
           language: 'powershell',
-          value: `$env:ANTHROPIC_BASE_URL="https://94api.dev"
-$env:ANTHROPIC_AUTH_TOKEN="YOUR_94API_KEY"
-$env:ANTHROPIC_MODEL="claude-opus-5"
-claude`,
+          value: 'codex --model $env:API94_MODEL',
+        },
+      ],
+    },
+    verify,
+  ],
+  'claude-code': [
+    account,
+    {
+      id: 'requirements',
+      title: 'Confirm client requirements',
+      paragraphs: [
+        'The reviewed 94API catalog contained GPT model IDs, not a listed Claude model. Messages-format conversion is not proof of Claude model availability or full Claude Code compatibility.',
+        'Anthropic documents gateway routing for Claude Code but does not support routing it to non-Claude models. Confirm a suitable model and client version with 94API support before using this configuration.',
+      ],
+    },
+    {
+      id: 'install',
+      title: 'Install the client',
+      paragraphs: [
+        'Use the official Claude Code installer for your operating system, then check the installed version.',
+      ],
+      code: [
+        {
+          label: 'Bash / Zsh',
+          language: 'bash',
+          value:
+            'curl -fsSL https://claude.ai/install.sh | bash\nclaude --version',
+        },
+        {
+          label: 'Windows PowerShell',
+          language: 'powershell',
+          value: 'irm https://claude.ai/install.ps1 | iex\nclaude --version',
+        },
+      ],
+    },
+    environment,
+    {
+      id: 'configure',
+      title: 'Configure the gateway connection',
+      paragraphs: [
+        'ANTHROPIC_BASE_URL uses the origin without /v1; the client adds /v1/messages. ANTHROPIC_AUTH_TOKEN sends a Bearer credential. Launch from this terminal after confirming model support.',
+      ],
+      code: [
+        {
+          label: 'Bash / Zsh',
+          language: 'bash',
+          value: `export ANTHROPIC_BASE_URL="https://94api.dev"
+export ANTHROPIC_AUTH_TOKEN="$API94_KEY"
+claude --model "$API94_MODEL"`,
+        },
+        {
+          label: 'Windows PowerShell',
+          language: 'powershell',
+          value: `$env:ANTHROPIC_BASE_URL = 'https://94api.dev'
+$env:ANTHROPIC_AUTH_TOKEN = $env:API94_KEY
+claude --model $env:API94_MODEL`,
         },
       ],
     },
     {
-      id: 'verify',
-      title: '4. Verify the connection',
+      id: 'status',
+      title: 'Check the active connection',
       paragraphs: [
-        'Ask Claude Code to report the active model. A normal response confirms that the setup is complete.',
+        'Run /status in Claude Code. Confirm the Anthropic base URL and credential source refer to this gateway rather than an existing claude.ai login. A model describing itself is not connection verification.',
       ],
     },
+    verify,
   ],
   'gemini-cli': [
+    account,
+    {
+      id: 'requirements',
+      title: 'Confirm client requirements',
+      paragraphs: [
+        'The reviewed 94API catalog did not list a Gemini model. A Gemini-format endpoint does not establish Gemini CLI compatibility. Confirm the model and required client features before using this reference.',
+        'Gemini CLI supports a custom base URL, but authentication behavior differs by version. Choosing the main model does not override subagent or other auxiliary models.',
+      ],
+    },
     {
       id: 'install',
-      title: '1. Install Gemini CLI',
+      title: 'Install the client',
       paragraphs: [
-        'Install the official CLI and verify the installed version.',
+        'Follow the official Gemini CLI installation and runtime requirements. Check the installed version before choosing matching authentication instructions.',
       ],
       code: [
         {
-          label: 'Terminal',
-          language: 'bash',
+          label: 'Bash / PowerShell',
+          language: 'shell',
           value: 'npm install -g @google/gemini-cli\ngemini --version',
         },
       ],
     },
+    environment,
     {
       id: 'configure',
-      title: '2. Configure 94API',
+      title: 'Configure the gateway connection',
       paragraphs: [
-        'Provide the 94API key and Gemini-compatible base URL before starting the CLI.',
+        'Set GOOGLE_GEMINI_BASE_URL to https://94api.dev, not the OpenAI /v1 base. Set GEMINI_API_KEY from API94_KEY and select the confirmed model explicitly.',
+        'Use /auth to check the active authentication method. Follow the API-key or gateway setup documented for your installed version; an existing Google-login session is not proof that the 94API key is active.',
       ],
       code: [
         {
-          label: 'macOS / Linux',
+          label: 'Bash / Zsh',
           language: 'bash',
-          value: `export GEMINI_API_KEY="YOUR_94API_KEY"
+          value: `export GEMINI_API_KEY="$API94_KEY"
 export GOOGLE_GEMINI_BASE_URL="https://94api.dev"
-gemini --model gemini-3.5-flash`,
+gemini --model "$API94_MODEL"`,
         },
         {
           label: 'Windows PowerShell',
           language: 'powershell',
-          value: `$env:GEMINI_API_KEY="YOUR_94API_KEY"
-$env:GOOGLE_GEMINI_BASE_URL="https://94api.dev"
-gemini --model gemini-3.5-flash`,
+          value: `$env:GEMINI_API_KEY = $env:API94_KEY
+$env:GOOGLE_GEMINI_BASE_URL = 'https://94api.dev'
+gemini --model $env:API94_MODEL`,
         },
       ],
     },
-    {
-      id: 'verify',
-      title: '3. Verify the connection',
-      paragraphs: [
-        'Send a short prompt and confirm the response appears without an authentication or model error.',
-      ],
-    },
+    verify,
   ],
   'openai-sdk': [
+    account,
     {
       id: 'install',
-      title: '1. Install the SDK',
+      title: 'Install an SDK in your project',
       paragraphs: [
-        'Choose the official package for your application language.',
+        'Use Node.js 22 or later for these JavaScript examples, or Python 3.10 or later for Python. Choose one SDK; the Python commands create an isolated .venv in your project.',
       ],
       code: [
-        { label: 'JavaScript', language: 'bash', value: 'npm install openai' },
-        { label: 'Python', language: 'bash', value: 'pip install openai' },
+        { label: 'Node.js', language: 'shell', value: 'npm install openai' },
+        {
+          label: 'Python — Bash / Zsh',
+          language: 'bash',
+          value:
+            'python3 -m venv .venv\n.venv/bin/python -m pip install openai',
+        },
+        {
+          label: 'Python — PowerShell',
+          language: 'powershell',
+          value:
+            'py -m venv .venv\n.\\.venv\\Scripts\\python.exe -m pip install openai',
+        },
       ],
     },
+    environment,
     {
       id: 'configure',
-      title: '2. Create the 94API client',
+      title: 'Create the SDK client',
       paragraphs: [
-        'Set baseURL to 94API and load the key from a server-side environment variable.',
+        'Save the JavaScript example as example.mjs or the Python example as example.py. Both use API94_KEY and API94_MODEL from the environment and the OpenAI-compatible /v1 base.',
       ],
       code: [
         {
-          label: 'JavaScript',
+          label: 'example.mjs',
           language: 'javascript',
           value: `import OpenAI from "openai";
 
+if (!process.env.API94_KEY || !process.env.API94_MODEL) {
+  throw new Error("Set API94_KEY and API94_MODEL first");
+}
 const client = new OpenAI({
   apiKey: process.env.API94_KEY,
   baseURL: "https://94api.dev/v1",
 });
 
-const response = await client.responses.create({
-  model: "gpt-5-mini",
-  input: "Reply with: 94API connected",
+const response = await client.chat.completions.create({
+  model: process.env.API94_MODEL,
+  messages: [{ role: "user", content: "Reply with: 94API connected" }],
 });
 
-console.log(response.output_text);`,
+console.log(response.choices[0].message.content);`,
         },
         {
-          label: 'Python',
+          label: 'example.py',
           language: 'python',
           value: `import os
 from openai import OpenAI
 
 client = OpenAI(
-    api_key=os.environ["94api_key"],
+    api_key=os.environ["API94_KEY"],
     base_url="https://94api.dev/v1",
 )
 
-response = client.responses.create(
-    model="gpt-5-mini",
-    input="Reply with: 94API connected",
+response = client.chat.completions.create(
+    model=os.environ["API94_MODEL"],
+    messages=[{"role": "user", "content": "Reply with: 94API connected"}],
 )
 
-print(response.output_text)`,
+print(response.choices[0].message.content)`,
         },
       ],
     },
-  ],
-  'anthropic-sdk': [
     {
-      id: 'install',
-      title: '1. Install the SDK',
+      id: 'run',
+      title: 'Run the saved example',
       paragraphs: [
-        'Install the official Anthropic library for JavaScript or Python.',
+        'Run the command matching your SDK from the folder containing the saved file, in the terminal where you set the environment variables.',
       ],
       code: [
+        { label: 'Node.js', language: 'shell', value: 'node example.mjs' },
         {
-          label: 'JavaScript',
+          label: 'Python — Bash / Zsh',
           language: 'bash',
-          value: 'npm install @anthropic-ai/sdk',
+          value: '.venv/bin/python example.py',
         },
-        { label: 'Python', language: 'bash', value: 'pip install anthropic' },
+        {
+          label: 'Python — PowerShell',
+          language: 'powershell',
+          value: '.\\.venv\\Scripts\\python.exe example.py',
+        },
       ],
     },
     {
-      id: 'configure',
-      title: '2. Create the 94API client',
+      id: 'responses',
+      title: 'Responses API alternative',
       paragraphs: [
-        'Use the native Messages API while routing the request through 94API.',
+        'Only use this alternative after confirming Responses support for your selected model and route. In the saved example, replace the request and print statements below the client initialization with the matching block.',
       ],
       code: [
         {
           label: 'JavaScript',
           language: 'javascript',
+          value: `const response = await client.responses.create({
+  model: process.env.API94_MODEL,
+  input: "Reply with: 94API connected",
+});
+console.log(response.output_text);`,
+        },
+        {
+          label: 'Python',
+          language: 'python',
+          value: `response = client.responses.create(
+    model=os.environ["API94_MODEL"],
+    input="Reply with: 94API connected",
+)
+print(response.output_text)`,
+        },
+      ],
+    },
+    verify,
+  ],
+  'anthropic-sdk': [
+    account,
+    {
+      id: 'requirements',
+      title: 'Confirm client requirements',
+      paragraphs: [
+        'This example uses the client-facing Messages format. Confirm a model and route supporting /v1/messages before running it. Format conversion does not mean the upstream model is Claude or that every Anthropic feature is preserved.',
+      ],
+    },
+    {
+      id: 'install',
+      title: 'Install an SDK in your project',
+      paragraphs: [
+        'Use Node.js 22 or later for these JavaScript examples, or Python 3.10 or later for Python. Choose one SDK; the Python commands create an isolated .venv in your project.',
+      ],
+      code: [
+        {
+          label: 'Node.js',
+          language: 'shell',
+          value: 'npm install @anthropic-ai/sdk',
+        },
+        {
+          label: 'Python — Bash / Zsh',
+          language: 'bash',
+          value:
+            'python3 -m venv .venv\n.venv/bin/python -m pip install anthropic',
+        },
+        {
+          label: 'Python — PowerShell',
+          language: 'powershell',
+          value:
+            'py -m venv .venv\n.\\.venv\\Scripts\\python.exe -m pip install anthropic',
+        },
+      ],
+    },
+    environment,
+    {
+      id: 'configure',
+      title: 'Create the SDK client',
+      paragraphs: [
+        'Save the JavaScript example as example.mjs or the Python example as example.py. The Anthropic SDK base is https://94api.dev; the SDK adds /v1/messages and sends the key in x-api-key.',
+      ],
+      code: [
+        {
+          label: 'example.mjs',
+          language: 'javascript',
           value: `import Anthropic from "@anthropic-ai/sdk";
 
+if (!process.env.API94_KEY || !process.env.API94_MODEL) {
+  throw new Error("Set API94_KEY and API94_MODEL first");
+}
 const client = new Anthropic({
   apiKey: process.env.API94_KEY,
   baseURL: "https://94api.dev",
 });
 
 const message = await client.messages.create({
-  model: "claude-opus-4-7",
-  max_tokens: 512,
+  model: process.env.API94_MODEL,
+  max_tokens: 128,
   messages: [{ role: "user", content: "Hello from 94API" }],
-});`,
+});
+console.log(message.content);`,
+        },
+        {
+          label: 'example.py',
+          language: 'python',
+          value: `import os
+from anthropic import Anthropic
+
+client = Anthropic(
+    api_key=os.environ["API94_KEY"],
+    base_url="https://94api.dev",
+)
+message = client.messages.create(
+    model=os.environ["API94_MODEL"],
+    max_tokens=128,
+    messages=[{"role": "user", "content": "Hello from 94API"}],
+)
+print(message.content)`,
         },
       ],
     },
+    {
+      id: 'run',
+      title: 'Run the saved example',
+      paragraphs: [
+        'Run the command matching your SDK from the folder containing the saved file, in the terminal where you set the environment variables.',
+      ],
+      code: [
+        { label: 'Node.js', language: 'shell', value: 'node example.mjs' },
+        {
+          label: 'Python — Bash / Zsh',
+          language: 'bash',
+          value: '.venv/bin/python example.py',
+        },
+        {
+          label: 'Python — PowerShell',
+          language: 'powershell',
+          value: '.\\.venv\\Scripts\\python.exe example.py',
+        },
+      ],
+    },
+    verify,
   ],
   'cc-switch': [
+    account,
     {
       id: 'install',
-      title: '1. Install CC-Switch',
+      title: 'Install the client',
       paragraphs: [
-        'Install CC-Switch from its official release and open the provider profile manager.',
+        'Download CC Switch from ccswitch.io or the farion1231/cc-switch GitHub releases. Record its version. It manages client configuration; it does not provide model access or credit.',
       ],
     },
     {
       id: 'profile',
-      title: '2. Create an 94API profile',
+      title: 'Add a custom provider',
       paragraphs: [
-        'Choose the tool you want to configure, create a custom provider named 94API, and enter the matching base URL from the table above.',
-        'Paste your 94API API key only into the local credential field. Select a supported model, then save the profile.',
+        'Select the target application in App Switcher, click + / Add Provider, and choose Custom. Use 94API as the display name and enter your key in the credential field.',
+        'For OpenCode, choose OpenAI Compatible for Chat Completions or OpenAI Responses only for a confirmed Responses route. Both use https://94api.dev/v1. Add the exact model ID; do not invent context or output limits.',
+        'For Codex, use a confirmed Responses route and inspect the generated Config TOML and Auth JSON. CC Switch file-managed authentication and the standalone env_key recipe are different methods; do not mix them blindly.',
+        'Fetch Models can discover IDs, but it does not test inference. Optional local routing requires the CC Switch proxy to remain running and is not required by this guide.',
       ],
     },
     {
       id: 'switch',
-      title: '3. Activate and verify',
+      title: 'Apply the configuration',
       paragraphs: [
-        'Activate the 94API profile, fully restart the target CLI, and send a short test prompt.',
+        'For Codex, enable the provider. For OpenCode, add the provider to its configuration, then choose its model in OpenCode. Exact button labels depend on the CC Switch version.',
+        'Restart the target client from the intended environment and inspect its active provider. Existing environment variables or another configuration manager can override the saved settings.',
       ],
     },
+    verify,
   ],
   opencode: [
+    account,
     {
       id: 'install',
-      title: '1. Install OpenCode',
+      title: 'Install the client',
       paragraphs: [
-        'Install OpenCode and confirm that the command is available in a new terminal.',
+        'Install OpenCode using its official instructions and record the version. This reference follows the linked custom-provider documentation; verify its applicability before using a different major version.',
       ],
       code: [
         {
-          label: 'Terminal',
-          language: 'bash',
+          label: 'Bash / PowerShell',
+          language: 'shell',
           value: 'npm install -g opencode-ai\nopencode --version',
         },
       ],
     },
+    environment,
     {
       id: 'configure',
-      title: '2. Add 94API as a provider',
+      title: 'Add a custom provider',
       paragraphs: [
-        'Add an OpenAI-compatible provider to your OpenCode configuration.',
+        'Merge this provider into opencode.json in your project. Replace the YOUR_MODEL_ID property name with the exact ID selected above; that property name is not read from API94_MODEL.',
+        'This configuration uses @ai-sdk/openai-compatible for Chat Completions and reads API94_KEY. A Responses-only route needs @ai-sdk/openai instead. Do not guess model context or output limits.',
       ],
       code: [
         {
@@ -379,15 +612,15 @@ const message = await client.messages.create({
           value: `{
   "$schema": "https://opencode.ai/config.json",
   "provider": {
-    "94API": {
+    "api94": {
       "npm": "@ai-sdk/openai-compatible",
       "name": "94API",
       "options": {
         "baseURL": "https://94api.dev/v1",
-        "apiKey": "{env:94api_key}"
+        "apiKey": "{env:API94_KEY}"
       },
       "models": {
-        "gpt-5-mini": { "name": "GPT-5 Mini" }
+        "YOUR_MODEL_ID": { "name": "94API model" }
       }
     }
   }
@@ -396,11 +629,15 @@ const message = await client.messages.create({
       ],
     },
     {
-      id: 'verify',
-      title: '3. Start OpenCode',
+      id: 'start',
+      title: 'Start the client',
       paragraphs: [
-        'Export 94api_key, start OpenCode, and select the 94API model from the model picker.',
+        'Start opencode from this project and terminal. Use /models and choose the model under 94API. The provider ID is api94; selecting a different saved provider uses that provider instead.',
+      ],
+      code: [
+        { label: 'Bash / PowerShell', language: 'shell', value: 'opencode' },
       ],
     },
+    verify,
   ],
 }

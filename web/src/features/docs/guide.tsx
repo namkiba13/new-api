@@ -22,38 +22,39 @@ import { useTranslation } from 'react-i18next'
 
 import { PublicLayout } from '@/components/layout'
 import { Footer } from '@/components/layout/components/footer'
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet'
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard'
 import { usePageSeo, type SeoLocale } from '@/lib/page-seo'
 
-import { DOCS_GUIDES, type DocsGuide } from './data'
-import { GUIDE_CONTENT, type GuideCode } from './guide-content'
+import { DOCS_GUIDES, DOCS_REVIEW_DATE, type DocsGuide } from './data'
 import {
-  docsGuideDescription,
-  docsGuideTitle,
-  docsSectionParagraphs,
-  docsSectionTitle,
-  docsUi,
-} from './translations'
+  GUIDE_CONTENT,
+  GUIDE_TROUBLESHOOTING,
+  type GuideCode,
+} from './guide-content'
+import { docsGuideDescription, docsGuideTitle, docsUi } from './translations'
 
 function CodeBlock(props: { code: GuideCode; copyLabel: string }) {
-  const { copyToClipboard } = useCopyToClipboard()
-  const [copied, setCopied] = useState(false)
-  const handleCopy = async () => {
-    await copyToClipboard(props.code.value)
-    setCopied(true)
-    window.setTimeout(() => setCopied(false), 1400)
-  }
+  const { t } = useTranslation()
+  const { copyToClipboard, copiedText } = useCopyToClipboard()
+  const copied = copiedText === props.code.value
 
   return (
     <div className='overflow-hidden border bg-[#111310] text-[#eef1ea]'>
-      <div className='flex h-10 items-center justify-between border-b border-white/10 px-3'>
-        <span className='font-mono text-[10px] font-bold tracking-[0.08em] text-white/55 uppercase'>
-          {props.code.label} · {props.code.language}
+      <div className='flex min-h-10 items-center justify-between gap-2 border-b border-white/10 px-3 py-1'>
+        <span className='min-w-0 font-mono text-[10px] font-bold tracking-[0.08em] break-words text-white/55 uppercase'>
+          {t(props.code.label)} · {props.code.language}
         </span>
         <button
           type='button'
-          onClick={handleCopy}
-          className='flex size-7 items-center justify-center text-white/55 transition-colors hover:bg-white/10 hover:text-white'
+          onClick={() => void copyToClipboard(props.code.value)}
+          className='flex size-9 shrink-0 items-center justify-center text-white/55 transition-colors hover:bg-white/10 hover:text-white'
           aria-label={props.copyLabel}
         >
           {copied ? (
@@ -97,21 +98,40 @@ export function DocsGuidePage(props: { guide: DocsGuide }) {
               <ArrowLeft className='size-4' />
               {docsUi(i18n.language, 'back')}
             </Link>
-            <button
-              type='button'
-              onClick={() => setMobileNavOpen(true)}
-              className='hover:bg-muted flex h-9 items-center gap-2 border px-3 text-xs font-medium lg:hidden'
-            >
-              <Menu className='size-4' />
-              {docsUi(i18n.language, 'browse')}
-            </button>
+            <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
+              <SheetTrigger className='hover:bg-muted flex h-9 items-center gap-2 border px-3 text-xs font-medium lg:hidden'>
+                <Menu className='size-4' />
+                {docsUi(i18n.language, 'browse')}
+              </SheetTrigger>
+              <SheetContent
+                className='docs-shell inset-y-3 right-3 z-60 h-auto w-[calc(100%_-_1.5rem)] max-w-sm gap-0 border shadow-2xl'
+                overlayClassName='z-60 bg-black/55 backdrop-blur-sm'
+                showCloseButton={false}
+              >
+                <div className='flex items-center justify-between border-b p-4'>
+                  <SheetTitle>{docsUi(i18n.language, 'setup')}</SheetTitle>
+                  <SheetClose
+                    className='hover:bg-muted flex size-9 items-center justify-center border'
+                    aria-label={docsUi(i18n.language, 'close')}
+                  >
+                    <X className='size-4' />
+                  </SheetClose>
+                </div>
+                <div className='overflow-y-auto p-4'>
+                  <DocsGuideNavigation
+                    currentSlug={props.guide.slug}
+                    onNavigate={() => setMobileNavOpen(false)}
+                  />
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
 
           <div className='grid lg:grid-cols-[260px_minmax(0,1fr)_220px]'>
             <aside className='hidden border-e py-8 pe-6 lg:block'>
               <DocsGuideNavigation currentSlug={props.guide.slug} />
             </aside>
-            <main className='min-w-0 py-10 lg:px-10 xl:px-14'>
+            <main className='@container min-w-0 py-10 lg:px-10 xl:px-14'>
               <header className='max-w-4xl border-b pb-10'>
                 <div className='mb-7 flex size-12 items-center justify-center border bg-[var(--docs-accent)] text-black'>
                   <Icon className='size-6' />
@@ -119,7 +139,7 @@ export function DocsGuidePage(props: { guide: DocsGuide }) {
                 <p className='docs-kicker font-mono text-xs font-semibold tracking-[0.14em] uppercase'>
                   {docsUi(i18n.language, 'apiDocs')} / {t(props.guide.eyebrow)}
                 </p>
-                <h1 className='mt-4 text-[clamp(2.75rem,7vw,5rem)] leading-[0.95] font-semibold tracking-[-0.055em]'>
+                <h1 className='mt-4 text-[clamp(2.75rem,10cqw,5rem)] leading-[0.95] font-semibold tracking-[-0.055em] break-words'>
                   {docsGuideTitle(i18n.language, props.guide)}
                 </h1>
                 <p className='text-muted-foreground mt-6 max-w-3xl text-base leading-relaxed sm:text-lg'>
@@ -143,6 +163,39 @@ export function DocsGuidePage(props: { guide: DocsGuide }) {
               </header>
 
               <div className='max-w-4xl'>
+                <section
+                  className='space-y-3 border-b py-6'
+                  aria-label={t('Official references')}
+                >
+                  <p className='text-sm'>
+                    {t('Sources reviewed')}:{' '}
+                    <time dateTime={DOCS_REVIEW_DATE}>{DOCS_REVIEW_DATE}</time>
+                  </p>
+                  <p className='text-muted-foreground text-sm'>
+                    {t(
+                      'These are source-checked configuration examples, not a claim that every client feature has been tested end to end on 94API.'
+                    )}
+                  </p>
+                  <div className='flex flex-wrap gap-x-4 gap-y-2 text-sm'>
+                    <Link
+                      to='/pricing'
+                      className='underline underline-offset-4'
+                    >
+                      {t('Models & pricing')}
+                    </Link>
+                    {props.guide.references.map((reference) => (
+                      <a
+                        key={reference.href}
+                        href={reference.href}
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        className='break-words underline underline-offset-4'
+                      >
+                        {t(reference.label)}
+                      </a>
+                    ))}
+                  </div>
+                </section>
                 {sections.map((section) => (
                   <section
                     key={section.id}
@@ -150,20 +203,10 @@ export function DocsGuidePage(props: { guide: DocsGuide }) {
                     className='scroll-mt-28 border-b py-10 sm:py-12'
                   >
                     <h2 className='text-2xl font-semibold tracking-[-0.035em] sm:text-3xl'>
-                      {docsSectionTitle(
-                        i18n.language,
-                        section.id,
-                        section.title
-                      )}
+                      {t(section.title)}
                     </h2>
                     <div className='mt-5 space-y-4'>
-                      {(
-                        docsSectionParagraphs(
-                          i18n.language,
-                          props.guide,
-                          section.id
-                        ) || section.paragraphs
-                      ).map((paragraph) => (
+                      {section.paragraphs.map((paragraph) => (
                         <p
                           key={paragraph}
                           className='text-muted-foreground text-[15px] leading-7'
@@ -186,13 +229,7 @@ export function DocsGuidePage(props: { guide: DocsGuide }) {
                     {section.note && (
                       <div className='mt-7 flex gap-3 border-s-2 border-[var(--docs-accent)] bg-[var(--docs-accent-soft)] p-4'>
                         <Info className='mt-0.5 size-4 shrink-0 text-[var(--docs-accent)]' />
-                        <p className='text-sm leading-6'>
-                          {docsSectionParagraphs(
-                            i18n.language,
-                            props.guide,
-                            section.id
-                          )?.[0] || t(section.note)}
-                        </p>
+                        <p className='text-sm leading-6'>{t(section.note)}</p>
                       </div>
                     )}
                   </section>
@@ -215,23 +252,10 @@ export function DocsGuidePage(props: { guide: DocsGuide }) {
                         </tr>
                       </thead>
                       <tbody>
-                        {[
-                          [
-                            '401 / Unauthorized',
-                            'Create a new key and confirm that the complete value is being used.',
-                          ],
-                          [
-                            'model_not_found',
-                            'Choose a model enabled for the API key group or copy its exact catalog name.',
-                          ],
-                          [
-                            'Connection timeout',
-                            'Check the Base URL, network connection, and remove any trailing duplicate /v1.',
-                          ],
-                        ].map(([symptom, solution]) => (
+                        {GUIDE_TROUBLESHOOTING.map(([symptom, solution]) => (
                           <tr key={symptom} className='border-t'>
                             <td className='border-e p-3 font-mono text-xs font-semibold'>
-                              {symptom}
+                              {t(symptom)}
                             </td>
                             <td className='text-muted-foreground p-3'>
                               {t(solution)}
@@ -275,11 +299,7 @@ export function DocsGuidePage(props: { guide: DocsGuide }) {
                       href={`#${section.id}`}
                       className='text-muted-foreground hover:text-foreground block border-s ps-3 text-xs leading-5 transition-colors hover:border-[var(--docs-accent)]'
                     >
-                      {docsSectionTitle(
-                        i18n.language,
-                        section.id,
-                        section.title
-                      )}
+                      {t(section.title)}
                     </a>
                   ))}
                   <a
@@ -294,29 +314,6 @@ export function DocsGuidePage(props: { guide: DocsGuide }) {
           </div>
         </div>
 
-        {mobileNavOpen && (
-          <div className='fixed inset-0 z-60 bg-black/55 p-3 backdrop-blur-sm lg:hidden'>
-            <div className='bg-background ms-auto flex h-full w-full max-w-sm flex-col border shadow-2xl'>
-              <div className='flex items-center justify-between border-b p-4'>
-                <strong>{docsUi(i18n.language, 'setup')}</strong>
-                <button
-                  type='button'
-                  onClick={() => setMobileNavOpen(false)}
-                  className='hover:bg-muted flex size-9 items-center justify-center border'
-                  aria-label={docsUi(i18n.language, 'close')}
-                >
-                  <X className='size-4' />
-                </button>
-              </div>
-              <div className='overflow-y-auto p-4'>
-                <DocsGuideNavigation
-                  currentSlug={props.guide.slug}
-                  onNavigate={() => setMobileNavOpen(false)}
-                />
-              </div>
-            </div>
-          </div>
-        )}
         <Footer />
       </div>
     </PublicLayout>
@@ -325,7 +322,7 @@ export function DocsGuidePage(props: { guide: DocsGuide }) {
 
 function MetaItem(props: { label: string; value: string; last?: boolean }) {
   return (
-    <div className={`border-b p-4 ${props.last ? '' : 'sm:border-e'}`}>
+    <div className={`min-w-0 border-b p-4 ${props.last ? '' : 'sm:border-e'}`}>
       <dt className='text-muted-foreground font-mono text-[9px] font-bold uppercase'>
         {props.label}
       </dt>

@@ -24,46 +24,12 @@ export function DocsIndex() {
   const { copyToClipboard } = useCopyToClipboard()
   const [search, setSearch] = useState('')
 
-  const seoCopy = useMemo(() => {
-    const copy = {
-      en: [
-        '94API API Documentation – Setup Guides',
-        'Connect Codex, Claude Code, Gemini CLI, OpenCode, CC-Switch, and official SDKs to the 94API AI gateway.',
-      ],
-      vi: [
-        'Tài liệu API 94API – Hướng dẫn cài đặt',
-        'Kết nối Codex, Claude Code, Gemini CLI, OpenCode, CC-Switch và các SDK chính thức với cổng AI 94API.',
-      ],
-      zhCN: [
-        '94API API 文档 – 设置指南',
-        '将 Codex、Claude Code、Gemini CLI、OpenCode、CC-Switch 和官方 SDK 连接到 94API AI 网关。',
-      ],
-      zhTW: [
-        '94API API 文件 – 設定指南',
-        '將 Codex、Claude Code、Gemini CLI、OpenCode、CC-Switch 與官方 SDK 連接至 94API AI 閘道。',
-      ],
-      fr: [
-        "Documentation de l'API 94API – Guides de configuration",
-        'Connectez Codex, Claude Code, Gemini CLI, OpenCode, CC-Switch et les SDK officiels à la passerelle IA 94API.',
-      ],
-      ru: [
-        'Документация API 94API — Руководства по настройке',
-        'Подключите Codex, Claude Code, Gemini CLI, OpenCode, CC-Switch и официальные SDK к ИИ-шлюзу 94API.',
-      ],
-      ja: [
-        '94API APIドキュメント – セットアップガイド',
-        'Codex、Claude Code、Gemini CLI、OpenCode、CC-Switch、公式SDKを94API AIゲートウェイに接続します。',
-      ],
-    } as const
-    return copy[i18n.language as keyof typeof copy] || copy.en
-  }, [i18n.language])
-
   let seoLocale = i18n.language as SeoLocale
   if (i18n.language === 'zhCN') seoLocale = 'zh-CN'
   if (i18n.language === 'zhTW') seoLocale = 'zh-TW'
   usePageSeo({
-    title: seoCopy[0],
-    description: seoCopy[1],
+    title: `${docsUi(i18n.language, 'apiDocs')} – ${docsUi(i18n.language, 'setup')}`,
+    description: docsUi(i18n.language, 'summary'),
     locale: seoLocale,
     path: '/docs',
   })
