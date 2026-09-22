@@ -76,6 +76,47 @@ func TestCalculateTextQuotaSummaryUnifiedForClaudeSemantic(t *testing.T) {
 	require.Equal(t, 1488, chatSummary.Quota)
 }
 
+func TestAzureImageCachePricing(t *testing.T) {
+	// Azure Global Sunburst, USD/1M: text 5, cached text 1.25,
+	// image input 8, cached image 2, image output 30.
+	for _, tc := range []struct {
+		name                          string
+		cache, cachedImage, wantQuota int
+	}{
+		{"uncached", 0, 0, 5200},
+		{"text cache", 100, 0, 5013},
+		{"image cache", 500, 500, 3700},
+		{"mixed cache", 600, 500, 3513},
+		{"fully cached input", 1000, 800, 2425},
+		{"negative image cache ignored", 100, -1, 5013},
+		{"image cache bounded by cache total", 100, 900, 4900},
+		{"image cache bounded by image total", 1000, 900, 2425},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx, _ := gin.CreateTestContext(httptest.NewRecorder())
+			info := &relaycommon.RelayInfo{
+				RelayFormat:     types.RelayFormatOpenAIImage,
+				OriginModelName: "gpt-image-2.5-sunburst",
+				StartTime:       time.Now(),
+				PriceData: hosttypes.PriceData{ModelRatio: 2.5, CompletionRatio: 6, ImageRatio: 1.6, CacheRatio: 0.25,
+					GroupRatioInfo: hosttypes.GroupRatioInfo{GroupRatio: 1}},
+			}
+			usage := &dto.Usage{
+				PromptTokens: 1000, CompletionTokens: 100,
+				PromptTokensDetails: dto.InputTokenDetails{
+					TextTokens: 200, ImageTokens: 800, CachedTokens: tc.cache,
+					CachedTokensDetails: &dto.CachedTokenDetails{ImageTokens: tc.cachedImage},
+				},
+			}
+			summary := calculateTextQuotaSummary(ctx, info, usage)
+			assert.Equal(t, tc.wantQuota, summary.Quota)
+			assert.Equal(t, 1000, summary.PromptTokens, "raw input totals must remain intact")
+			assert.Equal(t, 800, summary.ImageTokens)
+			assert.Equal(t, tc.cache, summary.CacheTokens)
+		})
+	}
+}
+
 func TestCalculateTextQuotaSummaryUsesSplitClaudeCacheCreationRatios(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()

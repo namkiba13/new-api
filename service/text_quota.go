@@ -47,6 +47,7 @@ type textQuotaSummary struct {
 	CacheCreationTokens5m  int
 	CacheCreationTokens1h  int
 	ImageTokens            int
+	CachedImageTokens      int
 	AudioTokens            int
 	ModelName              string
 	TokenName              string
@@ -264,6 +265,9 @@ func calculateTextQuotaSummary(ctx *gin.Context, relayInfo *relaycommon.RelayInf
 	summary.ImageTokens = usage.PromptTokensDetails.ImageTokens
 	summary.AudioTokens = usage.PromptTokensDetails.AudioTokens
 	legacyClaudeDerived := isLegacyClaudeDerivedOpenAIUsage(relayInfo, usage)
+	if details := usage.PromptTokensDetails.CachedTokensDetails; details != nil && !summary.IsClaudeUsageSemantic && !legacyClaudeDerived {
+		summary.CachedImageTokens = max(0, min(details.ImageTokens, summary.CacheTokens, summary.ImageTokens))
+	}
 	isOpenRouterClaudeBilling := relayInfo.ChannelMeta != nil &&
 		relayInfo.ChannelType == constant.ChannelTypeOpenRouter &&
 		summary.IsClaudeUsageSemantic
@@ -283,6 +287,7 @@ func calculateTextQuotaSummary(ctx *gin.Context, relayInfo *relaycommon.RelayInf
 	dPromptTokens := decimal.NewFromInt(int64(summary.PromptTokens))
 	dCacheTokens := decimal.NewFromInt(int64(summary.CacheTokens))
 	dImageTokens := decimal.NewFromInt(int64(summary.ImageTokens))
+	dCachedImageTokens := decimal.NewFromInt(int64(summary.CachedImageTokens))
 	dAudioTokens := decimal.NewFromInt(int64(summary.AudioTokens))
 	dCompletionTokens := decimal.NewFromInt(int64(summary.CompletionTokens))
 	dCachedCreationTokens := decimal.NewFromInt(int64(summary.CacheCreationTokens))
@@ -309,7 +314,10 @@ func calculateTextQuotaSummary(ctx *gin.Context, relayInfo *relaycommon.RelayInf
 			if !summary.IsClaudeUsageSemantic && !legacyClaudeDerived {
 				baseTokens = baseTokens.Sub(dCacheTokens)
 			}
-			cachedTokensWithRatio = dCacheTokens.Mul(dCacheRatio)
+			// Image cache is part of both cache and image totals. Price it once,
+			// with the same cache discount applied to the image input price.
+			cachedTokensWithRatio = dCacheTokens.Sub(dCachedImageTokens).Mul(dCacheRatio).
+				Add(dCachedImageTokens.Mul(dImageRatio).Mul(dCacheRatio))
 		}
 
 		var cachedCreationTokensWithRatio decimal.Decimal
@@ -330,6 +338,7 @@ func calculateTextQuotaSummary(ctx *gin.Context, relayInfo *relaycommon.RelayInf
 		}
 
 		var imageTokensWithRatio decimal.Decimal
+		dImageTokens = dImageTokens.Sub(dCachedImageTokens)
 		if !dImageTokens.IsZero() {
 			baseTokens = baseTokens.Sub(dImageTokens)
 			imageTokensWithRatio = dImageTokens.Mul(dImageRatio)
@@ -484,6 +493,10 @@ func PostTextConsumeQuota(ctx *gin.Context, relayInfo *relaycommon.RelayInfo, us
 		other.SetPublic("image", true)
 		other.SetPublic("image_ratio", summary.ImageRatio)
 		other.SetPublic("image_output", summary.ImageTokens)
+	}
+	if summary.CachedImageTokens > 0 {
+		other.SetPublic("image_cache_read_tokens", summary.CachedImageTokens)
+		other.SetPublic("image_cache_ratio", summary.ImageRatio*summary.CacheRatio)
 	}
 	appendToolSurchargeLogInfo(other, summary.ToolSurchargeItems)
 	if summary.AudioInputPrice > 0 && summary.AudioTokens > 0 {

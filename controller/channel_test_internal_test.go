@@ -58,6 +58,20 @@ func TestValidateChannelProxy(t *testing.T) {
 	}
 }
 
+func TestImageChannelTestEndpoint(t *testing.T) {
+	channel := &model.Channel{Type: constant.ChannelTypeOpenAI}
+	modelName := "gpt-image-2.5-sunburst"
+	endpoint := normalizeChannelTestEndpoint(channel, "", modelName)
+	require.Equal(t, string(constant.EndpointTypeImageGeneration), endpoint)
+	request, ok := buildTestRequest(modelName, endpoint, channel, false).(*dto.ImageRequest)
+	require.True(t, ok, "automatic channel tests must generate images rather than chat")
+	assert.Equal(t, modelName, request.Model)
+	assert.NotEmpty(t, request.Prompt)
+	assert.Contains(t, common.GetEndpointTypesByChannelType(channel.Type, modelName), constant.EndpointTypeImageGeneration)
+	assert.Equal(t, "openai", normalizeChannelTestEndpoint(channel, "openai", modelName), "explicit endpoint takes precedence")
+	assert.Empty(t, normalizeChannelTestEndpoint(channel, "", "gpt-6-astra"))
+}
+
 func TestValidateChannelRequiresNewAPIBaseURL(t *testing.T) {
 	tests := []struct {
 		name    string

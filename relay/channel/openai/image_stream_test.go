@@ -12,6 +12,7 @@ import (
 	"github.com/QuantumNous/new-api/constant"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
 	relayconstant "github.com/QuantumNous/new-api/relay/constant"
+	"github.com/QuantumNous/new-api/relaykit/dto"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
 )
@@ -64,6 +65,34 @@ func TestOpenaiImageDoResponseUsesInfoIsStream(t *testing.T) {
 		require.Contains(t, recorder.Body.String(), `event: image_generation.completed`)
 		require.Contains(t, recorder.Body.String(), `data: [DONE]`)
 	})
+}
+
+func TestImageResponsePreservesCacheModalities(t *testing.T) {
+	oldTimeout := constant.StreamingTimeout
+	constant.StreamingTimeout = 30
+	t.Cleanup(func() { constant.StreamingTimeout = oldTimeout })
+	usageJSON := `{"input_tokens":1000,"output_tokens":100,"total_tokens":1100,"input_tokens_details":{"text_tokens":200,"image_tokens":800,"cached_tokens":600,"cached_tokens_details":{"text_tokens":100,"image_tokens":500}}}`
+	for _, mode := range []string{"json", "sse", "json-as-stream"} {
+		t.Run(mode, func(t *testing.T) {
+			body := `{"data":[{"b64_json":"image"}],"usage":` + usageJSON + `}`
+			contentType := "application/json"
+			if mode == "sse" {
+				body = "data: {\"type\":\"image_generation.completed\",\"usage\":" + usageJSON + "}\n\ndata: [DONE]\n\n"
+				contentType = "text/event-stream"
+			}
+			ctx, _, resp, info := newImageTestContext(t, body, contentType, mode != "json")
+			info.RelayMode = relayconstant.RelayModeImagesGenerations
+			result, err := (&Adaptor{}).DoResponse(ctx, resp, info)
+			require.Nil(t, err)
+			usage := result.(*dto.Usage)
+			require.Equal(t, 1000, usage.PromptTokens)
+			require.Equal(t, 100, usage.CompletionTokens)
+			require.Equal(t, 600, usage.PromptTokensDetails.CachedTokens)
+			require.NotNil(t, usage.PromptTokensDetails.CachedTokensDetails)
+			require.Equal(t, 500, usage.PromptTokensDetails.CachedTokensDetails.ImageTokens)
+			require.Equal(t, 100, usage.PromptTokensDetails.CachedTokensDetails.TextTokens)
+		})
+	}
 }
 
 // TestOpenaiImageStreamHandlerForwardsSSEAndUsage covers the core SSE path:
