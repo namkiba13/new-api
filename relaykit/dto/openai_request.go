@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	kitutil "github.com/QuantumNous/new-api/relaykit/relayconvert/kitutil"
 	"github.com/QuantumNous/new-api/relaykit/types"
@@ -236,6 +237,44 @@ func IsOpenAIGPT5Model(modelName string) bool {
 	return strings.HasPrefix(modelName, "gpt-5")
 }
 
+// OpenAIChatCapabilities keeps token, role and sampling rules model-specific.
+type OpenAIChatCapabilities struct {
+	UseMaxCompletionTokens bool
+	UseDeveloperRole       bool
+	SupportsSampling       bool
+}
+
+func GetOpenAIChatCapabilities(modelName, reasoningEffort string) OpenAIChatCapabilities {
+	capabilities := OpenAIChatCapabilities{SupportsSampling: true}
+	if IsOpenAIReasoningOModel(modelName) {
+		capabilities.UseMaxCompletionTokens = true
+		capabilities.UseDeveloperRole = !strings.HasPrefix(modelName, "o1-mini") && !strings.HasPrefix(modelName, "o1-preview")
+		return capabilities
+	}
+	isSolLuna := isOpenAIModelSnapshot(modelName, "gpt-6-sol") || isOpenAIModelSnapshot(modelName, "gpt-6-luna")
+	isNoSampling := isOpenAIModelSnapshot(modelName, "gpt-6-astra") || isOpenAIModelSnapshot(modelName, "gpt-6.1-sol")
+	if !IsOpenAIGPT5Model(modelName) && !isSolLuna && !isNoSampling {
+		return capabilities
+	}
+	capabilities.UseMaxCompletionTokens = true
+	capabilities.UseDeveloperRole = true
+	// Preserve existing GPT-5 rules; Sol/Luna allow sampling without reasoning.
+	capabilities.SupportsSampling = isSolLuna && (reasoningEffort == "" || reasoningEffort == "none")
+	return capabilities
+}
+
+func isOpenAIModelSnapshot(modelName, baseModel string) bool {
+	if modelName == baseModel {
+		return true
+	}
+	snapshot, ok := strings.CutPrefix(modelName, baseModel+"-")
+	if !ok {
+		return false
+	}
+	_, err := time.Parse(time.DateOnly, snapshot)
+	return err == nil
+}
+
 func IsQwenThinkingBudgetModel(modelName string) bool {
 	normalized := strings.ToLower(strings.TrimSpace(modelName))
 	return strings.HasPrefix(normalized, "qwen") ||
@@ -245,11 +284,7 @@ func IsQwenThinkingBudgetModel(modelName string) bool {
 }
 
 func (r *GeneralOpenAIRequest) GetSystemRoleName() string {
-	if IsOpenAIReasoningOModel(r.Model) {
-		if !strings.HasPrefix(r.Model, "o1-mini") && !strings.HasPrefix(r.Model, "o1-preview") {
-			return "developer"
-		}
-	} else if IsOpenAIGPT5Model(r.Model) {
+	if GetOpenAIChatCapabilities(r.Model, r.ReasoningEffort).UseDeveloperRole {
 		return "developer"
 	}
 	return "system"
