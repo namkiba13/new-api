@@ -11,7 +11,6 @@ import (
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
 	relayconstant "github.com/QuantumNous/new-api/relay/constant"
 	"github.com/QuantumNous/new-api/relay/helper"
-	"github.com/QuantumNous/new-api/relaykit/dto"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -95,17 +94,57 @@ func TestChatTokenCompatibilityRejectsInvalidLimits(t *testing.T) {
 }
 
 func TestMappedGPT6ChatTokenCompatibility(t *testing.T) {
-	c, _ := gin.CreateTestContext(httptest.NewRecorder())
-	c.Set("model_mapping", `{"customer-model":"gpt-6.1-sol"}`)
-	request := &dto.GeneralOpenAIRequest{Model: "customer-model", MaxTokens: common.GetPointer(uint(64))}
-	info := &relaycommon.RelayInfo{OriginModelName: request.Model, ChannelMeta: &relaycommon.ChannelMeta{
-		ChannelType: constant.ChannelTypeAzure, UpstreamModelName: request.Model,
-	}}
-	require.NoError(t, helper.ModelMappedHelper(c, info, request))
-	_, err := (&Adaptor{}).ConvertOpenAIRequest(c, info, request)
-	require.NoError(t, err)
-	assert.Nil(t, request.MaxTokens)
-	require.NotNil(t, request.MaxCompletionTokens)
-	assert.Equal(t, uint(64), *request.MaxCompletionTokens)
-	assert.Equal(t, "developer", request.GetSystemRoleName())
+	for _, tt := range []struct {
+		name, origin, deployment, baseURL, fields, wantField string
+		channelType                                          int
+		wantValue                                            int64
+		wantRole                                             string
+		keepSampling                                         bool
+	}{
+		{"known upstream", "customer-model", "gpt-6.1-sol", "", `"max_tokens":64`, "max_completion_tokens", constant.ChannelTypeAzure, 64, "developer", false},
+		{"native Azure deployment", "gpt-6-astra", "production-astra-2", "", `"max_tokens":64`, "max_completion_tokens", constant.ChannelTypeAzure, 64, "developer", false},
+		{"OpenAI Azure astra", "gpt-6-astra", "gpt-6-astra-2", "https://escalanxcx.openai.azure.com/openai", `"max_tokens":64`, "max_completion_tokens", constant.ChannelTypeOpenAI, 64, "developer", false},
+		{"OpenAI Azure luna streaming", "gpt-6-luna", "gpt-6-luna-2", "https://escalanxcx.openai.azure.com/openai", `"max_tokens":64,"stream":true,"reasoning_effort":"none"`, "max_completion_tokens", constant.ChannelTypeOpenAI, 64, "developer", true},
+		{"mapped explicit zero wins", "gpt-6-astra", "gpt-6-astra-2", "https://escalanxcx.openai.azure.com/openai", `"max_tokens":64,"max_completion_tokens":0`, "max_completion_tokens", constant.ChannelTypeOpenAI, 0, "developer", false},
+		{"mapped legacy zero", "gpt-6-astra", "gpt-6-astra-2", "https://escalanxcx.openai.azure.com/openai", `"max_tokens":0`, "max_completion_tokens", constant.ChannelTypeOpenAI, 0, "developer", false},
+		{"mapped no limit", "gpt-6-astra", "gpt-6-astra-2", "https://escalanxcx.openai.azure.com/openai", `"stream":false`, "", constant.ChannelTypeOpenAI, 0, "developer", false},
+		{"mapped reasoning suffix", "gpt-6-luna-high", "gpt-6-luna-2", "https://escalanxcx.openai.azure.com/openai", `"max_tokens":64`, "max_completion_tokens", constant.ChannelTypeOpenAI, 64, "developer", false},
+		{"unknown Azure model", "customer-model", "custom-deployment", "", `"max_tokens":64`, "max_tokens", constant.ChannelTypeAzure, 64, "system", true},
+		{"non-Azure upstream wins", "gpt-6-astra", "gpt-4o", "https://api.openai.com", `"max_tokens":64`, "max_tokens", constant.ChannelTypeOpenAI, 64, "system", true},
+		{"Azure hostname lookalike unchanged", "gpt-6-astra", "custom-deployment", "https://escalanxcx.openai.azure.com.example.org/openai", `"max_tokens":64`, "max_tokens", constant.ChannelTypeOpenAI, 64, "system", true},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			body := `{"model":"` + tt.origin + `","messages":[{"role":"system","content":"Be brief."},{"role":"user","content":"OK"}],"temperature":0.5,"top_p":0.9,"logprobs":true,"top_logprobs":2,` + tt.fields + `}`
+			c, _ := gin.CreateTestContext(httptest.NewRecorder())
+			c.Request = httptest.NewRequest(http.MethodPost, "/v1/chat/completions", strings.NewReader(body))
+			c.Request.Header.Set("Content-Type", "application/json")
+			request, err := helper.GetAndValidateTextRequest(c, relayconstant.RelayModeChatCompletions)
+			require.NoError(t, err)
+			mapping, err := common.Marshal(map[string]string{tt.origin: tt.deployment})
+			require.NoError(t, err)
+			c.Set("model_mapping", string(mapping))
+			info := &relaycommon.RelayInfo{OriginModelName: tt.origin, ChannelMeta: &relaycommon.ChannelMeta{
+				ChannelType: tt.channelType, ChannelBaseUrl: tt.baseURL, UpstreamModelName: tt.origin,
+			}}
+			require.NoError(t, helper.ModelMappedHelper(c, info, request))
+			converted, err := (&Adaptor{}).ConvertOpenAIRequest(c, info, request)
+			require.NoError(t, err)
+			encoded, err := common.Marshal(converted)
+			require.NoError(t, err)
+			assert.Equal(t, tt.deployment, info.UpstreamModelName)
+			assert.Equal(t, tt.deployment, gjson.GetBytes(encoded, "model").String())
+			for _, field := range []string{"max_tokens", "max_completion_tokens"} {
+				value := gjson.GetBytes(encoded, field)
+				assert.Equal(t, field == tt.wantField, value.Exists(), field)
+				if field == tt.wantField {
+					assert.Equal(t, tt.wantValue, value.Int())
+				}
+			}
+			assert.Equal(t, tt.wantRole, gjson.GetBytes(encoded, "messages.0.role").String())
+			for _, field := range []string{"temperature", "top_p", "logprobs", "top_logprobs"} {
+				assert.Equal(t, tt.keepSampling, gjson.GetBytes(encoded, field).Exists(), field)
+			}
+			assert.Equal(t, request.IsStream(c.Request), gjson.GetBytes(encoded, "stream").Bool())
+		})
+	}
 }

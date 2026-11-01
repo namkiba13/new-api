@@ -414,14 +414,27 @@ func (a *Adaptor) ConvertOpenAIRequest(c *gin.Context, info *relaycommon.RelayIn
 		}
 	}
 
-	capabilities := dto.GetOpenAIChatCapabilities(info.UpstreamModelName, request.ReasoningEffort)
+	capabilityModel := info.UpstreamModelName
+	capabilities := dto.GetOpenAIChatCapabilities(capabilityModel, request.ReasoningEffort)
+	if info.IsModelMapped && !capabilities.UseMaxCompletionTokens {
+		baseURL, err := url.Parse(info.ChannelBaseUrl)
+		isAzureOpenAI := info.ChannelType == constant.ChannelTypeOpenAI && err == nil &&
+			(strings.HasSuffix(strings.ToLower(baseURL.Hostname()), ".openai.azure.com") ||
+				strings.HasSuffix(strings.ToLower(baseURL.Hostname()), ".cognitiveservices.azure.com") ||
+				strings.HasSuffix(strings.ToLower(baseURL.Hostname()), ".services.ai.azure.com"))
+		if info.ChannelType == constant.ChannelTypeAzure || isAzureOpenAI {
+			// Azure deployment names need not identify the underlying model.
+			_, capabilityModel = reasoning.ParseOpenAIReasoningEffortFromModelSuffix(info.OriginModelName)
+			capabilities = dto.GetOpenAIChatCapabilities(capabilityModel, request.ReasoningEffort)
+		}
+	}
 	if capabilities.UseMaxCompletionTokens {
 		if request.MaxCompletionTokens == nil {
 			request.MaxCompletionTokens = request.MaxTokens
 		}
 		request.MaxTokens = nil
 	}
-	if dto.IsOpenAIReasoningOModel(info.UpstreamModelName) || !capabilities.SupportsSampling {
+	if dto.IsOpenAIReasoningOModel(capabilityModel) || !capabilities.SupportsSampling {
 		request.Temperature = nil
 	}
 	if !capabilities.SupportsSampling {
