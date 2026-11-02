@@ -1,5 +1,6 @@
 {
   "translation": {
+    "Some selected groups are no longer available. Remove them or restore global Auto.": "Некоторые выбранные группы больше недоступны. Удалите их или восстановите глобальный Auto.",
     "Official references": "Официальные источники",
     "Sources reviewed": "Дата проверки источников",
     "These are source-checked configuration examples, not a claim that every client feature has been tested end to end on 94API.": "Примеры конфигурации сверены с источниками. Это не означает, что все функции клиентов прошли сквозное тестирование на 94API.",

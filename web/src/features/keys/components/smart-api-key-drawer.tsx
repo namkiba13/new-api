@@ -43,43 +43,18 @@ import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { getUserGroups } from '@/lib/api'
 import { parseQuotaFromDollars } from '@/lib/format'
-import { cn } from '@/lib/utils'
 
 import { createApiKey, getTokenAutoGroups } from '../api'
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants'
-import {
-  buildSmartApiKeyPayload,
-  resolveSmartStrategyGroups,
-  type SmartRoutingStrategy,
-} from '../lib/smart-routing-strategy'
+import { buildSmartApiKeyPayload } from '../lib/smart-routing-strategy'
+import type { ApiKeyGroupOption } from './api-key-group-combobox'
 import { useApiKeys } from './api-keys-provider'
+import { AutoGroupOrderEditor } from './auto-group-order-editor'
 
 type SmartApiKeyDrawerProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
-
-const STRATEGIES: Array<{
-  value: SmartRoutingStrategy
-  label: string
-  hint: string
-}> = [
-  {
-    value: 'balanced',
-    label: 'Balanced',
-    hint: 'All Stable groups',
-  },
-  {
-    value: 'stability',
-    label: 'Stability first',
-    hint: 'All Premium groups',
-  },
-  {
-    value: 'low-price',
-    label: 'Low price first',
-    hint: 'All Award groups',
-  },
-]
 
 export function SmartApiKeyDrawer({
   open,
@@ -88,7 +63,8 @@ export function SmartApiKeyDrawer({
   const { t } = useTranslation()
   const { triggerRefresh } = useApiKeys()
   const [name, setName] = useState('')
-  const [strategy, setStrategy] = useState<SmartRoutingStrategy>('balanced')
+  const [selectedGroups, setSelectedGroups] = useState<string[]>([])
+  const [groupsMode, setGroupsMode] = useState<'custom' | 'inherit'>('custom')
   const [unlimitedQuota, setUnlimitedQuota] = useState(true)
   const [quotaDollars, setQuotaDollars] = useState(10)
   const [allowIps, setAllowIps] = useState('')
@@ -96,35 +72,88 @@ export function SmartApiKeyDrawer({
   const [expirationPreset, setExpirationPreset] = useState('never')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const { data: groupsData, isLoading: groupsLoading } = useQuery({
+  const {
+    data: groupsData,
+    isFetching: groupsLoading,
+    isError: groupsError,
+  } = useQuery({
     queryKey: ['user-groups'],
     queryFn: getUserGroups,
     enabled: open,
     staleTime: 0,
   })
-  const { data: autoGroupsData } = useQuery({
+  const {
+    data: autoGroupsData,
+    isFetching: autoGroupsLoading,
+    isError: autoGroupsError,
+  } = useQuery({
     queryKey: ['token-auto-groups'],
     queryFn: getTokenAutoGroups,
     enabled: open,
     staleTime: 0,
   })
 
-  const availableGroups = useMemo(
-    () => Object.keys(groupsData?.data || {}),
+  const groupOptions = useMemo<ApiKeyGroupOption[]>(
+    () =>
+      Object.entries(groupsData?.data || {})
+        .filter(([group]) => group !== 'auto')
+        .map(([group, info]) => ({
+          value: group,
+          label: group,
+          desc: info.desc || group,
+          ratio: info.ratio,
+        })),
     [groupsData]
   )
-  const strategyGroups = useMemo(
-    () => resolveSmartStrategyGroups(availableGroups, strategy),
-    [availableGroups, strategy]
+  const globalOptions = useMemo(
+    () =>
+      (autoGroupsData?.data?.groups || []).flatMap((group) => {
+        const option = groupOptions.find((item) => item.value === group)
+        return option ? [option] : []
+      }),
+    [autoGroupsData, groupOptions]
   )
-  const maxGroups = autoGroupsData?.data?.max_count || 5
-  const autoRoutingConfigured = autoGroupsData?.success === true
-  const accountCanUseAuto = availableGroups.includes('auto')
-  const groupLimitExceeded = strategyGroups.length > maxGroups
+  const maxGroups =
+    Number.isInteger(autoGroupsData?.data?.max_count) &&
+    Number(autoGroupsData?.data?.max_count) > 0
+      ? Number(autoGroupsData?.data?.max_count)
+      : 5
+  const loading = groupsLoading || autoGroupsLoading
+  const accountCanUseAuto = Object.hasOwn(groupsData?.data || {}, 'auto')
+  let routingError = ''
+  if (
+    groupsError ||
+    autoGroupsError ||
+    groupsData?.success !== true ||
+    autoGroupsData?.success !== true
+  ) {
+    routingError = t('Unable to load Auto routing configuration.')
+  } else if (!accountCanUseAuto) {
+    routingError = t(
+      'The groups are configured, but this account has not been granted access to the Auto routing group.'
+    )
+  } else if (groupsMode === 'inherit') {
+    if (globalOptions.length === 0) {
+      routingError = t('No available groups in the global Auto order.')
+    }
+  } else if (
+    selectedGroups.some(
+      (group) => !groupOptions.some((option) => option.value === group)
+    )
+  ) {
+    routingError = t(
+      'Some selected groups are no longer available. Remove them or restore global Auto.'
+    )
+  } else if (selectedGroups.length > maxGroups) {
+    routingError = t('Select at most {{max}} Auto groups', { max: maxGroups })
+  } else if (selectedGroups.length === 0) {
+    routingError = t('Select at least one Auto group or restore global Auto.')
+  }
 
   const reset = () => {
     setName('')
-    setStrategy('balanced')
+    setSelectedGroups([])
+    setGroupsMode('custom')
     setUnlimitedQuota(true)
     setQuotaDollars(10)
     setAllowIps('')
@@ -138,32 +167,13 @@ export function SmartApiKeyDrawer({
   }
 
   const handleCreate = async () => {
+    if (isSubmitting || loading) return
     if (!name.trim()) {
       toast.error(t('Please enter a name'))
       return
     }
-    if (!autoRoutingConfigured) {
-      toast.error(t('Unable to load Auto routing configuration.'))
-      return
-    }
-    if (!accountCanUseAuto) {
-      toast.error(t('Auto routing is not enabled for this account.'))
-      return
-    }
-    if (strategyGroups.length === 0) {
-      toast.error(t('No groups match the selected routing strategy.'))
-      return
-    }
-    if (groupLimitExceeded) {
-      toast.error(
-        t(
-          'This strategy has {{count}} groups but the current limit is {{max}}.',
-          {
-            count: strategyGroups.length,
-            max: maxGroups,
-          }
-        )
-      )
+    if (routingError) {
+      toast.error(routingError)
       return
     }
 
@@ -172,8 +182,7 @@ export function SmartApiKeyDrawer({
       const result = await createApiKey(
         buildSmartApiKeyPayload({
           name,
-          groups: availableGroups,
-          strategy,
+          groups: groupsMode === 'inherit' ? null : selectedGroups,
           expiration,
           unlimitedQuota,
           remainQuota: parseQuotaFromDollars(quotaDollars),
@@ -209,9 +218,7 @@ export function SmartApiKeyDrawer({
         <SheetHeader className={sideDrawerHeaderClassName()}>
           <SheetTitle>{t('Create Smart API Key')}</SheetTitle>
           <SheetDescription>
-            {t(
-              'All models available to your account are included automatically. Choose how requests should prioritize routes.'
-            )}
+            {t('Choose and order the groups this API key will try.')}
           </SheetDescription>
         </SheetHeader>
 
@@ -236,68 +243,38 @@ export function SmartApiKeyDrawer({
 
           <SideDrawerSection>
             <SideDrawerSectionHeader
-              title={t('Routing Strategy')}
-              description={t('Choose one strategy across every model provider')}
-              icon={<Sparkles className='size-4' />}
+              title={t('Auto group order')}
+              description={t(
+                'When a token uses the auto group, the system tries groups from top to bottom until it finds an available group.'
+              )}
+              icon={<Route className='size-4' />}
               iconTone='warning'
             />
-            <div className='grid gap-2 sm:grid-cols-3'>
-              {STRATEGIES.map((item) => (
-                <button
-                  key={item.value}
-                  type='button'
-                  onClick={() => setStrategy(item.value)}
-                  className={cn(
-                    'min-h-20 rounded-md border p-3 text-start transition-colors',
-                    strategy === item.value
-                      ? 'border-foreground bg-muted ring-1 ring-foreground'
-                      : 'hover:bg-muted/60'
-                  )}
-                >
-                  <span className='block font-medium'>{t(item.label)}</span>
-                  <span className='text-muted-foreground mt-1 block text-xs'>
-                    {t(item.hint)}
-                  </span>
-                </button>
-              ))}
-            </div>
-            <div className='bg-muted/45 rounded-md border p-3'>
-              <div className='mb-2 flex items-center gap-2 text-sm font-medium'>
-                <Route className='size-4' />
-                {t('Included groups')} ({strategyGroups.length})
-              </div>
-              <div className='flex flex-wrap gap-2'>
-                {groupsLoading ? (
-                  <span className='text-muted-foreground text-xs'>
-                    {t('Loading...')}
-                  </span>
-                ) : (
-                  strategyGroups.map((group) => (
-                    <span
-                      key={group}
-                      className='bg-background rounded-sm border px-2 py-1 font-mono text-xs'
-                    >
-                      {group}
-                    </span>
-                  ))
-                )}
-              </div>
-              {groupLimitExceeded && (
-                <p className='text-destructive mt-2 text-xs'>
-                  {t(
-                    'This strategy has {{count}} groups but the current limit is {{max}}.',
-                    { count: strategyGroups.length, max: maxGroups }
-                  )}
-                </p>
-              )}
-              {autoRoutingConfigured && !accountCanUseAuto && (
-                <p className='text-destructive mt-2 text-xs'>
-                  {t(
-                    'The groups are configured, but this account has not been granted access to the Auto routing group.'
-                  )}
-                </p>
-              )}
-            </div>
+            <fieldset
+              disabled={isSubmitting || loading || !accountCanUseAuto}
+              className='min-w-0'
+            >
+              <AutoGroupOrderEditor
+                value={selectedGroups}
+                mode={groupsMode}
+                options={groupOptions}
+                globalOptions={globalOptions}
+                maxCount={maxGroups}
+                aria-invalid={Boolean(routingError)}
+                aria-describedby='smart-key-routing-message'
+                onChange={({ groups, mode }) => {
+                  setSelectedGroups(groups)
+                  setGroupsMode(mode)
+                }}
+              />
+            </fieldset>
+            <p
+              id='smart-key-routing-message'
+              role='status'
+              className='text-destructive text-xs'
+            >
+              {loading ? t('Loading...') : routingError}
+            </p>
           </SideDrawerSection>
 
           <SideDrawerSection>
@@ -376,18 +353,18 @@ export function SmartApiKeyDrawer({
         </div>
 
         <SheetFooter className={sideDrawerFooterClassName()}>
-          <Button variant='outline' onClick={() => onOpenChange(false)}>
+          <Button
+            variant='outline'
+            onClick={() => {
+              onOpenChange(false)
+              reset()
+            }}
+          >
             {t('Close')}
           </Button>
           <Button
             onClick={handleCreate}
-            disabled={
-              isSubmitting ||
-              groupsLoading ||
-              groupLimitExceeded ||
-              !autoRoutingConfigured ||
-              !accountCanUseAuto
-            }
+            disabled={isSubmitting || loading || Boolean(routingError)}
           >
             <Sparkles className='size-4' />
             {isSubmitting ? t('Creating...') : t('Create Smart API Key')}

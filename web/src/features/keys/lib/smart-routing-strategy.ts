@@ -21,8 +21,7 @@ export type SmartRoutingStrategy = 'balanced' | 'stability' | 'low-price'
 
 export type SmartApiKeyPayloadInput = {
   name: string
-  groups: string[]
-  strategy: SmartRoutingStrategy
+  groups: string[] | null
   unlimitedQuota?: boolean
   remainQuota?: number
   expiration?: number
@@ -33,24 +32,6 @@ const STRATEGY_SUFFIX: Record<SmartRoutingStrategy, string> = {
   balanced: '-stable',
   stability: '-premium',
   'low-price': '-award',
-}
-
-/**
- * Resolve every provider-specific group belonging to a Smart Key strategy.
- * The source order is preserved so administrators can control route priority.
- */
-export function resolveSmartStrategyGroups(
-  availableGroups: string[],
-  strategy: SmartRoutingStrategy
-): string[] {
-  const suffix = STRATEGY_SUFFIX[strategy]
-  return [
-    ...new Set(
-      availableGroups.filter(
-        (group) => group !== 'auto' && group.endsWith(suffix)
-      )
-    ),
-  ]
 }
 
 export function detectSmartRoutingStrategy(
@@ -73,7 +54,7 @@ export function buildSmartApiKeyPayload(input: SmartApiKeyPayloadInput) {
     model_limits: '',
     allow_ips: input.allowIps?.trim() ?? '',
     group: 'auto',
-    auto_groups: resolveSmartStrategyGroups(input.groups, input.strategy),
+    auto_groups: input.groups,
     cross_group_retry: true,
   }
 }

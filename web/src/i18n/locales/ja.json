@@ -1,5 +1,6 @@
 {
   "translation": {
+    "Some selected groups are no longer available. Remove them or restore global Auto.": "選択したグループの一部は利用できなくなりました。削除するか、グローバル Auto に戻してください。",
     "Official references": "公式参考資料",
     "Sources reviewed": "資料の確認日",
     "These are source-checked configuration examples, not a claim that every client feature has been tested end to end on 94API.": "これらは資料と照合した設定例です。すべてのクライアント機能を94APIでエンドツーエンド検証済みという意味ではありません。",

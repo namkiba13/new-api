@@ -1,5 +1,6 @@
 {
   "translation": {
+    "Some selected groups are no longer available. Remove them or restore global Auto.": "Một số nhóm đã chọn không còn khả dụng. Hãy xóa chúng hoặc khôi phục Auto toàn cục.",
     "Official references": "Tài liệu chính thức",
     "Sources reviewed": "Ngày đối chiếu nguồn",
     "These are source-checked configuration examples, not a claim that every client feature has been tested end to end on 94API.": "Các ví dụ cấu hình đã được đối chiếu nguồn; điều này không có nghĩa mọi tính năng của client đã được kiểm thử xuyên suốt trên 94API.",

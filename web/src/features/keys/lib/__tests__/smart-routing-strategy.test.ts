@@ -21,69 +21,46 @@ import { describe, expect, test } from 'vitest'
 import {
   buildSmartApiKeyPayload,
   detectSmartRoutingStrategy,
-  resolveSmartStrategyGroups,
 } from '../smart-routing-strategy'
 
-const groups = [
-  'auto',
-  'openai-stable',
-  'claude-stable',
-  'google-stable',
-  'openai-premium',
-  'claude-premium',
-  'openai-award',
-  'claude-award',
-  'default',
-]
-
-describe('resolveSmartStrategyGroups', () => {
-  test('maps Balanced to all provider stable groups', () => {
-    expect(resolveSmartStrategyGroups(groups, 'balanced')).toEqual([
-      'openai-stable',
-      'claude-stable',
-      'google-stable',
-    ])
-  })
-
-  test('maps Stability first to all provider premium groups', () => {
-    expect(resolveSmartStrategyGroups(groups, 'stability')).toEqual([
-      'openai-premium',
-      'claude-premium',
-    ])
-  })
-
-  test('maps Low price first to all provider award groups', () => {
-    expect(resolveSmartStrategyGroups(groups, 'low-price')).toEqual([
-      'openai-award',
-      'claude-award',
-    ])
-  })
-
-  test('preserves order and removes duplicates', () => {
-    expect(
-      resolveSmartStrategyGroups(
-        ['claude-stable', 'openai-stable', 'claude-stable'],
-        'balanced'
-      )
-    ).toEqual(['claude-stable', 'openai-stable'])
-  })
-
+describe('Smart routing', () => {
   test('builds a native Auto token payload with cross-group retry', () => {
     expect(
       buildSmartApiKeyPayload({
-        name: ' Hermes Balanced ',
-        groups,
-        strategy: 'balanced',
+        name: ' Hermes Custom ',
+        groups: ['stable', 'FREETIER', 'low'],
         allowIps: ' 10.0.0.1 ',
       })
     ).toMatchObject({
-      name: 'Hermes Balanced',
+      name: 'Hermes Custom',
       group: 'auto',
-      auto_groups: ['openai-stable', 'claude-stable', 'google-stable'],
+      auto_groups: ['stable', 'FREETIER', 'low'],
       cross_group_retry: true,
       allow_ips: '10.0.0.1',
       model_limits_enabled: false,
     })
+  })
+
+  test('preserves explicit global inheritance and usage restrictions', () => {
+    expect(
+      buildSmartApiKeyPayload({
+        name: 'Global',
+        groups: null,
+        unlimitedQuota: false,
+        remainQuota: 500,
+        expiration: 123,
+        allowIps: ' 10.0.0.0/24 ',
+      })
+    ).toMatchObject({
+      auto_groups: null,
+      unlimited_quota: false,
+      remain_quota: 500,
+      expired_time: 123,
+      allow_ips: '10.0.0.0/24',
+    })
+    expect(
+      buildSmartApiKeyPayload({ name: 'Empty', groups: [] }).auto_groups
+    ).toEqual([])
   })
 
   test('detects a display strategy from stored Auto groups', () => {

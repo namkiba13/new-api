@@ -1,5 +1,6 @@
 {
   "translation": {
+    "Some selected groups are no longer available. Remove them or restore global Auto.": "部分已選分組已無法使用。請移除它們或恢復全域 Auto。",
     "Official references": "官方參考資料",
     "Sources reviewed": "資料核對日期",
     "These are source-checked configuration examples, not a claim that every client feature has been tested end to end on 94API.": "這些設定範例已對照來源核查，但不代表所有用戶端功能都已在 94API 上完成端到端測試。",
