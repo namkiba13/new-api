@@ -471,6 +471,9 @@ type Thinking struct {
 	// the visible summary that was default on Opus 4.6; "omitted" (default on
 	// 4.7) suppresses it. Pass-through field from upstream Anthropic API.
 	Display string `json:"display,omitempty"`
+	// BlockBinding passes through Anthropic's signed-thinking binding policy,
+	// e.g. {"prefix_mismatch_behavior":"drop_block"}.
+	BlockBinding json.RawMessage `json:"block_binding,omitempty"`
 }
 
 func (c *Thinking) GetBudgetTokens() int {

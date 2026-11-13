@@ -95,6 +95,9 @@ func ApplyReasoning(req *dto.ClaudeRequest, info convmeta.Meta, source reasoning
 	}
 	req.Model = baseModel
 	if rendered.Thinking != nil {
+		if req.Thinking != nil {
+			rendered.Thinking.BlockBinding = req.Thinking.BlockBinding
+		}
 		req.Thinking = rendered.Thinking
 	}
 	if rendered.OutputEffort != "" {
