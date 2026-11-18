@@ -252,7 +252,8 @@ func GetOpenAIChatCapabilities(modelName, reasoningEffort string) OpenAIChatCapa
 		return capabilities
 	}
 	isSolLuna := isOpenAIModelSnapshot(modelName, "gpt-6-sol") || isOpenAIModelSnapshot(modelName, "gpt-6-luna")
-	isNoSampling := isOpenAIModelSnapshot(modelName, "gpt-6-astra") || isOpenAIModelSnapshot(modelName, "gpt-6.1-sol")
+	isNoSampling := isOpenAIModelSnapshot(modelName, "gpt-6-astra") || isOpenAIModelSnapshot(modelName, "gpt-6.1-sol") ||
+		isOpenAIModelSnapshot(modelName, "gpt-6.2-astra") || isOpenAIModelSnapshot(modelName, "gpt-6.2-sol")
 	if !IsOpenAIGPT5Model(modelName) && !isSolLuna && !isNoSampling {
 		return capabilities
 	}

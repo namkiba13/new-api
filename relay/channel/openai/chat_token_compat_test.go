@@ -25,6 +25,17 @@ func TestChatTokenCompatibility(t *testing.T) {
 		keepSampling                   bool
 	}{
 		{"sol legacy limit", "gpt-6.1-sol", `"max_tokens":64`, "max_completion_tokens", 64, "developer", false},
+		{"GPT6.2 astra legacy limit", "gpt-6.2-astra", `"max_tokens":64`, "max_completion_tokens", 64, "developer", false},
+		{"GPT6.2 sol streaming", "gpt-6.2-sol", `"max_tokens":64,"stream":true`, "max_completion_tokens", 64, "developer", false},
+		{"GPT6.2 astra snapshot", "gpt-6.2-astra-2026-11-01", `"max_tokens":64`, "max_completion_tokens", 64, "developer", false},
+		{"GPT6.2 sol reasoning suffix", "gpt-6.2-sol-high", `"max_tokens":64`, "max_completion_tokens", 64, "developer", false},
+		{"GPT6.2 sol new limit", "gpt-6.2-sol", `"max_completion_tokens":32`, "max_completion_tokens", 32, "developer", false},
+		{"GPT6.2 astra both limits", "gpt-6.2-astra", `"max_tokens":64,"max_completion_tokens":32`, "max_completion_tokens", 32, "developer", false},
+		{"GPT6.2 sol explicit zero wins", "gpt-6.2-sol", `"max_tokens":64,"max_completion_tokens":0`, "max_completion_tokens", 0, "developer", false},
+		{"GPT6.2 astra legacy zero", "gpt-6.2-astra", `"max_tokens":0`, "max_completion_tokens", 0, "developer", false},
+		{"GPT6.2 sol no limit", "gpt-6.2-sol", `"stream":false`, "", 0, "developer", false},
+		{"GPT6.2 custom variant unchanged", "gpt-6.2-sol-custom", `"max_tokens":64`, "max_tokens", 64, "system", true},
+		{"GPT6.2 invalid snapshot unchanged", "gpt-6.2-astra-2026-99-99", `"max_tokens":64`, "max_tokens", 64, "system", true},
 		{"luna streaming", "gpt-6-luna", `"max_tokens":64,"stream":true,"reasoning_effort":"none"`, "max_completion_tokens", 64, "developer", true},
 		{"sol reasoning suffix", "gpt-6-sol-high", `"max_tokens":64`, "max_completion_tokens", 64, "developer", false},
 		{"luna reasoning disables sampling", "gpt-6-luna", `"max_tokens":64,"reasoning_effort":"high"`, "max_completion_tokens", 64, "developer", false},
@@ -102,6 +113,8 @@ func TestMappedGPT6ChatTokenCompatibility(t *testing.T) {
 		keepSampling                                         bool
 	}{
 		{"known upstream", "customer-model", "gpt-6.1-sol", "", `"max_tokens":64`, "max_completion_tokens", constant.ChannelTypeAzure, 64, "developer", false},
+		{"GPT6.2 Azure deployment", "gpt-6.2-astra", "production-astra-2", "", `"max_tokens":64`, "max_completion_tokens", constant.ChannelTypeAzure, 64, "developer", false},
+		{"GPT6.2 OpenAI Azure deployment", "gpt-6.2-sol", "production-sol-2", "https://alejandrof.openai.azure.com/openai", `"max_tokens":64`, "max_completion_tokens", constant.ChannelTypeOpenAI, 64, "developer", false},
 		{"native Azure deployment", "gpt-6-astra", "production-astra-2", "", `"max_tokens":64`, "max_completion_tokens", constant.ChannelTypeAzure, 64, "developer", false},
 		{"OpenAI Azure astra", "gpt-6-astra", "gpt-6-astra-2", "https://escalanxcx.openai.azure.com/openai", `"max_tokens":64`, "max_completion_tokens", constant.ChannelTypeOpenAI, 64, "developer", false},
 		{"OpenAI Azure luna streaming", "gpt-6-luna", "gpt-6-luna-2", "https://escalanxcx.openai.azure.com/openai", `"max_tokens":64,"stream":true,"reasoning_effort":"none"`, "max_completion_tokens", constant.ChannelTypeOpenAI, 64, "developer", true},
